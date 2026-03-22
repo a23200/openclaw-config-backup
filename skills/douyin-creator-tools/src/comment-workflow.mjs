@@ -1,0 +1,248 @@
+import path from "node:path";
+import {
+  DEFAULT_COMMENT_PAGE_URL,
+  DEFAULT_USER_DATA_DIR,
+  launchPersistentPage,
+  promptForEnter
+} from "./douyin-browser.mjs";
+import {
+  getEffectiveTimeout,
+  setReplyFilterDebugEnabled
+} from "./lib/common.mjs";
+import { ensureCommentPageReady } from "./lib/comment-page.mjs";
+import { collectComments } from "./lib/comment-ops.mjs";
+import { replyToComments } from "./lib/reply-flow.mjs";
+import { emitResult, loadReplyCommentsFile } from "./lib/result-store.mjs";
+import {
+  fetchAllWorksWithRetry,
+  findTargetWorkWithRetry,
+  getSelectedWorkOutput,
+  getWorksOutput
+} from "./lib/works-panel.mjs";
+
+const DEFAULT_NAVIGATION_TIMEOUT_MS = 60000;
+const DEFAULT_UI_TIMEOUT_MS = 30000;
+const DEFAULT_WORKS_TIMEOUT_MS = 45000;
+const DEFAULT_WORKS_IDLE_MS = 5000;
+const DEFAULT_COMMENTS_TIMEOUT_MS = 300000;
+const DEFAULT_COMMENTS_IDLE_MS = 5000;
+const DEFAULT_REPLY_TIMEOUT_MS = 30000;
+const DEFAULT_REPLY_SETTLE_MS = 1800;
+const DEFAULT_REPLY_TYPE_DELAY_MS = 100;
+const DEFAULT_REPLY_LIMIT = 20;
+const DEFAULT_EXPORT_LIMIT = 200;
+const DEFAULT_REPLY_FLOW_TIMEOUT_MS = 1800000;
+const REPLY_FLOW_TIMEOUT_BUFFER_MS = 60000;
+const REPLY_FLOW_TIMEOUT_PER_PLAN_MS = 20000;
+const MAX_AUTO_REPLY_FLOW_TIMEOUT_MS = 7200000;
+
+export const DEFAULT_WORKS_OUTPUT_PATH = path.resolve("comments-output/list-works.json");
+export const DEFAULT_EXPORT_OUTPUT_PATH = path.resolve(
+  "comments-output/unreplied-comments.json"
+);
+export const DEFAULT_REPLY_OUTPUT_PATH = path.resolve(
+  "comments-output/reply-comments-result.json"
+);
+
+function buildRuntimeBudget(totalTimeoutMs = 0) {
+  if (!totalTimeoutMs) {
+    return {
+      deadline: null,
+      maxRuntimeMs: 0
+    };
+  }
+
+  return {
+    deadline: Date.now() + totalTimeoutMs,
+    maxRuntimeMs: totalTimeoutMs
+  };
+}
+
+function resolveReplyFlowTimeout(replyLimit, replyPlanCount) {
+  const targetReplyCount = Math.max(
+    1,
+    Math.min(replyLimit || replyPlanCount || 1, replyPlanCount || replyLimit || 1)
+  );
+
+  return Math.min(
+    MAX_AUTO_REPLY_FLOW_TIMEOUT_MS,
+    Math.max(
+      DEFAULT_REPLY_FLOW_TIMEOUT_MS,
+      REPLY_FLOW_TIMEOUT_BUFFER_MS + targetReplyCount * REPLY_FLOW_TIMEOUT_PER_PLAN_MS
+    )
+  );
+}
+
+async function openCommentSession(options = {}) {
+  setReplyFilterDebugEnabled(options.debug);
+
+  const runtimeBudget = buildRuntimeBudget(options.timeoutMs || 0);
+  const { context, page } = await launchPersistentPage({
+    userDataDir: options.profileDir || DEFAULT_USER_DATA_DIR,
+    headless: Boolean(options.headless)
+  });
+
+  context.setDefaultTimeout(getEffectiveTimeout(runtimeBudget, DEFAULT_UI_TIMEOUT_MS));
+  context.setDefaultNavigationTimeout(
+    getEffectiveTimeout(runtimeBudget, DEFAULT_NAVIGATION_TIMEOUT_MS)
+  );
+  page.setDefaultTimeout(getEffectiveTimeout(runtimeBudget, DEFAULT_UI_TIMEOUT_MS));
+  page.setDefaultNavigationTimeout(
+    getEffectiveTimeout(runtimeBudget, DEFAULT_NAVIGATION_TIMEOUT_MS)
+  );
+
+  await ensureCommentPageReady(page, options.pageUrl || DEFAULT_COMMENT_PAGE_URL, {
+    ...runtimeBudget,
+    navigationTimeoutMs: DEFAULT_NAVIGATION_TIMEOUT_MS,
+    uiTimeoutMs: DEFAULT_UI_TIMEOUT_MS
+  });
+
+  return {
+    context,
+    page,
+    runtimeBudget
+  };
+}
+
+async function resolveTargetWork(page, runtimeBudget, workTitle, workPublishText = "") {
+  return findTargetWorkWithRetry(page, {
+    ...runtimeBudget,
+    workTitle,
+    workPublishText,
+    selectWhenMatched: true,
+    timeoutMs: DEFAULT_WORKS_TIMEOUT_MS,
+    idleMs: DEFAULT_WORKS_IDLE_MS,
+    uiTimeoutMs: DEFAULT_UI_TIMEOUT_MS
+  });
+}
+
+export async function listWorks(options = {}) {
+  const outputPath = options.outputPath || DEFAULT_WORKS_OUTPUT_PATH;
+  const { context, page, runtimeBudget } = await openCommentSession(options);
+
+  try {
+    const works = await fetchAllWorksWithRetry(page, {
+      ...runtimeBudget,
+      timeoutMs: DEFAULT_WORKS_TIMEOUT_MS,
+      idleMs: DEFAULT_WORKS_IDLE_MS,
+      uiTimeoutMs: DEFAULT_UI_TIMEOUT_MS
+    });
+
+    await emitResult(
+      {
+        pageUrl: options.pageUrl || DEFAULT_COMMENT_PAGE_URL,
+        count: works.length,
+        works: getWorksOutput(works)
+      },
+      outputPath
+    );
+  } finally {
+    await context.close();
+  }
+}
+
+export async function exportUnrepliedComments(options = {}) {
+  if (!options.workTitle) {
+    throw new Error("Missing work title. Usage: npm run comments:export -- \"作品短标题\"");
+  }
+
+  const outputPath = options.outputPath || DEFAULT_EXPORT_OUTPUT_PATH;
+  const { context, page, runtimeBudget } = await openCommentSession(options);
+
+  try {
+    const targetWork = await resolveTargetWork(
+      page,
+      runtimeBudget,
+      options.workTitle,
+      options.workPublishText || ""
+    );
+
+    console.log(`已选中作品：${getSelectedWorkOutput(targetWork).title}`);
+    const comments = await collectComments(page, {
+      ...runtimeBudget,
+      limit: options.limit || DEFAULT_EXPORT_LIMIT,
+      timeoutMs: DEFAULT_COMMENTS_TIMEOUT_MS,
+      idleMs: DEFAULT_COMMENTS_IDLE_MS,
+      uiTimeoutMs: DEFAULT_UI_TIMEOUT_MS
+    });
+
+    await emitResult(
+      {
+        selectedWork: getSelectedWorkOutput(targetWork) ?? { title: "" },
+        count: comments.length,
+        comments: comments.map((comment) => ({
+          username: comment.username,
+          commentText: comment.commentText,
+          replyMessage: ""
+        }))
+      },
+      outputPath
+    );
+  } finally {
+    await context.close();
+  }
+}
+
+export async function replyComments(options = {}) {
+  if (!options.planFile) {
+    throw new Error("Missing plan file. Usage: npm run comments:reply -- plan.json");
+  }
+
+  const replyCommentsSource = await loadReplyCommentsFile(options.planFile);
+  const replyPlans = replyCommentsSource.plans ?? [];
+  const selectedWorkHint = replyCommentsSource.selectedWork;
+
+  if (!selectedWorkHint?.title) {
+    throw new Error("Reply plan file must contain selectedWork.title.");
+  }
+
+  const outputPath = options.outputPath || DEFAULT_REPLY_OUTPUT_PATH;
+  const replyLimit = options.limit || DEFAULT_REPLY_LIMIT;
+  const keepBrowserOpenAfterRun = Boolean(options.keepOpen || options.dryRun) && !options.headless;
+  const replyFlowTimeoutMs = resolveReplyFlowTimeout(replyLimit, replyPlans.length);
+  const { context, page, runtimeBudget } = await openCommentSession(options);
+
+  try {
+    const targetWork = await resolveTargetWork(
+      page,
+      runtimeBudget,
+      selectedWorkHint.title,
+      selectedWorkHint.publishText || ""
+    );
+
+    console.log(`已选中作品：${getSelectedWorkOutput(targetWork).title}`);
+    const replySummary = await replyToComments(page, {
+      ...runtimeBudget,
+      replyPlans,
+      selectedWork: targetWork,
+      replyLimit,
+      replyDryRun: Boolean(options.dryRun),
+      replyTimeoutMs: DEFAULT_REPLY_TIMEOUT_MS,
+      replySettleMs: DEFAULT_REPLY_SETTLE_MS,
+      replyTypeDelayMs: DEFAULT_REPLY_TYPE_DELAY_MS,
+      timeoutMs: replyFlowTimeoutMs,
+      idleMs: DEFAULT_COMMENTS_IDLE_MS,
+      uiTimeoutMs: DEFAULT_UI_TIMEOUT_MS
+    });
+
+    await emitResult(
+      {
+        fetchedAt: new Date().toISOString(),
+        mode: "reply_comments",
+        pageUrl: options.pageUrl || DEFAULT_COMMENT_PAGE_URL,
+        selectedWork: getSelectedWorkOutput(targetWork),
+        replyCommentsFile: options.planFile,
+        replyDryRun: Boolean(options.dryRun),
+        replyLimit,
+        ...replySummary
+      },
+      outputPath
+    );
+
+    if (keepBrowserOpenAfterRun) {
+      await promptForEnter("流程已完成，检查浏览器现场后按 Enter 关闭浏览器");
+    }
+  } finally {
+    await context.close();
+  }
+}

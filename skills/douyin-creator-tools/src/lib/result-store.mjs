@@ -1,0 +1,226 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import {
+  logReplyFilterDebug,
+  normalizeText,
+  normalizeUsername,
+  normalizeWorkTitle
+} from "./common.mjs";
+
+function normalizeSelectedWorkHint(rawWork) {
+  if (!rawWork || typeof rawWork !== "object" || Array.isArray(rawWork)) {
+    return null;
+  }
+
+  const title = normalizeText(String(rawWork.title ?? ""));
+  const publishText = normalizeText(String(rawWork.publishText ?? rawWork.publish_text ?? ""));
+
+  if (!title) {
+    return null;
+  }
+
+  return {
+    title: normalizeWorkTitle(title),
+    publishText
+  };
+}
+
+function normalizeReplyCommentsFileEntry(rawEntry, index) {
+  if (!rawEntry || typeof rawEntry !== "object" || Array.isArray(rawEntry)) {
+    throw new Error(`reply comments item ${index + 1} must be an object`);
+  }
+
+  const username = normalizeUsername(String(rawEntry.username ?? ""));
+  const commentText = normalizeText(
+    String(rawEntry.commentText ?? rawEntry.comment ?? rawEntry.text ?? "")
+  );
+  const publishText = normalizeText(
+    String(rawEntry.publishText ?? rawEntry.publish ?? rawEntry.time ?? "")
+  );
+  const replyMessage = String(rawEntry.replyMessage ?? "").trim();
+
+  if (!username) {
+    throw new Error(`reply comments item ${index + 1} requires username`);
+  }
+
+  return {
+    id: index + 1,
+    username,
+    commentText,
+    publishText,
+    replyMessage
+  };
+}
+
+export async function loadReplyCommentsFile(replyCommentsFile) {
+  const rawContent = await fs.readFile(replyCommentsFile, "utf8");
+  let parsed;
+
+  try {
+    parsed = JSON.parse(rawContent);
+  } catch (error) {
+    throw new Error(
+      `Failed to parse reply comments JSON at ${replyCommentsFile}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("reply comments file must be a JSON object with a comments array");
+  }
+
+  if (!Array.isArray(parsed.comments)) {
+    throw new Error("reply comments file requires a comments array");
+  }
+
+  const normalizedEntries = parsed.comments.map((entry, index) =>
+    normalizeReplyCommentsFileEntry(entry, index)
+  );
+  const plans = normalizedEntries.filter((entry) => entry.replyMessage);
+
+  if (plans.length === 0) {
+    throw new Error(
+      "reply comments file does not contain any comments with replyMessage; please fill comments[].replyMessage first"
+    );
+  }
+
+  return {
+    selectedWork: normalizeSelectedWorkHint(parsed.selectedWork),
+    plans,
+    totalCount: normalizedEntries.length,
+    actionableCount: plans.length
+  };
+}
+
+function dedupeOutputEntriesByUsernameAndCommentText(entries) {
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return {
+      entries: Array.isArray(entries) ? entries : [],
+      removed: 0
+    };
+  }
+
+  const seen = new Set();
+  const dedupedEntries = [];
+  let removed = 0;
+
+  for (const entry of entries) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      dedupedEntries.push(entry);
+      continue;
+    }
+
+    if (!("username" in entry) || !("commentText" in entry)) {
+      dedupedEntries.push(entry);
+      continue;
+    }
+
+    const key = `${String(entry.username ?? "")}\u0000${String(entry.commentText ?? "")}`;
+    if (seen.has(key)) {
+      removed += 1;
+      continue;
+    }
+
+    seen.add(key);
+    dedupedEntries.push(entry);
+  }
+
+  return {
+    entries: dedupedEntries,
+    removed
+  };
+}
+
+export function prepareResultForOutput(result) {
+  if (!result || typeof result !== "object" || Array.isArray(result)) {
+    return result;
+  }
+
+  const nextResult = { ...result };
+  const dedupeSummary = [];
+
+  if (Array.isArray(nextResult.comments)) {
+    const dedupedComments = dedupeOutputEntriesByUsernameAndCommentText(nextResult.comments);
+    nextResult.comments = dedupedComments.entries;
+    if (typeof nextResult.count === "number") {
+      nextResult.count = dedupedComments.entries.length;
+    }
+    if (dedupedComments.removed > 0) {
+      dedupeSummary.push({
+        field: "comments",
+        removed: dedupedComments.removed,
+        remaining: dedupedComments.entries.length
+      });
+    }
+  }
+
+  if (Array.isArray(nextResult.results)) {
+    const dedupedResults = dedupeOutputEntriesByUsernameAndCommentText(nextResult.results);
+    nextResult.results = dedupedResults.entries;
+    if (typeof nextResult.totalProcessed === "number") {
+      nextResult.totalProcessed = dedupedResults.entries.length;
+    }
+    if (typeof nextResult.repliedCount === "number") {
+      nextResult.repliedCount = dedupedResults.entries.filter((item) => item?.status === "replied").length;
+    }
+    if (typeof nextResult.dryRunCount === "number") {
+      nextResult.dryRunCount = dedupedResults.entries.filter(
+        (item) => item?.status === "dry_run_typed"
+      ).length;
+    }
+    if (typeof nextResult.skippedCount === "number") {
+      nextResult.skippedCount = dedupedResults.entries.filter(
+        (item) => typeof item?.status === "string" && item.status.startsWith("skipped_")
+      ).length;
+    }
+    if (typeof nextResult.errorCount === "number") {
+      nextResult.errorCount = dedupedResults.entries.filter((item) => item?.status === "error").length;
+    }
+    if (dedupedResults.removed > 0) {
+      dedupeSummary.push({
+        field: "results",
+        removed: dedupedResults.removed,
+        remaining: dedupedResults.entries.length
+      });
+    }
+  }
+
+  if (Array.isArray(nextResult.unmatchedPlans)) {
+    const dedupedUnmatchedPlans = dedupeOutputEntriesByUsernameAndCommentText(
+      nextResult.unmatchedPlans
+    );
+    nextResult.unmatchedPlans = dedupedUnmatchedPlans.entries;
+    if (typeof nextResult.unmatchedPlanCount === "number") {
+      nextResult.unmatchedPlanCount = dedupedUnmatchedPlans.entries.length;
+    }
+    if (dedupedUnmatchedPlans.removed > 0) {
+      dedupeSummary.push({
+        field: "unmatchedPlans",
+        removed: dedupedUnmatchedPlans.removed,
+        remaining: dedupedUnmatchedPlans.entries.length
+      });
+    }
+  }
+
+  if (dedupeSummary.length > 0) {
+    logReplyFilterDebug("deduped final output entries", dedupeSummary);
+  }
+
+  return nextResult;
+}
+
+export async function emitResult(result, outputPath) {
+  const outputResult = prepareResultForOutput(result);
+  const payload = JSON.stringify(outputResult, null, 2);
+
+  if (!outputPath) {
+    console.log(payload);
+    return;
+  }
+
+  const absolutePath = path.resolve(outputPath);
+  await fs.mkdir(path.dirname(absolutePath), { recursive: true });
+  await fs.writeFile(absolutePath, `${payload}\n`, "utf8");
+  console.log(`Wrote result to ${absolutePath}`);
+}

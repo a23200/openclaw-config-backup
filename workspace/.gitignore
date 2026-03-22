@@ -1,0 +1,11 @@
+*.png
+*.jpg
+*.jpeg
+*.mp4
+*.webm
+*.zip
+*.tar.gz
+.DS_Store
+node_modules/
+.playwright/
+*.log

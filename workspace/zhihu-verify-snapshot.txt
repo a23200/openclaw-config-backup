@@ -1,0 +1,6 @@
+- link "欢迎进入 安全验证 - 知乎,盲人用户使用操作智能引导，请按快捷键Ctrl+Alt+R；阅读详细操作说明请按快捷键Ctrl+Alt+问号键。" [ref=e1]
+- link "知乎" [ref=e2]
+- heading "进入知乎" [level=1, ref=e3]
+- button "开始验证" [ref=e4]
+- button "意见反馈" [ref=e5]
+- button "回到顶部" [ref=e6]
