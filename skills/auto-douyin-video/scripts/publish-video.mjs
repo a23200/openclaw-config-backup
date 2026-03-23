@@ -107,20 +107,19 @@ console.log(`[Douyin-Pub] 正在独立启动新的发布窗口...`);
             console.log(`[Douyin-Pub] ⚠️ 没找到“智能字幕”相关按钮。可能是被其他元素挡住了。`);
         }
         
-        // 4. 终极安全输入法（绝对不碰键盘，防止触发回车闪退BUG）
+        // 4. 终极安全输入法（避免回车误触，优先直接 fill）
         console.log(`[Douyin-Pub] 正在使用纯净模式输入文案...`);
-        const editor = page.locator('.zone-container').first(); 
-        
-        if (await editor.isVisible()) {
-            await editor.fill(description);
-            console.log(`[Douyin-Pub] ✅ 文案填充完毕！`);
+        const primaryEditor = page.locator('.zone-container').first();
+        const fallbackEditor = page.getByPlaceholder('添加作品简介').first();
+        const targetEditor = await primaryEditor.isVisible() ? primaryEditor : fallbackEditor;
+
+        if (await targetEditor.isVisible()) {
+            await targetEditor.click();
+            await page.waitForTimeout(500);
+            await targetEditor.fill(description);
+            console.log(`[Douyin-Pub] ✅ 文案已通过 fill() 直接写入！`);
         } else {
-            console.log(`[Douyin-Pub] ⚠️ 未能找到 .zone-container 输入框！尝试直接按内容匹配...`);
-            const fallbackEditor = page.getByPlaceholder('添加作品简介').first();
-            if (await fallbackEditor.isVisible()) {
-                await fallbackEditor.fill(description);
-                console.log(`[Douyin-Pub] ✅ 文案填充完毕 (使用备用输入框)！`);
-            }
+            console.log(`[Douyin-Pub] ⚠️ 未能找到任何可用的文案输入框！`);
         }
 
         // 5. 最终发布
