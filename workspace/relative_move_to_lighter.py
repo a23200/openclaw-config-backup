@@ -1,0 +1,37 @@
+from pymycobot import MyCobot
+import time
+
+PORT = '/dev/cu.usbserial-54F70030501'
+BAUD = 115200
+
+# 基于保守估计的视觉偏移计算结果
+# X 方向（向前）移动 49mm
+# Y 方向（向左）移动 34.8mm
+delta_x = 49
+delta_y = 34.8
+
+print("✅ 连接机械臂...")
+mc = MyCobot(PORT, BAUD)
+time.sleep(1)
+
+print("🔍 正在读取当前坐标作为基准...")
+base_coords = mc.get_coords()
+time.sleep(0.5)
+
+if not base_coords:
+    print("❌ 读取基准坐标失败，无法执行相对移动。")
+    exit()
+
+print(f"📍 基准坐标: {base_coords}")
+
+# 计算目标坐标
+target_coords = base_coords[:] # 复制列表
+target_coords[0] += delta_x
+target_coords[1] += delta_y
+
+print(f"🎯 正在执行相对移动，目标坐标: {target_coords}")
+# 使用较慢的速度 20，保证平稳
+mc.send_coords(target_coords, 20, 0)
+time.sleep(3) # 等待移动完成
+
+print("✅ 已到达目标位置，锁定姿态。")

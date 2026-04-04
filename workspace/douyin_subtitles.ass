@@ -1,0 +1,36 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,PingFang SC,72,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,3,0,2,80,80,180,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:03.33,Default,,0,0,0,,有时候
+Dialogue: 0,0:00:03.33,0:00:06.66,Default,,0,0,0,,真正让人放松下来的
+Dialogue: 0,0:00:06.66,0:00:09.99,Default,,0,0,0,,不是什么大道理
+Dialogue: 0,0:00:09.99,0:00:13.32,Default,,0,0,0,,而只是一个安静的下午
+Dialogue: 0,0:00:13.32,0:00:16.65,Default,,0,0,0,,一束刚刚好的光
+Dialogue: 0,0:00:16.65,0:00:19.98,Default,,0,0,0,,一杯冰美式
+Dialogue: 0,0:00:19.98,0:00:23.31,Default,,0,0,0,,和一点点属于自己的时间
+Dialogue: 0,0:00:23.31,0:00:26.64,Default,,0,0,0,,春天从来都不是急着告诉你答案
+Dialogue: 0,0:00:26.64,0:00:29.97,Default,,0,0,0,,它只是轻轻提醒你
+Dialogue: 0,0:00:29.97,0:00:33.30,Default,,0,0,0,,慢一点
+Dialogue: 0,0:00:33.30,0:00:36.63,Default,,0,0,0,,也没关系
+Dialogue: 0,0:00:36.63,0:00:39.96,Default,,0,0,0,,当风吹过窗边
+Dialogue: 0,0:00:39.96,0:00:43.29,Default,,0,0,0,,当光落在书页上
+Dialogue: 0,0:00:43.29,0:00:46.62,Default,,0,0,0,,那些原本拧紧的情绪
+Dialogue: 0,0:00:46.62,0:00:49.95,Default,,0,0,0,,也会一点点松开
+Dialogue: 0,0:00:49.95,0:00:53.28,Default,,0,0,0,,如果今天有点累
+Dialogue: 0,0:00:53.28,0:00:56.61,Default,,0,0,0,,就先别硬撑了
+Dialogue: 0,0:00:56.61,0:00:59.94,Default,,0,0,0,,坐下来
+Dialogue: 0,0:00:59.94,0:01:03.27,Default,,0,0,0,,喝一口咖啡
+Dialogue: 0,0:01:03.27,0:01:06.60,Default,,0,0,0,,让自己安静一会儿
+Dialogue: 0,0:01:06.60,0:01:09.93,Default,,0,0,0,,你不是停下来了
+Dialogue: 0,0:01:09.93,0:01:13.26,Default,,0,0,0,,你只是在给自己
+Dialogue: 0,0:01:13.26,0:01:16.59,Default,,0,0,0,,重新出发的力气

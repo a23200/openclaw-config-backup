@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "moss_calculator": {
+      "type": "stdio",
+      "command": "/Users/mac/.openclaw/workspace/mcp-calculator/.venv/bin/python",
+      "args": [
+        "/Users/mac/.openclaw/workspace/mcp-calculator/calculator.py"
+      ]
+    }
+  }
+}

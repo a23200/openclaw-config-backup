@@ -1,0 +1,8 @@
+2026/04/02-22:03:47.540 25de2 Reusing MANIFEST /Users/mac/.openclaw/workspace/xianyu-openclaw-channel/browser_data/user_3083424450/Default/Local Storage/leveldb/MANIFEST-000001
+2026/04/02-22:03:47.541 25de2 Recovering log #4
+2026/04/02-22:03:47.542 25de2 Level-0 table #7: started
+2026/04/02-22:03:47.545 25de2 Level-0 table #7: 19323 bytes OK
+2026/04/02-22:03:47.546 25de2 Delete type=0 #4
+2026/04/02-22:03:59.558 25de5 Level-0 table #10: started
+2026/04/02-22:03:59.561 25de5 Level-0 table #10: 86166 bytes OK
+2026/04/02-22:03:59.563 25de5 Delete type=0 #8

@@ -1,0 +1,5 @@
+2026/04/02-21:36:15.913 1d30d Creating DB /Users/mac/.openclaw/workspace/xianyu-openclaw-channel/browser_data/user_3083424450/Default/Local Storage/leveldb since it was missing.
+2026/04/02-21:36:15.918 1d30d Reusing MANIFEST /Users/mac/.openclaw/workspace/xianyu-openclaw-channel/browser_data/user_3083424450/Default/Local Storage/leveldb/MANIFEST-000001
+2026/04/02-21:36:25.292 1d311 Level-0 table #5: started
+2026/04/02-21:36:25.296 1d311 Level-0 table #5: 170199 bytes OK
+2026/04/02-21:36:25.298 1d311 Delete type=0 #3

@@ -116,7 +116,19 @@ console.log(`[Douyin-Pub] 正在独立启动新的发布窗口...`);
         if (await targetEditor.isVisible()) {
             await targetEditor.click();
             await page.waitForTimeout(500);
-            await targetEditor.fill(description);
+            
+            // 抖音的 .zone-container 是 contenteditable，fill 可能会失效。
+            // 使用 insertText 防止触发回车键导致表单异常提交，同时保证 React 状态更新
+            
+            await page.keyboard.insertText(description);
+            await page.waitForTimeout(2000); // Wait for React state to settle
+            
+            
+            await page.keyboard.press('Escape');
+            await page.waitForTimeout(1000);
+
+
+
             console.log(`[Douyin-Pub] ✅ 文案已通过 fill() 直接写入！`);
         } else {
             console.log(`[Douyin-Pub] ⚠️ 未能找到任何可用的文案输入框！`);
@@ -137,7 +149,14 @@ console.log(`[Douyin-Pub] 正在独立启动新的发布窗口...`);
             console.log(`[Douyin-Pub] 🚀 找到发布按钮！即将发射！`);
             await publishBtn.click();
         } else {
-            console.log(`[Douyin-Pub] ⚠️ 发布按钮不可用。`);
+            
+            console.log(`[Douyin-Pub] ⚠️ 发布按钮不可用。截图保存为 error-publish.png`);
+            
+            await page.screenshot({ path: '/tmp/video-build/error-publish.png', fullPage: true });
+            const html = await page.content();
+            fs.writeFileSync('/tmp/video-build/error.html', html);
+
+
         }
         
         console.log(`\n[Douyin-Pub] 🎉 脚本执行完毕！浏览器保留 5 分钟。`);

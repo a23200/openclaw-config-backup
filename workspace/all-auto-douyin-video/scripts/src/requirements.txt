@@ -1,0 +1,4 @@
+openai
+requests
+google-genai
+Pillow

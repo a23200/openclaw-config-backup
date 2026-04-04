@@ -42,18 +42,29 @@ if (!process.argv[3] && !providedSrtPath) {
 }
 
 async function run() {
-    console.log("[Composite] 🎙️ 正在调用微软 Edge TTS 引擎生成超高清男声（晓晓/云希）...");
+    console.log("[Composite] 🎙️ 正在优先调用微软 Edge TTS，引擎异常时自动回退到 macOS say...");
     
-    const tts = new MsEdgeTTS();
-    await tts.setMetadata("zh-CN-YunxiNeural", OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-    
-    // msedge-tts 的 toFile() 参数是一个目录路径，而不是具体的文件名，它会自动在此目录生成 audio.mp3
-    const _tts = new MsEdgeTTS();
-    await _tts.setMetadata("zh-CN-YunxiNeural", OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
     const tempDir = path.join(dir, `temp_audio_${Date.now()}`);
     fs.mkdirSync(tempDir);
-    await _tts.toFile(tempDir, newsText);
-    const realAudioPath = path.join(tempDir, "audio.mp3");
+    let realAudioPath = path.join(tempDir, "audio.mp3");
+
+    try {
+        const tts = new MsEdgeTTS();
+        await tts.setMetadata("zh-CN-YunxiNeural", OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+
+        // msedge-tts 的 toFile() 参数是一个目录路径，而不是具体的文件名，它会自动在此目录生成 audio.mp3
+        const _tts = new MsEdgeTTS();
+        await _tts.setMetadata("zh-CN-YunxiNeural", OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+        await _tts.toFile(tempDir, newsText);
+        console.log("[Composite] ✅ Edge TTS 生成成功。");
+    } catch (e) {
+        console.warn(`[Composite] ⚠️ Edge TTS 失败，回退到 macOS say: ${e}`);
+        const aiffPath = path.join(tempDir, "audio.aiff");
+        const escapedText = newsText.replace(/"/g, '\\"');
+        execSync(`say -v Tingting -o "${aiffPath}" "${escapedText}"`, { stdio: 'inherit' });
+        execSync(`"/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg" -y -i "${aiffPath}" -ar 24000 -b:a 48k "${realAudioPath}"`, { stdio: 'inherit' });
+        console.log("[Composite] ✅ 已使用 macOS say 生成回退音频。");
+    }
     
     console.log(`[Composite] 🎞️ 正在使用 FFmpeg 融合高清音轨并硬核烧录字幕到视频...`);
 

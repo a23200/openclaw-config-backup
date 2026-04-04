@@ -1,0 +1,6 @@
+{
+  "ok": false,
+  "returncode": 1,
+  "stdout": "Created temporary directory: /var/folders/j8/0f8b_9650cb1wcvt43dysm9c0000gn/T/tmpt0p2z9bo\n--- Step 1: Generating images with DALL-E 3 ---\nGenerating image 1/5 for prompt: '一个适合抖音竖屏传播的高质感短视频世界，真实电影感，强情绪转场，画面干净，细节丰富，光影戏剧化，适合做热点改编，9:16 竖屏，不出现 logo，不出现杂乱文字。, 1. 以“穿搭能让普通人改变气质”为灵感的开场镜头，情绪一下抓住人，画面有强烈视觉记忆点和戏剧化转场感。'\nError generating image 1: Error code: 400 - {'error': {'message': 'This request has been blocked by our content filters.', 'type': 'image_generation_user_error', 'param': None, 'code': 'content_policy_violation'}}\n\\n--- Cleaning up temporary directory: /var/folders/j8/0f8b_9650cb1wcvt43dysm9c0000gn/T/tmpt0p2z9bo ---\n--- Cleanup complete. ---\n",
+  "stderr": ""
+}

@@ -4,11 +4,27 @@ import json
 import socket
 import threading
 import numpy as np
-sys.path.append('third_party/Matcha-TTS')
+import torch
+import whisper
+import pyaudio
+import wave
+import subprocess
 from cosyvoice.cli.cosyvoice import AutoModel
-import torchaudio
 
-# ====================== 单例模型（只加载一次）======================
+# ====================== 配置项 ======================
+WAKE_WORD = "你好老弟"
+WAKE_RESPONSE = "老弟在呢请讲"
+TARGET_SCRIPT = "/Users/mac/openclaw_voice_agent/wake_test_whisper.py"
+MODEL_DIR = 'pretrained_models/Fun-CosyVoice3-0.5B'
+PROMPT_WAV = "./asset/zero_shot_prompt.wav"
+MIC_CHANNELS = 1
+MIC_RATE = 16000
+MIC_CHUNK = 1024
+MIC_FORMAT = pyaudio.paInt16
+SILENCE_THRESHOLD = 500  # 静音阈值
+SILENCE_DURATION = 1.5   # 录音判断结束的静音时长（秒）
+
+# ====================== 单例TTS模型 ======================
 class CosyVoiceModel:
     _instance = None
     _sample_rate = None
@@ -16,137 +32,175 @@ class CosyVoiceModel:
     @classmethod
     def get(cls):
         if cls._instance is None:
-            print("[TTS 守护进程] 首次加载 CosyVoice3 模型...")
-            cls._instance = AutoModel(model_dir='pretrained_models/Fun-CosyVoice3-0.5B')
+            print(f"[TTS] 首次加载 CosyVoice3 模型 (来自: {MODEL_DIR})...")
+            cls._instance = AutoModel(model_dir=MODEL_DIR)
             cls._sample_rate = cls._instance.sample_rate
+            print("[TTS] 模型加载完毕。")
         return cls._instance, cls._sample_rate
 
-# ====================== 后台服务（修正参数名，匹配官方调用）======================
-class TTSServer:
-    def __init__(self, host='127.0.0.1', port=9999):
-        self.host = host
-        self.port = port
-        self.model, self.sample_rate = CosyVoiceModel.get()
-        self.default_prompt_wav = "./asset/zero_shot_prompt.wav"
+# ====================== 主动语音助理 ======================
+class VoiceAgent:
+    def __init__(self):
+        print("[助理] 正在初始化...")
+        # 1. 初始化TTS
+        self.tts_model, self.tts_sample_rate = CosyVoiceModel.get()
+        
+        # 2. 初始化STT (Whisper)
+        print("[STT] 正在加载 Whisper 模型...")
+        self.stt_model = whisper.load_model("base")
+        print("[STT] Whisper 模型加载完毕。")
 
-    def generate_audio(self, params):
-        """
-        严格匹配 CosyVoice3 官方参数名和调用方式
-        :param params: 包含调用参数的字典
-        :return: (audio_np, sample_rate) 或 (None, error_msg)
-        """
-        mode = params.get('mode', 'zero_shot')
-        content_text = params.get('content_text', '')  # 要合成的核心文本
-        prompt_text = params.get('prompt_text', '')    # 提示词/指令文本
-        prompt_wav = params.get('prompt_wav', self.default_prompt_wav)
+        # 3. 初始化麦克风
+        self.audio = pyaudio.PyAudio()
+        self.stream = self.audio.open(format=MIC_FORMAT,
+                                      channels=MIC_CHANNELS,
+                                      rate=MIC_RATE,
+                                      input=True,
+                                      frames_per_buffer=MIC_CHUNK)
+        print("[麦克风] 麦克风已开启，准备监听。")
 
+    def speak(self, text):
+        """使用CosyVoice合成并播放语音"""
+        print(f"🔊 正在说: {text}")
         try:
-            # 1. Zero-shot 模式（严格匹配官方调用：content_text, prompt_text, prompt_wav）
-            if mode == 'zero_shot':
-                gen = self.model.inference_zero_shot(
-                    content_text,  # 第一个参数：要合成的文本（官方无keyword，位置传参）
-                    prompt_text,   # 第二个参数：提示词
-                    prompt_wav,    # 第三个参数：参考音频
-                    stream=False
-                )
-            # 2. 细粒度控制（cross_lingual：只有prompt_text和prompt_wav两个参数）
-            elif mode == 'cross_lingual':
-                gen = self.model.inference_cross_lingual(
-                    prompt_text,  # 包含文本+控制符（如[breath]）
-                    prompt_wav,
-                    stream=False
-                )
-            # 3. 指令控制（instruct2：content_text + instruct_text + prompt_wav）
-            elif mode == 'instruct2':
-                gen = self.model.inference_instruct2(
-                    content_text,  # 要合成的文本
-                    prompt_text,   # 指令提示词（如“用广东话表达”）
-                    prompt_wav,
-                    stream=False
-                )
-            else:
-                return None, f"不支持的模式：{mode}，支持的模式：zero_shot/cross_lingual/instruct2"
-
-            # 提取音频张量（和官方示例一致）
-            for i, res in enumerate(gen):
-                audio_tensor = res['tts_speech'].squeeze().cpu().numpy()
-                return audio_tensor, self.sample_rate
-
-            return None, "未生成任何音频数据"
+            gen = self.tts_model.inference_zero_shot(text, "", PROMPT_WAV, stream=False)
+            for res in gen:
+                audio_np = res['tts_speech'].squeeze().cpu().numpy()
+                
+                # 创建一个PyAudio的播放流
+                p = pyaudio.PyAudio()
+                play_stream = p.open(format=pyaudio.paFloat32,
+                                     channels=1,
+                                     rate=self.tts_sample_rate,
+                                     output=True)
+                # 播放音频
+                play_stream.write(audio_np.astype(np.float32).tobytes())
+                play_stream.stop_stream()
+                play_stream.close()
+                p.terminate()
+                break # 只处理第一个生成结果
         except Exception as e:
-            return None, f"生成失败：{str(e)}"
+            print(f"❌ 语音合成或播放失败: {e}")
 
-    def handle_client(self, client_socket):
-        """处理单个客户端请求"""
-        try:
-            # 接收客户端数据（先收长度，再收内容）
-            len_data = client_socket.recv(4)
-            if not len_data:
-                return
-            data_len = int.from_bytes(len_data, byteorder='big')
-            
-            res_data = b''
-            while len(res_data) < data_len:
-                chunk = client_socket.recv(min(data_len - len(res_data), 4096))
-                if not chunk:
-                    break
-                res_data += chunk
-            
-            # 解析请求参数
-            req = json.loads(res_data.decode('utf-8'))
-            
-            # 生成音频
-            audio_np, result = self.generate_audio(req)
-            if audio_np is not None:
-                # 序列化音频数据
-                audio_str = ','.join(map(str, audio_np))
-                response = json.dumps({
-                    "status": "success",
-                    "sample_rate": result,
-                    "audio_data": audio_str,
-                    "msg": "音频生成成功"
-                }).encode('utf-8')
-            else:
-                # 生成失败
-                response = json.dumps({
-                    "status": "failed",
-                    "sample_rate": 0,
-                    "audio_data": "",
-                    "msg": result
-                }).encode('utf-8')
-
-            # 发送响应（先长度，后内容）
-            client_socket.send(len(response).to_bytes(4, byteorder='big'))
-            client_socket.send(response)
-
-        except Exception as e:
-            error_res = json.dumps({
-                "status": "failed",
-                "sample_rate": 0,
-                "audio_data": "",
-                "msg": f"处理失败：{str(e)}"
-            }).encode('utf-8')
-            client_socket.send(len(error_res).to_bytes(4, byteorder='big'))
-            client_socket.send(error_res)
-        finally:
-            client_socket.close()
-
-    def start(self):
-        """启动后台服务"""
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server_socket.bind((self.host, self.port))
-        server_socket.listen(5)
-        print(f"[TTS 守护进程] 已启动，监听 {self.host}:{self.port}")
-        print(f"[支持模式] zero_shot / cross_lingual / instruct2")
+    def listen_and_transcribe(self, timeout=None):
+        """
+        从麦克风录音，直到检测到静音，然后进行语音识别。
+        - timeout: 如果设置了秒数，则最多录音这么久。
+        """
+        print("🎤 正在听...")
+        frames = []
+        silent_chunks = 0
+        max_silent_chunks = int(SILENCE_DURATION * MIC_RATE / MIC_CHUNK)
+        recording_started = False
 
         while True:
-            client_socket, addr = server_socket.accept()
-            print(f"[客户端连接] {addr}")
-            client_thread = threading.Thread(target=self.handle_client, args=(client_socket,))
-            client_thread.daemon = True
-            client_thread.start()
+            data = self.stream.read(MIC_CHUNK, exception_on_overflow=False)
+            frames.append(data)
+            
+            # 简单VAD：检查音量
+            audio_data = np.frombuffer(data, dtype=np.int16)
+            is_loud = np.abs(audio_data).mean() > SILENCE_THRESHOLD
+
+            if is_loud:
+                if not recording_started:
+                    print("🎤 检测到声音，开始录制...")
+                    recording_started = True
+                silent_chunks = 0
+            elif recording_started:
+                silent_chunks += 1
+
+            if recording_started and silent_chunks > max_silent_chunks:
+                print("🎤 检测到静音，录制结束。")
+                break
+        
+        # 将录音数据保存为临时的WAV文件
+        temp_wav_path = "temp_recording.wav"
+        with wave.open(temp_wav_path, 'wb') as wf:
+            wf.setnchannels(MIC_CHANNELS)
+            wf.setsampwidth(self.audio.get_sample_size(MIC_FORMAT))
+            wf.setframerate(MIC_RATE)
+            wf.writeframes(b''.join(frames))
+
+        # 使用Whisper进行识别
+        print("🧠 正在识别...")
+        try:
+            result = self.stt_model.transcribe(temp_wav_path, fp16=False)
+            text = result['text'].strip()
+            print(f"💬 识别结果: {text}")
+            os.remove(temp_wav_path) # 删除临时文件
+            return text
+        except Exception as e:
+            print(f"❌ 语音识别失败: {e}")
+            return ""
+
+    def run_target_script(self, command_text):
+        """将识别到的指令发送到目标脚本"""
+        if not os.path.exists(TARGET_SCRIPT):
+            print(f"❌ 错误：目标脚本不存在！路径: {TARGET_SCRIPT}")
+            self.speak("老板，目标脚本找不到了，请检查路径配置。")
+            return
+            
+        print(f"🚀 正在将指令 '{command_text}' 发送到 '{TARGET_SCRIPT}'...")
+        try:
+            # 使用subprocess.run来执行脚本并传递参数
+            # 注意：指令文本作为单个参数传递
+            result = subprocess.run(
+                ['python3', TARGET_SCRIPT, command_text],
+                capture_output=True, text=True, check=True
+            )
+            print("✅ 指令已成功发送。")
+            # 可以选择性地播报目标脚本的输出
+            if result.stdout:
+                print(f"📜 目标脚本输出:\n{result.stdout}")
+        except FileNotFoundError:
+             print(f"❌ 错误：python3 命令未找到，请确保已安装并配置好环境。")
+             self.speak("老板，执行环境好像有点问题，找不到python3。")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ 目标脚本执行出错！")
+            print(f"   返回码: {e.returncode}")
+            print(f"   输出: {e.stdout}")
+            print(f"   错误: {e.stderr}")
+            self.speak("老板，执行指令的时候出错了。")
+        except Exception as e:
+            print(f"❌ 发送指令时发生未知错误: {e}")
+            self.speak("老板，发送指令的时候遇到了一个未知问题。")
+
+    def start(self):
+        """启动助理的主循环"""
+        print("="*50)
+        print(f"老弟语音助理已启动")
+        print(f"唤醒词: '{WAKE_WORD}'")
+        print("按 Ctrl+C 退出程序")
+        print("="*50)
+
+        try:
+            while True:
+                # 1. 监听唤醒词
+                print("\n💤 等待唤醒...")
+                text = self.listen_and_transcribe()
+                if WAKE_WORD in text:
+                    # 2. 唤醒并回应
+                    self.speak(WAKE_RESPONSE)
+                    
+                    # 3. 监听完整指令
+                    command = self.listen_and_transcribe()
+                    if command:
+                        # 4. 转发指令到目标脚本
+                        self.run_target_script(command)
+                    else:
+                        print("🤔 未听到有效指令。")
+
+        except KeyboardInterrupt:
+            print("\n👋 收到退出指令，正在关闭...")
+        finally:
+            self.stream.stop_stream()
+            self.stream.close()
+            self.audio.terminate()
+            print("💤 助理已休眠。")
 
 if __name__ == "__main__":
-    server = TTSServer()
-    server.start()
+    # 解决libomp库冲突问题
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+    
+    agent = VoiceAgent()
+    agent.start()

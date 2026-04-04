@@ -1,22 +1,18 @@
-# MEMORY.md - Long-Term Context
 
-## User Preferences
+### AI 内容生成 SOP (2026-03-27) - **补充教训**
+- **重大教训 - 必须遵循官方文档**: 在调用 Google Veo 的 `generate_videos` API 时，我遗漏了一个关键的 `config` 参数，特别是 `config=types.GenerateVideosConfig(aspect_ratio="9:16")`。
+- **问题根源**: 官方文档和示例明确指出需要此参数来指定视频的宽高比。我的代码中缺少这个参数，很可能是导致API虽然接受请求但无法正确处理、最终返回空视频数据的根本原因。
+- **核心原则**: 在集成任何新的第三方API时，严禁想当然或只参考部分资料。**必须第一时间找到并严格遵循官方最新的代码示例（Code Example）**，确保所有必需的参数都已正确提供。这能避免大量无效的调试。
 
-* **Content Creation:** 老板明确要求，所有自动化生成的社交媒体内容（特别是抖音文案和相关资讯），**必须是中文**。绝对不能发布英文内容。
-
-## Video Generation & Publishing Workflows
-
-* **核心视频流 (2026-03-21):** 生成纯视觉默片 (Veo 3.1) -> 高清TTS朗读新闻 + FFmpeg Full 版合并音频并**硬烧录带透明底的高级中文字幕**（去掉喧宾夺主的大字水印，且字幕时间轴需精准匹配语速） -> FFMPEG 视频循环拉长以匹配音频 -> Playwright 自动避开所有弹窗并发布。
-* **画质与声音标准 (2026-03-23):** Veo 3.1 提示词必须强制加上电影级强化（`cinematic lighting, 8k resolution, photorealistic, ultra-detailed`）；音频采用 Edge TTS (晓晓/云希) 搭配高级硬核 `.srt` 阴影字幕。
-* **操作红线 (Playwright):** 禁止在填表单时模拟 `Enter` 键（导致抖音保存退出），必须用 `element.fill()` 或纯物理敲击；遇到弹窗必须有精准的关闭/跳过逻辑；发布时绝对不可使用 `pkill -f "Google Chrome"` 误杀用户的私人浏览器进程。
-* **发图文 vs 发文章红线 (2026-03-21):** 绝对不能把“图文”和“文章”发布搞混。发图文必须用 `node ~/.agents/skills/douyin-creator-tools/src/publish-imagetext.mjs`，JSON 载荷包含 `description` 和 `imagePaths` 数组；发文章用 `publish-douyin-article.mjs`，绝不能混用。
-
-## Hardware & Robotics Integration (2026-03-23)
-
-* **机械臂控制流:** 目标是通过 ROS 2 桥接 Elephant Robotics 机械臂，接入视觉（`camsnap`）与语音指令。
-* **语音助理状态:** 已完成 `voice_assistant_final.py`，使用 Whisper base 模型进行 Wake Word (“老弟”) + VAD + 语音转文本。通过 `subprocess` 调用 `openclaw system event` 将指令传入系统，实现语音唤醒后的全自动接管。
-* **Elephant Robotics 底层控制经验 (2026-03-24):** 
-    1. 发现旧版 `pymycobot` 的全坐标群发指令 `send_coords(..., mode=1)` 存在严重的逆运动学畸变（掉高）。对于精准的空间定位和单轴姿态调整，必须抛弃群发，拆分为单轴锁定指令 `send_coord(id, value, speed)`，它能物理死锁其他 5 个自由度走出完美直线（如 Z 轴直降）。
-    2. **奇异点死锁警报：** 当机械臂像电线杆一样完全伸直（Z轴到达绝对顶峰 ~420mm）时，姿态旋转 (Rx/Ry) 会因没有关节冗余而失败。**破解方案：必须先下沉 Z 轴至少 10 厘米释放肘部空间，再进行翻转。**
-    3. 视觉抓取：直接将 XY 像素差乘上比例尺（如 1mm=1.5px）转化为物理偏移量，然后使用高精度单轴锁定直接 Z 轴下降，摒弃复杂的纯角度猜测。
-    4. 兜底方案：开发了 `teach_and_play.py`，遇到死角直接断电变软人工掰姿势，记录角度后一键回放。
+### AI 视频生成 - API 迭代与兼容处理 (2026-03-28)
+- **废弃库的平滑迁移 (google.generativeai 到 google.genai)**: 
+  - 当第三方库（如 Gemini）发出 `FutureWarning: All support for the package has ended` 时，不要试图在旧包的底层结构中盲目 `import` （例如寻找 `operations` 类）。
+  - **处理方案**：立刻舍弃旧包的修复，去官方的 "Deprecated" 通知、官方的 Cookbook 仓库或者 PyPI (用 DuckDuckGo 无验证搜索代替 Google 被拦截的搜索) 找到全新的重构版本库。
+  - **新库的变更特征**：`google.genai` 的调用方式已全面转向面向对象的 `Client` 架构（例如 `genai.Client(api_key=...)`，后续方法挂载在 `client.models`、`client.operations` 下），不再支持零散模块的直接挂载和平铺传参（所有文件数据、对象现在都被打包在如 `GenerateVideosSource` 之类的专属类中）。
+- **Google Veo 审核与下载排坑**: 
+  - **假视频（文件损坏）陷阱**: 如果生成视频下载后被 ffmpeg 报 `moov atom not found` 或非 MP4 格式，一定是拿到了**重定向的加密下载链接 (`uri`)**，却没有使用含有 `x-goog-api-key` 的 headers 进行鉴权请求（导致下到的是 401 报错页面的 HTML，却被当成了视频写入）。
+  - **敏感词封锁 (`code: 3`)**: Veo 的预览版 API 审核极其苛刻（即便是儿童童话，出现"女孩"、“连衣裙”也会被 `Responsible AI` 直接拦截）。
+  - **应对策略**: 不要死磕具体的人物/服装描写，直接转换为大场景的**风光空镜**、**花草意象**描写，这是最稳妥的通过方案。
+- **排障最佳实践**: 
+  - 遇到库的参数不认识（例如报没有某个属性），不要猜。直接通过 `exec` 用 Python 脚本打印其属性列表（如 `print(dir(obj))`、`print(inspect.signature(func))` 或 `print(obj.model_fields.keys())`）来解剖实际运行时对象的下划线格式还是驼峰格式（如 `videoBytes` 还是 `video_bytes`）。
+  - 对于合并文件的文本清单（如 ffmpeg 的 `concat` 的 `filelist.txt`），写换行符时严防把 `\n` 误写成 `\\n`（变成字面上的 `\nfile`），这会直接导致读取到畸形路径。
