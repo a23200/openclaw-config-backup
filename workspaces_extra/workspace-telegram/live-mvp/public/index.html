@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live MVP · 本地直播原型</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero-card">
+        <div class="hero-copy">
+          <span class="badge badge-live">LIVE MVP</span>
+          <h1>一个能本地跑起来的直播网站原型</h1>
+          <p>
+            支持主播开播、观众加入、房间列表、聊天室，以及基于 WebRTC 的一对多推流演示。
+          </p>
+
+          <div class="hero-meta">
+            <div>
+              <span class="label">当前房间</span>
+              <strong id="heroRoomId">尚未加入</strong>
+            </div>
+            <div>
+              <span class="label">主播</span>
+              <strong id="heroBroadcaster">等待中</strong>
+            </div>
+            <div>
+              <span class="label">在线观众</span>
+              <strong id="heroViewerCount">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-cover-wrap">
+          <img id="heroCover" class="hero-cover" alt="直播封面" />
+          <div class="hero-floating-card">
+            <span class="label">房间标题</span>
+            <strong id="heroRoomTitle">还没有房间</strong>
+            <span id="heroRoomLiveState" class="tiny-pill">未开播</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-grid">
+        <section class="panel control-panel">
+          <div class="panel-header">
+            <h2>控制台</h2>
+            <span id="rolePill" class="role-pill">未加入</span>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              <span>显示名称</span>
+              <input id="displayName" type="text" maxlength="24" placeholder="比如：富贵 / 主播A" />
+            </label>
+            <label>
+              <span>房间号</span>
+              <input id="roomId" type="text" maxlength="24" placeholder="例如：room-1001" />
+            </label>
+            <label>
+              <span>直播标题</span>
+              <input id="roomTitle" type="text" maxlength="40" placeholder="今晚聊产品设计" />
+            </label>
+            <label>
+              <span>封面图 URL（可选）</span>
+              <input id="coverUrl" type="url" placeholder="https://..." />
+            </label>
+          </div>
+
+          <div class="action-row">
+            <button id="startBroadcast" class="btn btn-primary">开始直播</button>
+            <button id="joinViewer" class="btn btn-secondary">作为观众加入</button>
+            <button id="leaveRoom" class="btn btn-ghost">离开房间</button>
+          </div>
+
+          <div class="status-box">
+            <span class="label">系统状态</span>
+            <p id="statusText">等待操作</p>
+          </div>
+
+          <div class="tips-card">
+            <h3>现在已经补上的能力</h3>
+            <ul>
+              <li>主动离开房间 / 主播下播</li>
+              <li>房间信息与在线人数实时同步</li>
+              <li>聊天记录保留最近 50 条</li>
+              <li>首页房间列表动态刷新</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="panel video-panel">
+          <div class="panel-header">
+            <h2>直播画面</h2>
+            <span class="tiny-pill">WebRTC</span>
+          </div>
+
+          <div class="video-grid">
+            <div class="video-card">
+              <span class="video-label">本地画面（主播）</span>
+              <video id="localVideo" autoplay muted playsinline></video>
+            </div>
+            <div class="video-card">
+              <span class="video-label">远端画面（观众）</span>
+              <video id="remoteVideo" autoplay playsinline></video>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel rooms-panel">
+          <div class="panel-header">
+            <h2>直播房间列表</h2>
+            <span id="roomsCount" class="tiny-pill">0 个房间</span>
+          </div>
+          <div id="roomsList" class="rooms-list empty-state">
+            当前还没有房间，先开一个试试。
+          </div>
+        </section>
+
+        <section class="panel chat-panel">
+          <div class="panel-header">
+            <h2>聊天室</h2>
+            <span id="chatCount" class="tiny-pill">0 条消息</span>
+          </div>
+          <div id="chatMessages" class="chat-messages">
+            <div class="chat-empty">加入房间后，这里会显示聊天记录。</div>
+          </div>
+          <div class="chat-input-row">
+            <input id="chatInput" type="text" maxlength="300" placeholder="发条弹幕试试…" />
+            <button id="sendChat" class="btn btn-primary">发送</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/app.js"></script>
+  
+    <section class="invite-card" aria-labelledby="inviteCardTitle">
+      <div class="invite-card__header">
+        <h3 id="inviteCardTitle">邀请链接</h3>
+        <p>复制带房间号的链接，别人打开就能直接进对应直播间。</p>
+      </div>
+      <div class="invite-card__body">
+        <input id="inviteLinkOutput" class="invite-link-output" type="text" readonly placeholder="输入或选择房间后，这里会生成邀请链接" />
+        <button id="copyInviteBtn" class="btn btn-secondary" type="button" disabled>复制链接</button>
+      </div>
+    </section>
+
+</body>
+</html>
