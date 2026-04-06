@@ -267,6 +267,9 @@ class XianyuProductSpider:
             await self._goto_with_retry(self.HOME_URL)
             await asyncio.sleep(1)
             
+            # 在触发搜索前先注册响应监听，避免错过快速返回的接口结果
+            self.page.on("response", self._handle_response)
+
             # 填写搜索关键词
             await self.page.fill('input[class*="search-input"]', keyword)
             await self.page.click('button[type="submit"]')
@@ -290,9 +293,6 @@ class XianyuProductSpider:
                 logger.info(f"【{self.cookie_id}】已设置排序为最新")
             except Exception as e:
                 logger.warning(f"【{self.cookie_id}】设置排序失败: {e}")
-            
-            # 注册响应监听
-            self.page.on("response", self._handle_response)
             
             # 分页处理
             current_page = 1

@@ -1,0 +1,17 @@
+{
+  "session_id": "3083424450-search",
+  "control_url": "http://127.0.0.1:8080/api/captcha/control/3083424450-search",
+  "captcha_info": {
+    "selector": "#nocaptcha",
+    "x": 430,
+    "y": 220,
+    "width": 420,
+    "height": 252,
+    "in_iframe": true
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "question": "亲，请按照说明进行验证哦"
+}

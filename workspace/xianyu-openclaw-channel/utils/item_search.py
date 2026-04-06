@@ -5,10 +5,12 @@
 """
 
 import asyncio
+import base64
 import json
 import time
 import sys
 import os
+import subprocess
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from loguru import logger
@@ -46,8 +48,94 @@ class XianyuSearcher:
         self.browser = None
         self.context = None
         self.page = None
+        self.playwright = None
+        self.using_cdp_browser = False
         self.api_responses = []
         self.user_id = "default"  # 默认用户ID
+        self.preferred_cookie_id = None
+        self.yescaptcha_key = os.getenv("YESCAPTCHA_CLIENT_KEY")
+        self.last_captcha_info = None
+
+    def _get_cdp_url(self) -> str | None:
+        return os.getenv("LOCAL_BROWSER_CDP_URL") or os.getenv("BROWSER_CDP_URL")
+
+    async def _extract_scratch_question(self, page) -> str:
+        selectors = [
+            '.captcha-title',
+            '.captcha-text',
+            '.captcha-dialog-title',
+            '.desc',
+            '.title',
+            '[class*="captcha"] [class*="title"]',
+        ]
+
+        for selector in selectors:
+            try:
+                text = await page.locator(selector).first.text_content(timeout=1000)
+                if text and text.strip():
+                    return text.strip()
+            except Exception:
+                continue
+
+        for frame in page.frames:
+            if frame == page.main_frame:
+                continue
+            for selector in selectors:
+                try:
+                    text = await frame.locator(selector).first.text_content(timeout=1000)
+                    if text and text.strip():
+                        return text.strip()
+                except Exception:
+                    continue
+
+        return ""
+
+    async def _try_solve_scratch_with_yescaptcha(self, page) -> bool:
+        if not self.yescaptcha_key:
+            logger.info("未配置 YesCaptcha Key，跳过自动识别")
+            return False
+
+        try:
+            from utils.captcha_remote_control import captcha_controller
+            from utils.yescaptcha_client import YesCaptchaClient
+
+            captcha_info = await captcha_controller._get_captcha_info(page)
+            if not captcha_info:
+                logger.warning("YesCaptcha 自动识别失败：未找到验证码容器")
+                return False
+
+            screenshot_bytes = await captcha_controller._screenshot_captcha_area(page, captcha_info)
+            screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
+            question = await self._extract_scratch_question(page)
+            logger.warning(f"YesCaptcha 实验性识别启动，问题文本: {question or '未识别到'}")
+
+            client = YesCaptchaClient(self.yescaptcha_key)
+            result = await client.solve_funcaptcha_classification(screenshot_base64, question or "Pick the correct image")
+
+            if result.get("errorId"):
+                logger.warning(f"YesCaptcha createTask 失败: {result}")
+                return False
+
+            solution = result.get("solution") or {}
+            if result.get("status") != "ready" and result.get("taskId"):
+                result = await client.wait_for_result(result["taskId"])
+                if result.get("errorId"):
+                    logger.warning(f"YesCaptcha getTaskResult 失败: {result}")
+                    return False
+                solution = result.get("solution") or {}
+
+            objects = solution.get("objects") or solution.get("top_k") or []
+            logger.warning(f"YesCaptcha 返回结果: {solution}")
+
+            # 当前闲鱼是刮刮乐滑动验证，不是标准六宫格/九宫格点选。
+            # 即使服务返回了对象索引，也无法直接映射到刮刮乐动作，因此仅记录实验结果。
+            if objects:
+                logger.warning("YesCaptcha 返回了图像分类结果，但当前验证码是刮刮乐滑动验证，无法直接应用")
+
+            return False
+        except Exception as e:
+            logger.warning(f"YesCaptcha 自动识别异常: {e}")
+            return False
 
     async def _handle_scratch_captcha_manual(self, page, max_retries=3, wait_for_completion=True):
         """人工处理刮刮乐滑块（远程控制 + 截图备份）
@@ -64,7 +152,7 @@ class XianyuSearcher:
         logger.warning("=" * 60)
         
         # 获取会话ID
-        session_id = getattr(self, 'user_id', 'default')
+        session_id = str(getattr(self, 'user_id', None) or getattr(self, 'preferred_cookie_id', None) or 'default')
         
         # 【新方案】启用远程控制
         use_remote_control = getattr(self, 'use_remote_control', True)
@@ -81,42 +169,35 @@ class XianyuSearcher:
                 import socket
                 import os
                 
-                # 尝试多种方式获取IP
-                local_ip = "localhost"
+                # 本地协作场景下优先使用 127.0.0.1，避免错误探测出不可访问的内网地址。
+                local_ip = os.getenv('SERVER_HOST') or os.getenv('PUBLIC_IP') or "127.0.0.1"
                 
-                # 方法1：从环境变量获取（Docker/配置文件）
-                local_ip = os.getenv('SERVER_HOST') or os.getenv('PUBLIC_IP')
-                
-                if not local_ip:
-                    # 方法2：尝试获取外网IP
-                    try:
-                        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                        s.connect(("8.8.8.8", 80))
-                        local_ip = s.getsockname()[0]
-                        s.close()
-                        
-                        # 检查是否是Docker内网IP（172.x.x.x 或 10.x.x.x）
-                        if local_ip.startswith('172.') or local_ip.startswith('10.'):
-                            logger.warning(f"⚠️ 检测到Docker内网IP: {local_ip}")
-                            local_ip = None  # 重置，使用localhost
-                    except:
-                        pass
-                
-                if not local_ip:
-                    local_ip = "localhost"
-                    logger.warning("⚠️ 无法获取外网IP，使用 localhost")
-                    logger.warning("💡 如果在Docker中，请设置环境变量 SERVER_HOST 为公网IP")
-                
-                control_url = f"http://{local_ip}:8000/api/captcha/control/{session_id}"
+                server_port = os.getenv('SERVER_PORT', '8080')
+                control_url = f"http://{local_ip}:{server_port}/api/captcha/control/{session_id}"
                 
                 logger.warning("=" * 60)
                 logger.warning(f"🌐 远程控制已启动！")
                 logger.warning(f"📱 请访问以下网址进行验证：")
                 logger.warning(f"   {control_url}")
                 logger.warning("=" * 60)
-                logger.warning(f"💡 或直接访问: http://{local_ip}:8000/api/captcha/control")
+                logger.warning(f"💡 或直接访问: http://{local_ip}:{server_port}/api/captcha/control")
                 logger.warning(f"   然后输入会话ID: {session_id}")
                 logger.warning("=" * 60)
+
+                self.last_captcha_info = {
+                    'session_id': session_id,
+                    'control_url': control_url,
+                    'base_control_url': f"http://{local_ip}:{server_port}/api/captcha/control",
+                }
+
+                # 自动弹出控制页，用户可以直接在浏览器里完成验证。
+                auto_open_captcha = os.getenv('AUTO_OPEN_CAPTCHA', '1') == '1'
+                if auto_open_captcha:
+                    try:
+                        subprocess.Popen(['open', control_url])
+                        logger.info(f"已自动打开验证码控制页: {control_url}")
+                    except Exception as open_error:
+                        logger.warning(f"自动打开验证码控制页失败: {open_error}")
                 
                 # 如果不等待完成，立即返回特殊值给调用者
                 if not wait_for_completion:
@@ -553,10 +634,17 @@ class XianyuSearcher:
             
             if is_scratch_captcha:
                 logger.warning("🎨 检测到刮刮乐类型滑块")
-                
-                # 人工处理模式 - 等待用户完成验证
-                logger.warning("⚠️ 刮刮乐需要人工处理，等待验证完成")
-                slider_success = await self._handle_scratch_captcha_manual(page, max_retries=3, wait_for_completion=True)
+
+                auto_solved = await self._try_solve_scratch_with_yescaptcha(page)
+                if auto_solved:
+                    logger.success("✅ YesCaptcha 自动处理成功")
+                    return True
+                 
+                # 人工处理模式 - 立即返回给上层，由调用方决定如何提示用户
+                logger.warning("⚠️ 刮刮乐需要人工处理，立即返回验证码状态")
+                slider_success = await self._handle_scratch_captcha_manual(page, max_retries=3, wait_for_completion=False)
+                if slider_success == 'need_captcha':
+                    return 'need_captcha'
             else:
                 actual_max_retries = max_retries
                 slider_success = None
@@ -639,6 +727,17 @@ class XianyuSearcher:
             # 获取所有cookies，返回格式是 {id: value}
             cookies = db_manager.get_all_cookies()
 
+            # 优先使用指定账号
+            if self.preferred_cookie_id is not None:
+                preferred_id = str(self.preferred_cookie_id)
+                preferred_cookie = cookies.get(preferred_id)
+                if preferred_cookie and len(preferred_cookie) > 50:
+                    logger.info(f"使用指定cookie: {preferred_id}")
+                    return {
+                        'id': preferred_id,
+                        'value': preferred_cookie
+                    }
+
             # 找到第一个有效的cookie（长度大于50的认为是有效的）
             for cookie_id, cookie_value in cookies.items():
                 if len(cookie_value) > 50:
@@ -683,18 +782,38 @@ class XianyuSearcher:
             return False
 
     async def init_browser(self):
-        """初始化浏览器（使用持久化上下文，保留缓存和cookies）"""
+        """初始化浏览器。"""
         if not PLAYWRIGHT_AVAILABLE:
             raise Exception("Playwright 未安装，无法使用真实搜索功能")
 
         if not self.browser:
-            playwright = await async_playwright().start()
-            
-            # 设置持久化数据目录（保存缓存、cookies等）
-            import tempfile
-            user_data_dir = os.path.join(tempfile.gettempdir(), 'xianyu_browser_cache')
-            os.makedirs(user_data_dir, exist_ok=True)
-            logger.info(f"使用持久化数据目录（保留缓存）: {user_data_dir}")
+            logger.info("启动 Playwright...")
+            self.playwright = await async_playwright().start()
+
+            cdp_url = self._get_cdp_url()
+            if cdp_url:
+                logger.info(f"连接本地浏览器 CDP: {cdp_url}")
+                self.browser = await self.playwright.chromium.connect_over_cdp(cdp_url)
+                self.using_cdp_browser = True
+
+                if self.browser.contexts:
+                    self.context = self.browser.contexts[0]
+                else:
+                    self.context = await self.browser.new_context(
+                        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                        viewport={'width': 1280, 'height': 720},
+                        locale='zh-CN',
+                    )
+
+                self.context.set_default_timeout(30000)
+
+                if self.context.pages:
+                    self.page = self.context.pages[0]
+                else:
+                    self.page = await self.context.new_page()
+
+                logger.info("已复用本地浏览器上下文")
+                return
             
             # 简化的浏览器启动参数，避免冲突
             browser_args = [
@@ -714,54 +833,48 @@ class XianyuSearcher:
             if os.getenv('DOCKER_ENV') == 'true':
                 browser_args.extend([
                     '--disable-gpu',
-                    # 移除--single-process参数，使用多进程模式提高稳定性
-                    # '--single-process'  # 注释掉，避免崩溃
                 ])
 
-            logger.info("正在启动浏览器（中文模式，持久化缓存）...")
-            
-            # 使用 launch_persistent_context 实现跨会话的缓存持久化
-            # 这样通过一次滑块验证后，下次搜索可以复用缓存，避免再次出现滑块
-            self.context = await playwright.chromium.launch_persistent_context(
-                user_data_dir,  # 第一个参数是用户数据目录，用于持久化
-                headless=True,  # 无头模式，后台运行
+            logger.info("启动 Chromium（普通上下文模式）...")
+            self.browser = await self.playwright.chromium.launch(
+                headless=True,
                 args=browser_args,
+            )
+
+            logger.info("创建浏览器上下文...")
+            self.context = await self.browser.new_context(
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 viewport={'width': 1280, 'height': 720},
-                locale='zh-CN',  # 设置语言为中文
-                # 持久化上下文会自动保存和加载：
-                # - Cookies
-                # - 缓存
-                # - LocalStorage
-                # - SessionStorage
-                # - 其他浏览器状态
+                locale='zh-CN',
             )
-            
-            # launch_persistent_context 返回的是 context，不是 browser
-            # 需要通过 context.browser 获取 browser 对象
-            self.browser = self.context.browser
 
-            logger.info("浏览器启动成功（持久化上下文已创建）...")
+            self.context.set_default_timeout(30000)
+
+            logger.info("浏览器启动成功")
 
             logger.info("创建页面...")
             self.page = await self.context.new_page()
 
-            logger.info("浏览器初始化完成（缓存将持久化保存）")
+            logger.info("浏览器初始化完成")
 
     async def close_browser(self):
-        """关闭浏览器（持久化上下文会自动保存缓存和cookies）"""
+        """关闭浏览器。"""
         try:
             if self.page:
                 await self.page.close()
                 self.page = None
-            # 注意：使用 persistent_context 时，关闭 context 会自动保存所有数据
             if self.context:
-                await self.context.close()
+                if not self.using_cdp_browser:
+                    await self.context.close()
                 self.context = None
-            # persistent_context 的 browser 会在 context 关闭时自动关闭
-            # 不需要单独关闭 browser
-            self.browser = None
-            logger.debug("商品搜索器浏览器已关闭（缓存已保存）")
+            if self.browser:
+                await self.browser.close()
+                self.browser = None
+            if self.playwright:
+                await self.playwright.stop()
+                self.playwright = None
+            self.using_cdp_browser = False
+            logger.debug("商品搜索器浏览器已关闭")
         except Exception as e:
             logger.warning(f"关闭商品搜索器浏览器时出错: {e}")
     
@@ -862,8 +975,15 @@ class XianyuSearcher:
                 # 注册响应监听
                 self.page.on("response", on_response)
 
-                await self.page.click('button[type="submit"]')
-                                  
+                # 优先使用回车触发真正的搜索请求，避免只命中联想词接口 search.shade
+                await self.page.keyboard.press('Enter')
+                await asyncio.sleep(1)
+
+                # 如果页面没有进入搜索结果态，再回退到点击搜索按钮
+                if not self.api_responses:
+                    logger.info("回车后未捕获搜索结果，回退到点击搜索按钮...")
+                    await self.page.click('button[type="submit"]')
+                                   
                 await self.page.wait_for_load_state("networkidle", timeout=15000)
 
                 # 等待第一页API响应（缩短等待时间）
@@ -885,7 +1005,11 @@ class XianyuSearcher:
                     playwright=getattr(self, 'playwright', None),
                     max_retries=5
                 )
-                
+
+                if slider_result == 'need_captcha':
+                    logger.warning("⚠️ 需要人工处理刮刮乐验证码")
+                    return 'need_captcha'
+
                 if not slider_result:
                     logger.error(f"❌ 滑块验证失败，搜索终止")
                     return None
@@ -1317,9 +1441,13 @@ class XianyuSearcher:
                 # 注册响应监听
                 self.page.on("response", on_response)
 
-                logger.info("🖱️ 准备点击搜索按钮...")
-                await self.page.click('button[type="submit"]')
-                logger.info("✅ 搜索按钮已点击")
+                logger.info("🖱️ 准备提交搜索...")
+                await self.page.keyboard.press('Enter')
+                await asyncio.sleep(1)
+                if not self.api_responses:
+                    logger.info("回车后未捕获搜索结果，回退到点击搜索按钮...")
+                    await self.page.click('button[type="submit"]')
+                logger.info("✅ 搜索已提交")
                     
                 await self.page.wait_for_load_state("networkidle", timeout=15000)
 
@@ -1342,7 +1470,11 @@ class XianyuSearcher:
                     playwright=getattr(self, 'playwright', None),
                     max_retries=5
                 )
-                
+
+                if slider_result == 'need_captcha':
+                    logger.warning("⚠️ 需要人工处理刮刮乐验证码")
+                    return 'need_captcha'
+
                 if not slider_result:
                     logger.error(f"❌ 滑块验证失败，搜索终止")
                     return {
@@ -1572,6 +1704,120 @@ async def search_xianyu_items(keyword: str, page: int = 1, page_size: int = 20) 
     }
 
 
+async def search_xianyu_items_with_cookie(cookie_id: str, keyword: str, page: int = 1, page_size: int = 20) -> Dict[str, Any]:
+    """使用指定 cookie 搜索闲鱼商品。"""
+    max_retries = 2
+    retry_delay = 5
+
+    for attempt in range(max_retries + 1):
+        searcher = None
+        try:
+            searcher = XianyuSearcher()
+            searcher.preferred_cookie_id = str(cookie_id)
+            searcher.user_id = str(cookie_id)
+
+            logger.info(f"开始单页搜索（指定cookie={cookie_id}），尝试次数: {attempt + 1}/{max_retries + 1}")
+            result = await searcher.search_items(keyword, page, page_size)
+
+            if result == 'need_captcha':
+                captcha_info = searcher.last_captcha_info or {}
+                return {
+                    'items': [],
+                    'total': 0,
+                    'error': '需要人工完成刮刮乐验证码',
+                    'captcha_required': True,
+                    'captcha_info': captcha_info,
+                }
+
+            if result.get('items') or not result.get('error'):
+                logger.info(f"单页搜索成功，获取到 {len(result.get('items', []))} 条数据")
+                return result
+
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"搜索商品失败 (尝试 {attempt + 1}/{max_retries + 1}): {error_msg}")
+
+            if attempt == max_retries:
+                return {
+                    'items': [],
+                    'total': 0,
+                    'error': f"搜索失败，已重试 {max_retries} 次: {error_msg}"
+                }
+
+            logger.info(f"等待 {retry_delay} 秒后重试...")
+            await asyncio.sleep(retry_delay)
+
+        finally:
+            if searcher:
+                try:
+                    await searcher.close_browser()
+                except Exception as close_error:
+                    logger.warning(f"关闭搜索器时出错: {str(close_error)}")
+
+    return {
+        'items': [],
+        'total': 0,
+        'error': "未知错误"
+    }
+
+
+async def search_multiple_pages_xianyu_with_cookie(cookie_id: str, keyword: str, total_pages: int = 1) -> Dict[str, Any]:
+    """使用指定 cookie 搜索多页闲鱼商品。"""
+    max_retries = 0
+    retry_delay = 5
+
+    for attempt in range(max_retries + 1):
+        searcher = None
+        try:
+            searcher = XianyuSearcher()
+            searcher.preferred_cookie_id = str(cookie_id)
+            searcher.user_id = str(cookie_id)
+
+            logger.info(f"开始多页搜索（指定cookie={cookie_id}），尝试次数: {attempt + 1}/{max_retries + 1}")
+            result = await searcher.search_multiple_pages(keyword, total_pages)
+
+            if result == 'need_captcha':
+                captcha_info = searcher.last_captcha_info or {}
+                return {
+                    'items': [],
+                    'total': 0,
+                    'error': '需要人工完成刮刮乐验证码',
+                    'captcha_required': True,
+                    'captcha_info': captcha_info,
+                }
+
+            if result.get('items') or not result.get('error'):
+                logger.info(f"多页搜索成功，获取到 {len(result.get('items', []))} 条数据")
+                return result
+
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"多页搜索商品失败 (尝试 {attempt + 1}/{max_retries + 1}): {error_msg}")
+
+            if attempt == max_retries:
+                return {
+                    'items': [],
+                    'total': 0,
+                    'error': f"搜索失败，已重试 {max_retries} 次: {error_msg}"
+                }
+
+            logger.info(f"等待 {retry_delay} 秒后重试...")
+            await asyncio.sleep(retry_delay)
+
+        finally:
+            if searcher:
+                try:
+                    await searcher.close_browser()
+                except Exception as close_error:
+                    logger.warning(f"关闭搜索器时出错: {str(close_error)}")
+
+    return {
+        'items': [],
+        'total': 0,
+        'error': "未知错误"
+    }
+
+
 async def search_multiple_pages_xianyu(keyword: str, total_pages: int = 1) -> Dict[str, Any]:
     """
     搜索多页闲鱼商品的便捷函数，带重试机制
@@ -1630,6 +1876,3 @@ async def search_multiple_pages_xianyu(keyword: str, total_pages: int = 1) -> Di
         'total': 0,
         'error': "未知错误"
     }
-
-
-

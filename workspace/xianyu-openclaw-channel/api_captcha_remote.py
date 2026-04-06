@@ -11,6 +11,8 @@ import asyncio
 import os
 from loguru import logger
 
+from db_manager import db_manager
+
 from utils.captcha_remote_control import captcha_controller
 
 
@@ -29,6 +31,88 @@ class MouseEvent(BaseModel):
 class SessionCheckRequest(BaseModel):
     """会话检查请求"""
     session_id: str
+
+
+class SearchCaptchaStartRequest(BaseModel):
+    """启动搜索验证码会话请求"""
+    cookie_id: str
+    keyword: str
+
+
+async def _start_search_captcha_session(session_id: str, cookie_id: str, keyword: str):
+    from playwright.async_api import async_playwright
+
+    cookie_value = db_manager.get_all_cookies().get(str(cookie_id))
+    if not cookie_value:
+        raise RuntimeError(f"Cookie不存在: {cookie_id}")
+
+    playwright = await async_playwright().start()
+    cdp_url = os.getenv('LOCAL_BROWSER_CDP_URL') or os.getenv('BROWSER_CDP_URL')
+    using_cdp_browser = False
+
+    if cdp_url:
+        logger.info(f"连接本地浏览器 CDP 启动验证码会话: {cdp_url}")
+        browser = await playwright.chromium.connect_over_cdp(cdp_url)
+        using_cdp_browser = True
+        if browser.contexts:
+            context = browser.contexts[0]
+        else:
+            context = await browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36',
+                viewport={'width': 1280, 'height': 720},
+                locale='zh-CN',
+            )
+        if context.pages:
+            page = context.pages[0]
+        else:
+            page = await context.new_page()
+    else:
+        browser = await playwright.chromium.launch(
+            headless=False,
+            args=[
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--lang=zh-CN',
+                '--accept-lang=zh-CN,zh,en-US,en',
+            ],
+        )
+        context = await browser.new_context(
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36',
+            viewport={'width': 1280, 'height': 720},
+            locale='zh-CN',
+        )
+        page = await context.new_page()
+
+    cookies = []
+    for cookie_pair in cookie_value.split(';'):
+        cookie_pair = cookie_pair.strip()
+        if '=' not in cookie_pair:
+            continue
+        name, value = cookie_pair.split('=', 1)
+        cookies.append({
+            'name': name.strip(),
+            'value': value.strip(),
+            'domain': '.goofish.com',
+            'path': '/',
+        })
+
+    await page.goto('https://www.goofish.com', timeout=30000)
+    await context.add_cookies(cookies)
+    await page.reload()
+    await page.wait_for_load_state('networkidle', timeout=15000)
+    await page.fill('input[class*="search-input"]', keyword)
+    await page.keyboard.press('Enter')
+    await page.wait_for_load_state('networkidle', timeout=20000)
+    await asyncio.sleep(5)
+
+    session_info = await captcha_controller.create_session(session_id, page)
+    captcha_controller.active_sessions[session_id]['playwright'] = playwright
+    captcha_controller.active_sessions[session_id]['browser'] = browser
+    captcha_controller.active_sessions[session_id]['context'] = context
+    captcha_controller.active_sessions[session_id]['using_cdp_browser'] = using_cdp_browser
+    logger.info(f"✅ 主服务内验证码搜索会话已启动: {session_id}")
+    return session_info
 
 
 # =============================================================================
@@ -176,6 +260,36 @@ async def get_active_sessions():
     }
 
 
+@router.post("/start-search-session")
+async def start_search_session(body: SearchCaptchaStartRequest):
+    """在主服务内启动一个用于人工验证的搜索验证码会话。"""
+    session_id = str(body.cookie_id)
+    try:
+        if session_id in captcha_controller.active_sessions:
+            await captcha_controller.close_session(session_id)
+
+        await _start_search_captcha_session(
+            session_id=session_id,
+            cookie_id=body.cookie_id,
+            keyword=body.keyword,
+        )
+
+        return {
+            'ok': True,
+            'captcha_required': True,
+            'session_id': session_id,
+            'control_url': f'http://127.0.0.1:8080/api/captcha/control/{session_id}',
+        }
+    except Exception as e:
+        logger.error(f"启动搜索验证码会话失败: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return {
+            'ok': False,
+            'error': str(e),
+        }
+
+
 @router.get("/session/{session_id}")
 async def get_session_info(session_id: str):
     """获取指定会话的信息"""
@@ -315,4 +429,3 @@ async def captcha_control_page_with_session(session_id: str):
             return HTMLResponse(content=html_content)
     else:
         raise HTTPException(status_code=404, detail="前端页面不存在")
-

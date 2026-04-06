@@ -460,6 +460,21 @@ const plugin: XianyuPluginModule = {
           const result = await response.json();
 
           if (result.ok) {
+            if (result.captcha_required) {
+              const controlUrl = result.captcha_info?.control_url || "http://127.0.0.1:8080/api/captcha/control";
+              const sessionId = result.captcha_info?.session_id || cookie_id;
+              return {
+                content: [{
+                  type: "text",
+                  text: `⚠️ 当前账号触发了闲鱼风控验证码，商品搜索暂未完成。\n\n关键词: ${result.keyword}\n会话ID: ${sessionId}\n处理地址: ${controlUrl}\n\n请先在浏览器中手动完成验证码，再重新发起搜索。`
+                }],
+                details: {
+                  captcha_required: true,
+                  captcha_info: result.captcha_info || {}
+                }
+              };
+            }
+
             const summary = `✅ 搜索完成！\n\n关键词: ${result.keyword}\n总结果数: ${result.total_results}\n新增记录: ${result.new_records}\n\n`;
             
             if (result.new_records > 0) {

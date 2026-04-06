@@ -958,6 +958,58 @@ class SearchProductsMultiRequest(BaseModel):
     max_pages: int = 5
 
 
+def _get_link_unique_key(link: str) -> str:
+    parts = link.split('&', 1)
+    if len(parts) >= 2:
+        return '&'.join(parts[:1])
+    return link
+
+
+def _save_bridge_search_items(items: list[dict]) -> tuple[int, list[int]]:
+    import hashlib
+    from datetime import datetime
+    from db_manager import db_manager
+
+    new_records = 0
+    new_ids: list[int] = []
+
+    for item in items:
+        title = str(item.get("title") or "").strip()
+        price = str(item.get("price") or "").strip()
+        link = str(item.get("item_url") or "").strip()
+        if not title or not price or not link:
+            continue
+
+        unique_part = _get_link_unique_key(link)
+        link_hash = hashlib.md5(unique_part.encode("utf-8")).hexdigest()
+        if db_manager.get_spider_product_by_hash(link_hash):
+            continue
+
+        publish_time = None
+        publish_time_text = str(item.get("publish_time") or "").strip()
+        if publish_time_text and publish_time_text != "未知时间":
+            try:
+                publish_time = datetime.strptime(publish_time_text, "%Y-%m-%d %H:%M")
+            except Exception:
+                publish_time = None
+
+        product_id = db_manager.save_spider_product(
+            title=title,
+            price=price,
+            area=str(item.get("area") or "地区未知"),
+            seller=str(item.get("seller_name") or "匿名卖家"),
+            link=link,
+            link_hash=link_hash,
+            image_url=str(item.get("main_image") or ""),
+            publish_time=publish_time,
+        )
+        if product_id:
+            new_records += 1
+            new_ids.append(product_id)
+
+    return new_records, new_ids
+
+
 @bridge_router.post("/spider/search")
 async def search_products(body: SearchProductsRequest):
     """搜索闲鱼商品（单页）
@@ -980,7 +1032,7 @@ async def search_products(body: SearchProductsRequest):
     """
     try:
         from cookie_manager import manager as cookie_manager
-        from product_spider import search_xianyu_products
+        from utils.item_search import search_xianyu_items_with_cookie
         
         # 获取Cookie
         cookie_value = cookie_manager.cookies.get(body.cookie_id)
@@ -989,15 +1041,32 @@ async def search_products(body: SearchProductsRequest):
             return {"ok": False, "error": f"Cookie不存在: {body.cookie_id}"}
         
         logger.info(f"[Bridge] 开始搜索商品: cookie_id={body.cookie_id}, keyword={body.keyword}, max_pages={body.max_pages}")
-        
-        # 执行搜索
-        total_results, new_records, new_ids = await search_xianyu_products(
+
+        result = await search_xianyu_items_with_cookie(
             cookie_id=body.cookie_id,
-            cookies_str=cookie_value,
             keyword=body.keyword,
-            max_pages=body.max_pages,
-            headless=True
+            page=1,
+            page_size=20,
         )
+        if result.get("captcha_required"):
+            logger.warning(f"[Bridge] 搜索触发验证码: keyword={body.keyword}, captcha_info={result.get('captcha_info')}")
+            return {
+                "ok": True,
+                "keyword": body.keyword,
+                "total_results": 0,
+                "new_records": 0,
+                "new_record_ids": [],
+                "captcha_required": True,
+                "error": result.get("error") or "需要人工完成刮刮乐验证码",
+                "captcha_info": result.get("captcha_info", {}),
+            }
+        if result.get("error"):
+            logger.error(f"[Bridge] 搜索商品失败: {result['error']}")
+            return {"ok": False, "error": result["error"]}
+
+        items = result.get("items", [])
+        total_results = int(result.get("total", len(items) or 0))
+        new_records, new_ids = _save_bridge_search_items(items)
         
         logger.info(f"[Bridge] 搜索完成: keyword={body.keyword}, total={total_results}, new={new_records}")
         
@@ -1038,7 +1107,7 @@ async def search_products_multi(body: SearchProductsMultiRequest):
     """
     try:
         from cookie_manager import manager as cookie_manager
-        from product_spider import search_xianyu_products
+        from utils.item_search import search_multiple_pages_xianyu_with_cookie
         
         # 获取Cookie
         cookie_value = cookie_manager.cookies.get(body.cookie_id)
@@ -1047,15 +1116,31 @@ async def search_products_multi(body: SearchProductsMultiRequest):
             return {"ok": False, "error": f"Cookie不存在: {body.cookie_id}"}
         
         logger.info(f"[Bridge] 开始多页搜索商品: cookie_id={body.cookie_id}, keyword={body.keyword}, max_pages={body.max_pages}")
-        
-        # 执行搜索
-        total_results, new_records, new_ids = await search_xianyu_products(
+
+        result = await search_multiple_pages_xianyu_with_cookie(
             cookie_id=body.cookie_id,
-            cookies_str=cookie_value,
             keyword=body.keyword,
-            max_pages=body.max_pages,
-            headless=True
+            total_pages=body.max_pages,
         )
+        if result.get("captcha_required"):
+            logger.warning(f"[Bridge] 多页搜索触发验证码: keyword={body.keyword}, captcha_info={result.get('captcha_info')}")
+            return {
+                "ok": True,
+                "keyword": body.keyword,
+                "total_results": 0,
+                "new_records": 0,
+                "new_record_ids": [],
+                "captcha_required": True,
+                "error": result.get("error") or "需要人工完成刮刮乐验证码",
+                "captcha_info": result.get("captcha_info", {}),
+            }
+        if result.get("error"):
+            logger.error(f"[Bridge] 多页搜索商品失败: {result['error']}")
+            return {"ok": False, "error": result["error"]}
+
+        items = result.get("items", [])
+        total_results = int(result.get("total", len(items) or 0))
+        new_records, new_ids = _save_bridge_search_items(items)
         
         logger.info(f"[Bridge] 多页搜索完成: keyword={body.keyword}, total={total_results}, new={new_records}")
         

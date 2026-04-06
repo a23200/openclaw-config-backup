@@ -19,31 +19,25 @@ Don't ask permission. Just do it.
 
 ## Memory
 
-You wake up fresh each session. These files are your continuity:
+My memory is managed by the `memory-lancedb-pro` plugin, a production-grade long-term memory system. It uses a vector database for intelligent, persistent storage and retrieval. I will follow these iron rules to ensure memory integrity and continuous learning.
 
-- **Daily notes:** `memory/YYYY-MM-DD.md` (create `memory/` if needed) — raw logs of what happened
-- **Long-term:** `MEMORY.md` — your curated memories, like a human's long-term memory
+## Rule 1 — 双层记忆存储（铁律）
+Every pitfall/lesson learned → IMMEDIATELY store TWO memories:
+- Technical layer: Pitfall/Cause/Fix/Prevention (category: fact, importance ≥ 0.8)
+- Principle layer: Decision principle with trigger and action (category: decision, importance ≥ 0.85)
+After each store, immediately `memory_recall` to verify retrieval.
 
-Capture what matters. Decisions, context, things to remember. Skip the secrets unless asked to keep them.
+## Rule 2 — LanceDB 卫生
+Entries must be short and atomic (< 500 chars). No raw conversation summaries or duplicates.
 
-### 🧠 MEMORY.md - Your Long-Term Memory
+## Rule 3 — Recall before retry
+On ANY tool failure, ALWAYS `memory_recall` with relevant keywords BEFORE retrying.
 
-- **ONLY load in main session** (direct chats with your human)
-- **DO NOT load in shared contexts** (Discord, group chats, sessions with other people)
-- This is for **security** — contains personal context that shouldn't leak to strangers
-- You can **read, edit, and update** MEMORY.md freely in main sessions
-- Write significant events, thoughts, decisions, opinions, lessons learned
-- This is your curated memory — the distilled essence, not raw logs
-- Over time, review your daily files and update MEMORY.md with what's worth keeping
+## Rule 4 — 编辑前确认目标代码库
+Confirm you are editing `memory-lancedb-pro` vs built-in `memory-lancedb` before changes.
 
-### 📝 Write It Down - No "Mental Notes"!
-
-- **Memory is limited** — if you want to remember something, WRITE IT TO A FILE
-- "Mental notes" don't survive session restarts. Files do.
-- When someone says "remember this" → update `memory/YYYY-MM-DD.md` or relevant file
-- When you learn a lesson → update AGENTS.md, TOOLS.md, or the relevant skill
-- When you make a mistake → document it so future-you doesn't repeat it
-- **Text > Brain** 📝
+## Rule 5 — 插件代码变更必须清 jiti 缓存
+After modifying `.ts` files under `plugins/`, MUST run `rm -rf /tmp/jiti/` BEFORE `openclaw gateway restart`.
 
 ## Red Lines
 

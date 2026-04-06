@@ -17,6 +17,21 @@ class CaptchaRemoteController:
     def __init__(self):
         self.active_sessions: Dict[str, Dict[str, Any]] = {}
         self.websocket_connections: Dict[str, Any] = {}
+
+    def _normalize_coords(self, session_id: str, x: int, y: int) -> tuple[int, int]:
+        session = self.active_sessions.get(session_id, {})
+        captcha_info = session.get('captcha_info') or {}
+
+        # 前端通常传的是验证码截图区域内坐标；这里统一限制在验证码容器附近，避免拖到容器外。
+        if captcha_info and 'x' in captcha_info:
+            left = int(captcha_info['x'])
+            top = int(captcha_info['y'])
+            right = int(captcha_info['x'] + captcha_info['width'])
+            bottom = int(captcha_info['y'] + captcha_info['height'])
+            x = max(left, min(int(x), right))
+            y = max(top, min(int(y), bottom))
+
+        return int(x), int(y)
     
     async def create_session(self, session_id: str, page: Page) -> Dict[str, str]:
         """
@@ -213,18 +228,36 @@ class CaptchaRemoteController:
         
         try:
             page = self.active_sessions[session_id]['page']
+            x, y = self._normalize_coords(session_id, x, y)
+            session = self.active_sessions[session_id]
+            drag_state = session.setdefault('drag_state', {})
             
             if event_type == 'down':
                 await page.mouse.move(x, y)
                 await page.mouse.down()
+                drag_state['last_x'] = x
+                drag_state['last_y'] = y
                 logger.debug(f"鼠标按下: ({x}, {y})")
                 
             elif event_type == 'move':
-                await page.mouse.move(x, y)
+                last_x = drag_state.get('last_x', x)
+                last_y = drag_state.get('last_y', y)
+                distance = max(abs(x - last_x), abs(y - last_y))
+                steps = max(1, min(20, distance // 8 if distance else 1))
+                await page.mouse.move(x, y, steps=steps)
+                drag_state['last_x'] = x
+                drag_state['last_y'] = y
                 logger.debug(f"鼠标移动: ({x}, {y})")
                 
             elif event_type == 'up':
+                last_x = drag_state.get('last_x', x)
+                last_y = drag_state.get('last_y', y)
+                if x != last_x or y != last_y:
+                    distance = max(abs(x - last_x), abs(y - last_y))
+                    steps = max(1, min(20, distance // 8 if distance else 1))
+                    await page.mouse.move(x, y, steps=steps)
                 await page.mouse.up()
+                drag_state.clear()
                 logger.debug(f"鼠标释放: ({x}, {y})")
                 
             else:
@@ -328,6 +361,26 @@ class CaptchaRemoteController:
     async def close_session(self, session_id: str):
         """关闭会话"""
         if session_id in self.active_sessions:
+            session = self.active_sessions[session_id]
+            try:
+                page = session.get('page')
+                context = session.get('context')
+                browser = session.get('browser')
+                playwright = session.get('playwright')
+                using_cdp_browser = session.get('using_cdp_browser', False)
+
+                if page and not page.is_closed():
+                    await page.close()
+                if context:
+                    if not using_cdp_browser:
+                        await context.close()
+                if browser:
+                    await browser.close()
+                if playwright:
+                    await playwright.stop()
+            except Exception as e:
+                logger.warning(f"关闭会话浏览器资源失败: {e}")
+
             del self.active_sessions[session_id]
             logger.info(f"🔒 关闭远程控制会话: {session_id}")
     
@@ -365,4 +418,3 @@ class CaptchaRemoteController:
 
 # 全局实例
 captcha_controller = CaptchaRemoteController()
-

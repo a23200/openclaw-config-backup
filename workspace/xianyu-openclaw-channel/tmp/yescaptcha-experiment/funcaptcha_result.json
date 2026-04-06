@@ -1,0 +1,5 @@
+{
+  "errorId": 1,
+  "errorCode": "ERROR_UNKNOWN_QUESTION",
+  "errorDescription": "错误的问题ID，如果您没有填写错误，可能是这个问题暂时还不支持，请联系客服（新问题3工作日内会得到支持）"
+}

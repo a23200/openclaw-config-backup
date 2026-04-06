@@ -107,6 +107,8 @@
             max-width: 100%;
             display: block;
             cursor: crosshair;
+            touch-action: none;
+            user-select: none;
         }
 
         .loading {
@@ -305,6 +307,9 @@
         let canvas = null;
         let ctx = null;
         let isMouseDown = false;
+        let activePointerId = null;
+        let reconnectTimer = null;
+        let reconnectAttempts = 0;
         let lastMoveTime = 0;
         let moveThrottle = 5; // 节流：每10ms最多发送一次（极致流畅）
         let captchaOffset = {x: 0, y: 0}; // 滑块区域在页面中的偏移量
@@ -340,12 +345,49 @@
                 connectSession();
             }
 
-            // 鼠标事件
+            // 指针事件，兼容鼠标、触控板、触摸屏
+            canvas.addEventListener('pointerdown', handlePointerDown);
+            canvas.addEventListener('pointermove', handlePointerMove);
+            canvas.addEventListener('pointerup', handlePointerUp);
+            canvas.addEventListener('pointercancel', handlePointerUp);
+
+            // 兼容旧鼠标事件
             canvas.addEventListener('mousedown', handleMouseDown);
             canvas.addEventListener('mousemove', handleMouseMove);
             canvas.addEventListener('mouseup', handleMouseUp);
             canvas.addEventListener('mouseleave', handleMouseUp);
         });
+
+        function handlePointerDown(event) {
+            if (event.pointerType === 'mouse' && event.button !== 0) {
+                return;
+            }
+            activePointerId = event.pointerId;
+            try {
+                canvas.setPointerCapture(event.pointerId);
+            } catch (_) {}
+            handleMouseDown(event);
+        }
+
+        function handlePointerMove(event) {
+            if (activePointerId !== null && event.pointerId !== activePointerId) {
+                return;
+            }
+            handleMouseMove(event);
+        }
+
+        function handlePointerUp(event) {
+            if (activePointerId !== null && event.pointerId !== activePointerId) {
+                return;
+            }
+            handleMouseUp(event);
+            if (activePointerId !== null) {
+                try {
+                    canvas.releasePointerCapture(activePointerId);
+                } catch (_) {}
+            }
+            activePointerId = null;
+        }
 
         function log(message, type = 'info') {
             const logEl = document.getElementById('log');
@@ -389,6 +431,11 @@
                 ws = new WebSocket(wsUrl);
 
                 ws.onopen = () => {
+                    reconnectAttempts = 0;
+                    if (reconnectTimer) {
+                        clearTimeout(reconnectTimer);
+                        reconnectTimer = null;
+                    }
                     log('WebSocket 连接成功', 'success');
                     updateStatus('connected', '已连接');
                 };
@@ -408,6 +455,15 @@
                     log('WebSocket 连接关闭', 'info');
                     updateStatus('disconnected', '连接已关闭');
                     document.getElementById('connectBtn').disabled = false;
+
+                    if (currentSessionId && document.getElementById('verificationStatus').textContent !== '已完成') {
+                        const delay = Math.min(3000, 500 * (reconnectAttempts + 1));
+                        reconnectAttempts += 1;
+                        log(`准备自动重连 (${reconnectAttempts})...`, 'info');
+                        reconnectTimer = setTimeout(() => {
+                            connectSession();
+                        }, delay);
+                    }
                 };
 
             } catch (error) {
@@ -493,6 +549,8 @@
                 return;
             }
 
+            event.preventDefault();
+
             isMouseDown = true;
             const coords = getMouseCoords(event);
             
@@ -510,6 +568,8 @@
             if (!ws || ws.readyState !== WebSocket.OPEN || !isMouseDown) {
                 return;
             }
+
+            event.preventDefault();
 
             // 节流：限制发送频率，避免卡顿
             const now = Date.now();
@@ -532,6 +592,8 @@
             if (!ws || ws.readyState !== WebSocket.OPEN || !isMouseDown) {
                 return;
             }
+
+            event.preventDefault();
 
             isMouseDown = false;
             const coords = getMouseCoords(event);
@@ -565,7 +627,8 @@
                 y: canvasY + captchaOffset.y
             };
         }
+
+        canvas && canvas.addEventListener('dragstart', (event) => event.preventDefault());
     </script>
 </body>
 </html>
-

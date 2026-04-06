@@ -598,5 +598,197 @@
     "completion_used": false,
     "completion_steps": 0,
     "success": true
+  },
+  {
+    "timestamp": 1775331023.478878,
+    "user_id": "3083424450",
+    "distance": 258.2351420316075,
+    "total_steps": 17,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 17,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1775332932.9007192,
+    "user_id": "3083424450",
+    "distance": 257.7923499604977,
+    "total_steps": 24,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 24,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1775335229.783713,
+    "user_id": "3083424450",
+    "distance": 258.1246724787345,
+    "total_steps": 15,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 15,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1775350978.793798,
+    "user_id": "3083424450",
+    "distance": 258.49780427427856,
+    "total_steps": 15,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 15,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1775353038.995144,
+    "user_id": "3083424450",
+    "distance": 258.2057532659993,
+    "total_steps": 20,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 20,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1775378672.0833569,
+    "user_id": "3083424450",
+    "distance": 258.2714309134029,
+    "total_steps": 22,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 22,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1775396720.751408,
+    "user_id": "3083424450",
+    "distance": 257.7294990468286,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1775425850.181567,
+    "user_id": "3083424450",
+    "distance": 258.3705306127206,
+    "total_steps": 17,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 17,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
   }
 ]
