@@ -6362,6 +6362,105 @@ class DBManager:
             logger.error(f"统计爬虫商品总数失败: {e}")
             return 0
 
+    # ==================== 聊天记录相关方法 ====================
+    
+    def get_conversations_by_cookie(self, cookie_id: str, limit: int = 20, offset: int = 0):
+        """获取指定账号的聊天记录"""
+        with self.lock:
+            cursor = self.conn.cursor()
+            self._execute_sql(cursor, '''
+                SELECT id, cookie_id, chat_id, user_id, item_id, role, content, intent, bargain_count, created_at
+                FROM ai_conversations
+                WHERE cookie_id = ?
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?
+            ''', (cookie_id, limit, offset))
+            rows = cursor.fetchall()
+            return [{
+                'id': r[0],
+                'cookie_id': r[1],
+                'chat_id': r[2],
+                'user_id': r[3],
+                'item_id': r[4],
+                'role': r[5],
+                'content': r[6],
+                'intent': r[7],
+                'bargain_count': r[8],
+                'created_at': r[9]
+            } for r in rows]
+    
+    def count_conversations_by_cookie(self, cookie_id: str) -> int:
+        """统计指定账号的聊天记录数量"""
+        with self.lock:
+            cursor = self.conn.cursor()
+            self._execute_sql(cursor, 'SELECT COUNT(*) FROM ai_conversations WHERE cookie_id = ?', (cookie_id,))
+            return cursor.fetchone()[0]
+    
+    def get_conversations_by_cookies(self, cookie_ids: list, limit: int = 20, offset: int = 0):
+        """获取多个账号的聊天记录"""
+        if not cookie_ids:
+            return []
+        
+        with self.lock:
+            cursor = self.conn.cursor()
+            placeholders = ','.join('?' * len(cookie_ids))
+            self._execute_sql(cursor, f'''
+                SELECT id, cookie_id, chat_id, user_id, item_id, role, content, intent, bargain_count, created_at
+                FROM ai_conversations
+                WHERE cookie_id IN ({placeholders})
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?
+            ''', (*cookie_ids, limit, offset))
+            rows = cursor.fetchall()
+            return [{
+                'id': r[0],
+                'cookie_id': r[1],
+                'chat_id': r[2],
+                'user_id': r[3],
+                'item_id': r[4],
+                'role': r[5],
+                'content': r[6],
+                'intent': r[7],
+                'bargain_count': r[8],
+                'created_at': r[9]
+            } for r in rows]
+    
+    def count_conversations_by_cookies(self, cookie_ids: list) -> int:
+        """统计多个账号的聊天记录数量"""
+        if not cookie_ids:
+            return 0
+        
+        with self.lock:
+            cursor = self.conn.cursor()
+            placeholders = ','.join('?' * len(cookie_ids))
+            self._execute_sql(cursor, f'SELECT COUNT(*) FROM ai_conversations WHERE cookie_id IN ({placeholders})', cookie_ids)
+            return cursor.fetchone()[0]
+    
+    def get_conversation_by_id(self, conversation_id: int):
+        """获取聊天记录详情"""
+        with self.lock:
+            cursor = self.conn.cursor()
+            self._execute_sql(cursor, '''
+                SELECT id, cookie_id, chat_id, user_id, item_id, role, content, intent, bargain_count, created_at
+                FROM ai_conversations
+                WHERE id = ?
+            ''', (conversation_id,))
+            row = cursor.fetchone()
+            if row:
+                return {
+                    'id': row[0],
+                    'cookie_id': row[1],
+                    'chat_id': row[2],
+                    'user_id': row[3],
+                    'item_id': row[4],
+                    'role': row[5],
+                    'content': row[6],
+                    'intent': row[7],
+                    'bargain_count': row[8],
+                    'created_at': row[9]
+                }
+            return None
+
 
 # 全局单例
 db_manager = DBManager()

@@ -18,7 +18,7 @@ import random
 from typing import List, Dict, Optional, Any, Tuple
 from datetime import datetime
 from loguru import logger
-from playwright.async_api import async_playwright, Page, Browser, BrowserContext, Response, TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
+from patchright.async_api import async_playwright, Page, Browser, BrowserContext, Response, TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
 from tenacity import retry, stop_after_attempt, wait_exponential
 from db_manager import db_manager
 
@@ -50,6 +50,50 @@ async def safe_get(data, *keys, default="暂无"):
     return data
 
 
+async def human_like_delay(min_sec: float = 1.0, max_sec: float = 3.0):
+    """随机延迟，模拟人类行为"""
+    delay = random.uniform(min_sec, max_sec)
+    await asyncio.sleep(delay)
+
+
+async def human_like_mouse_move(page: Page):
+    """随机鼠标移动，模拟人类行为"""
+    try:
+        x = random.randint(100, 800)
+        y = random.randint(100, 600)
+        await page.mouse.move(x, y)
+        await asyncio.sleep(random.uniform(0.1, 0.3))
+    except Exception:
+        pass
+
+
+async def human_like_scroll(page: Page):
+    """随机滚动页面，模拟人类浏览"""
+    try:
+        scroll_amount = random.randint(100, 500)
+        await page.evaluate(f"window.scrollBy(0, {scroll_amount})")
+        await asyncio.sleep(random.uniform(0.5, 1.5))
+    except Exception:
+        pass
+
+
+async def human_like_type(page: Page, selector: str, text: str):
+    """慢速输入文本，模拟人类打字"""
+    try:
+        element = await page.query_selector(selector)
+        if element:
+            await element.click()
+            await asyncio.sleep(random.uniform(0.3, 0.8))
+            
+            for char in text:
+                await page.keyboard.type(char)
+                await asyncio.sleep(random.uniform(0.1, 0.3))
+            
+            await asyncio.sleep(random.uniform(0.5, 1.0))
+    except Exception:
+        await page.fill(selector, text)
+
+
 class XianyuProductSpider:
     """闲鱼商品搜索爬虫"""
     
@@ -78,60 +122,48 @@ class XianyuProductSpider:
         self.data_list: List[Dict[str, Any]] = []
     
     async def init_browser(self):
-        """初始化浏览器"""
+        """初始化浏览器（使用持久化上下文）"""
         try:
-            logger.info(f"【{self.cookie_id}】初始化 Playwright 浏览器...")
+            logger.info(f"【{self.cookie_id}】初始化 Patchright 浏览器（持久化模式）...")
             
             self.playwright = await async_playwright().start()
             
-            # 启动浏览器（使用反检测配置）
-            self.browser = await self.playwright.chromium.launch(
-                headless=self.headless,
-                args=[
+            # 使用持久化上下文
+            import os
+            user_data_dir = f"./browser_data/{self.cookie_id}"
+            os.makedirs(user_data_dir, exist_ok=True)
+            
+            # 构建启动参数
+            launch_options = {
+                'user_data_dir': user_data_dir,
+                'channel': 'chrome',
+                'headless': self.headless,
+                'no_viewport': True,
+                'locale': 'zh-CN',
+                'timezone_id': 'Asia/Shanghai',
+                'args': [
                     '--disable-blink-features=AutomationControlled',
-                    '--disable-dev-shm-usage',  # Docker 环境必需
+                    '--disable-dev-shm-usage',
                     '--disable-gpu',
-                    '--disable-web-security',  # 跨域资源加载
-                    '--disable-features=IsolateOrigins,site-per-process',  # 性能优化
-                    '--window-size=1920,1080',
                     '--log-level=3',
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
                 ]
-            )
-            
-            # 创建浏览器上下文（支持代理）
-            context_options = {
-                'viewport': {'width': 1920, 'height': 1080},
-                'user_agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             }
             
             if self.proxy:
-                context_options['proxy'] = self.proxy
+                launch_options['proxy'] = self.proxy
                 logger.info(f"【{self.cookie_id}】使用代理: {self.proxy.get('server')}")
             
-            self.context = await self.browser.new_context(**context_options)
-            
-            # 设置默认超时
+            self.context = await self.playwright.chromium.launch_persistent_context(**launch_options)
             self.context.set_default_timeout(30000)
             
-            # 创建页面
-            self.page = await self.context.new_page()
+            if self.context.pages:
+                self.page = self.context.pages[0]
+            else:
+                self.page = await self.context.new_page()
             
-            # 注入反检测脚本
-            await self.page.add_init_script("""
-                Object.defineProperty(navigator, 'webdriver', {
-                    get: () => undefined
-                });
-                Object.defineProperty(navigator, 'plugins', {
-                    get: () => [1, 2, 3, 4, 5]
-                });
-                Object.defineProperty(navigator, 'languages', {
-                    get: () => ['zh-CN', 'zh', 'en']
-                });
-            """)
-            
-            logger.info(f"【{self.cookie_id}】浏览器初始化成功")
+            logger.info(f"【{self.cookie_id}】浏览器初始化成功（持久化模式）")
             
         except Exception as e:
             logger.error(f"【{self.cookie_id}】浏览器初始化失败: {e}")
@@ -247,8 +279,32 @@ class XianyuProductSpider:
             except Exception as e:
                 logger.error(f"【{self.cookie_id}】响应处理异常: {e}")
     
+    async def _check_and_handle_captcha(self) -> bool:
+        """检测并处理验证码"""
+        try:
+            if "punish" in self.page.url or "/captcha" in self.page.url:
+                logger.warning(f"【{self.cookie_id}】⚠️ 检测到验证码页面！")
+                return True
+            
+            captcha_selectors = [
+                "div[class*='captcha']",
+                "div[class*='punish']",
+                "iframe[src*='captcha']"
+            ]
+            
+            for selector in captcha_selectors:
+                element = await self.page.query_selector(selector)
+                if element:
+                    logger.warning(f"【{self.cookie_id}】⚠️ 检测到验证码元素: {selector}")
+                    return True
+            
+            return False
+        except Exception as e:
+            logger.error(f"【{self.cookie_id}】验证码检测失败: {e}")
+            return False
+    
     async def search_products(self, keyword: str, max_pages: int = 1) -> Tuple[int, int, List[int]]:
-        """搜索商品
+        """搜索商品（增强版：人类行为模拟 + 验证码处理）
         
         Args:
             keyword: 搜索关键词
@@ -260,62 +316,67 @@ class XianyuProductSpider:
         try:
             logger.info(f"【{self.cookie_id}】开始搜索商品: {keyword}, 最大页数: {max_pages}")
             
-            # 清空数据列表
             self.data_list = []
             
-            # 访问首页（带重试）
+            logger.info(f"【{self.cookie_id}】访问闲鱼首页...")
             await self._goto_with_retry(self.HOME_URL)
-            await asyncio.sleep(1)
+            await human_like_delay(2, 4)
+            await human_like_mouse_move(self.page)
+            await human_like_scroll(self.page)
+            await human_like_delay(1, 2)
             
-            # 在触发搜索前先注册响应监听，避免错过快速返回的接口结果
+            if await self._check_and_handle_captcha():
+                logger.info(f"【{self.cookie_id}】检测到验证码")
+            
             self.page.on("response", self._handle_response)
-
-            # 填写搜索关键词
-            await self.page.fill('input[class*="search-input"]', keyword)
-            await self.page.click('button[type="submit"]')
-            await asyncio.sleep(2)
             
-            # 如果存在弹窗广告则关闭
+            logger.info(f"【{self.cookie_id}】输入搜索关键词: {keyword}")
+            await human_like_type(self.page, 'input[class*="search-input"]', keyword)
+            await human_like_delay(0.5, 1.5)
+            await self.page.click('button[type="submit"]')
+            await human_like_delay(3, 5)
+            
+            if await self._check_and_handle_captcha():
+                logger.info(f"【{self.cookie_id}】检测到验证码")
+            
             try:
-                await self.page.wait_for_selector("div[class*='closeIconBg']", timeout=5000)
-                await self.page.click("div[class*='closeIconBg']")
-                logger.info(f"【{self.cookie_id}】已关闭广告弹窗")
+                close_btn = await self.page.query_selector("div[class*='closeIconBg']")
+                if close_btn:
+                    await close_btn.click()
+                    logger.info(f"【{self.cookie_id}】已关闭广告弹窗")
+                    await human_like_delay(0.5, 1)
             except:
-                logger.debug(f"【{self.cookie_id}】未找到广告弹窗，继续执行")
                 pass
             
-            # 点击"新发布"和"最新"排序
-            try:
-                await self.page.click('text=新发布', timeout=5000)
-                await asyncio.sleep(1)
-                await self.page.click('text=最新', timeout=5000)
-                await asyncio.sleep(1)
-                logger.info(f"【{self.cookie_id}】已设置排序为最新")
-            except Exception as e:
-                logger.warning(f"【{self.cookie_id}】设置排序失败: {e}")
+            await human_like_scroll(self.page)
+            await human_like_delay(2, 3)
             
-            # 分页处理
             current_page = 1
             while current_page <= max_pages:
                 logger.info(f"【{self.cookie_id}】正在处理第 {current_page} 页")
                 
-                # 随机延迟 2-5 秒
-                delay = random.uniform(2, 5)
+                if await self._check_and_handle_captcha():
+                    logger.info(f"【{self.cookie_id}】检测到验证码")
+                
+                delay = random.uniform(10, 20)
                 logger.debug(f"【{self.cookie_id}】等待 {delay:.2f} 秒后继续...")
                 await asyncio.sleep(delay)
                 
+                await human_like_scroll(self.page)
+                await human_like_mouse_move(self.page)
+                await human_like_delay(1, 2)
+                
                 if current_page < max_pages:
-                    # 查找下一页按钮
                     next_btn = await self.page.query_selector("[class*='search-pagination-arrow-right']:not([disabled])")
                     if not next_btn:
                         logger.info(f"【{self.cookie_id}】没有更多页面，停止爬取")
                         break
                     await next_btn.click()
                     current_page += 1
+                    await human_like_delay(3, 5)
                 else:
                     break
             
-            # 保存数据到数据库
             new_count, new_ids = await self._save_to_db()
             
             logger.info(f"【{self.cookie_id}】搜索完成: 总结果 {len(self.data_list)}, 新增 {new_count}")
@@ -415,14 +476,11 @@ class XianyuProductSpider:
         return (new_records, new_ids)
     
     async def close(self):
-        """关闭浏览器"""
+        """关闭浏览器（持久化上下文版本）"""
         try:
-            if self.page:
-                await self.page.close()
             if self.context:
                 await self.context.close()
-            if self.browser:
-                await self.browser.close()
+                logger.info(f"【{self.cookie_id}】浏览器上下文已关闭（数据已保存）")
             if self.playwright:
                 await self.playwright.stop()
             logger.info(f"【{self.cookie_id}】浏览器已关闭")

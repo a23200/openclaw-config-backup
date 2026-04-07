@@ -367,13 +367,11 @@ class CaptchaRemoteController:
                 context = session.get('context')
                 browser = session.get('browser')
                 playwright = session.get('playwright')
-                using_cdp_browser = session.get('using_cdp_browser', False)
 
                 if page and not page.is_closed():
                     await page.close()
                 if context:
-                    if not using_cdp_browser:
-                        await context.close()
+                    await context.close()
                 if browser:
                     await browser.close()
                 if playwright:

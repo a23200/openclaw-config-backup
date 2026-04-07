@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试聊天记录API</title>
+</head>
+<body>
+    <h1>测试聊天记录API</h1>
+    <button onclick="testAPI()">测试API</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在测试...';
+            
+            try {
+                // 先登录
+                const loginResp = await fetch('/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: 'admin', password: 'admin123'})
+                });
+                const loginData = await loginResp.json();
+                
+                if (!loginData.success) {
+                    resultDiv.innerHTML = '登录失败: ' + loginData.message;
+                    return;
+                }
+                
+                const token = loginData.token;
+                resultDiv.innerHTML += '<br>✅ 登录成功';
+                
+                // 获取聊天记录
+                const convResp = await fetch('/api/conversations?page=1&page_size=5', {
+                    headers: {'Authorization': 'Bearer ' + token}
+                });
+                const convData = await convResp.json();
+                
+                resultDiv.innerHTML += '<br>API响应: ' + JSON.stringify(convData, null, 2);
+                
+                if (convData.success && convData.data) {
+                    resultDiv.innerHTML += '<br><br>✅ 找到 ' + convData.total + ' 条记录';
+                    resultDiv.innerHTML += '<br><br>前3条:';
+                    convData.data.slice(0, 3).forEach(conv => {
+                        resultDiv.innerHTML += '<br>- [' + conv.role + '] ' + conv.content;
+                    });
+                } else {
+                    resultDiv.innerHTML += '<br>❌ 没有数据';
+                }
+            } catch (error) {
+                resultDiv.innerHTML += '<br>错误: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -5,12 +5,10 @@
 """
 
 import asyncio
-import base64
 import json
 import time
 import sys
 import os
-import subprocess
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from loguru import logger
@@ -49,93 +47,10 @@ class XianyuSearcher:
         self.context = None
         self.page = None
         self.playwright = None
-        self.using_cdp_browser = False
         self.api_responses = []
         self.user_id = "default"  # 默认用户ID
         self.preferred_cookie_id = None
-        self.yescaptcha_key = os.getenv("YESCAPTCHA_CLIENT_KEY")
         self.last_captcha_info = None
-
-    def _get_cdp_url(self) -> str | None:
-        return os.getenv("LOCAL_BROWSER_CDP_URL") or os.getenv("BROWSER_CDP_URL")
-
-    async def _extract_scratch_question(self, page) -> str:
-        selectors = [
-            '.captcha-title',
-            '.captcha-text',
-            '.captcha-dialog-title',
-            '.desc',
-            '.title',
-            '[class*="captcha"] [class*="title"]',
-        ]
-
-        for selector in selectors:
-            try:
-                text = await page.locator(selector).first.text_content(timeout=1000)
-                if text and text.strip():
-                    return text.strip()
-            except Exception:
-                continue
-
-        for frame in page.frames:
-            if frame == page.main_frame:
-                continue
-            for selector in selectors:
-                try:
-                    text = await frame.locator(selector).first.text_content(timeout=1000)
-                    if text and text.strip():
-                        return text.strip()
-                except Exception:
-                    continue
-
-        return ""
-
-    async def _try_solve_scratch_with_yescaptcha(self, page) -> bool:
-        if not self.yescaptcha_key:
-            logger.info("未配置 YesCaptcha Key，跳过自动识别")
-            return False
-
-        try:
-            from utils.captcha_remote_control import captcha_controller
-            from utils.yescaptcha_client import YesCaptchaClient
-
-            captcha_info = await captcha_controller._get_captcha_info(page)
-            if not captcha_info:
-                logger.warning("YesCaptcha 自动识别失败：未找到验证码容器")
-                return False
-
-            screenshot_bytes = await captcha_controller._screenshot_captcha_area(page, captcha_info)
-            screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
-            question = await self._extract_scratch_question(page)
-            logger.warning(f"YesCaptcha 实验性识别启动，问题文本: {question or '未识别到'}")
-
-            client = YesCaptchaClient(self.yescaptcha_key)
-            result = await client.solve_funcaptcha_classification(screenshot_base64, question or "Pick the correct image")
-
-            if result.get("errorId"):
-                logger.warning(f"YesCaptcha createTask 失败: {result}")
-                return False
-
-            solution = result.get("solution") or {}
-            if result.get("status") != "ready" and result.get("taskId"):
-                result = await client.wait_for_result(result["taskId"])
-                if result.get("errorId"):
-                    logger.warning(f"YesCaptcha getTaskResult 失败: {result}")
-                    return False
-                solution = result.get("solution") or {}
-
-            objects = solution.get("objects") or solution.get("top_k") or []
-            logger.warning(f"YesCaptcha 返回结果: {solution}")
-
-            # 当前闲鱼是刮刮乐滑动验证，不是标准六宫格/九宫格点选。
-            # 即使服务返回了对象索引，也无法直接映射到刮刮乐动作，因此仅记录实验结果。
-            if objects:
-                logger.warning("YesCaptcha 返回了图像分类结果，但当前验证码是刮刮乐滑动验证，无法直接应用")
-
-            return False
-        except Exception as e:
-            logger.warning(f"YesCaptcha 自动识别异常: {e}")
-            return False
 
     async def _handle_scratch_captcha_manual(self, page, max_retries=3, wait_for_completion=True):
         """人工处理刮刮乐滑块（远程控制 + 截图备份）
@@ -190,15 +105,6 @@ class XianyuSearcher:
                     'base_control_url': f"http://{local_ip}:{server_port}/api/captcha/control",
                 }
 
-                # 自动弹出控制页，用户可以直接在浏览器里完成验证。
-                auto_open_captcha = os.getenv('AUTO_OPEN_CAPTCHA', '1') == '1'
-                if auto_open_captcha:
-                    try:
-                        subprocess.Popen(['open', control_url])
-                        logger.info(f"已自动打开验证码控制页: {control_url}")
-                    except Exception as open_error:
-                        logger.warning(f"自动打开验证码控制页失败: {open_error}")
-                
                 # 如果不等待完成，立即返回特殊值给调用者
                 if not wait_for_completion:
                     logger.warning("⚠️ 不等待验证完成，立即返回给前端处理")
@@ -634,11 +540,6 @@ class XianyuSearcher:
             
             if is_scratch_captcha:
                 logger.warning("🎨 检测到刮刮乐类型滑块")
-
-                auto_solved = await self._try_solve_scratch_with_yescaptcha(page)
-                if auto_solved:
-                    logger.success("✅ YesCaptcha 自动处理成功")
-                    return True
                  
                 # 人工处理模式 - 立即返回给上层，由调用方决定如何提示用户
                 logger.warning("⚠️ 刮刮乐需要人工处理，立即返回验证码状态")
@@ -789,31 +690,6 @@ class XianyuSearcher:
         if not self.browser:
             logger.info("启动 Playwright...")
             self.playwright = await async_playwright().start()
-
-            cdp_url = self._get_cdp_url()
-            if cdp_url:
-                logger.info(f"连接本地浏览器 CDP: {cdp_url}")
-                self.browser = await self.playwright.chromium.connect_over_cdp(cdp_url)
-                self.using_cdp_browser = True
-
-                if self.browser.contexts:
-                    self.context = self.browser.contexts[0]
-                else:
-                    self.context = await self.browser.new_context(
-                        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                        viewport={'width': 1280, 'height': 720},
-                        locale='zh-CN',
-                    )
-
-                self.context.set_default_timeout(30000)
-
-                if self.context.pages:
-                    self.page = self.context.pages[0]
-                else:
-                    self.page = await self.context.new_page()
-
-                logger.info("已复用本地浏览器上下文")
-                return
             
             # 简化的浏览器启动参数，避免冲突
             browser_args = [
@@ -864,8 +740,7 @@ class XianyuSearcher:
                 await self.page.close()
                 self.page = None
             if self.context:
-                if not self.using_cdp_browser:
-                    await self.context.close()
+                await self.context.close()
                 self.context = None
             if self.browser:
                 await self.browser.close()
@@ -873,7 +748,6 @@ class XianyuSearcher:
             if self.playwright:
                 await self.playwright.stop()
                 self.playwright = None
-            self.using_cdp_browser = False
             logger.debug("商品搜索器浏览器已关闭")
         except Exception as e:
             logger.warning(f"关闭商品搜索器浏览器时出错: {e}")

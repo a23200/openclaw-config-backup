@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import AccountList from './components/AccountList';
 import OrderList from './components/OrderList';
+import Conversations from './components/Conversations';
 import CardList from './components/CardList';
 import ItemList from './components/ItemList';
 import ProductPublish from './components/ProductPublish';
@@ -160,6 +161,7 @@ const App: React.FC = () => {
       case 'dashboard': return <Dashboard />;
       case 'accounts': return <AccountList />;
       case 'orders': return <OrderList />;
+      case 'conversations': return <Conversations />;
       case 'cards': return <CardList />;
       case 'items': return <ItemList />;
       case 'publish': return <ProductPublish />;

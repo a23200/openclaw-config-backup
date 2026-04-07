@@ -7637,6 +7637,107 @@ async def get_publish_statistics(
         raise HTTPException(status_code=500, detail=f"获取发布统计失败: {str(e)}")
 
 
+# ==================== 聊天记录 API ====================
+
+@app.get('/api/conversations')
+def get_conversations(
+    cookie_id: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """获取聊天记录列表"""
+    try:
+        user_id = current_user['user_id']
+        log_with_user('info', f"查询聊天记录: cookie_id={cookie_id}, page={page}", current_user)
+        
+        # 获取用户的所有Cookie
+        user_cookies = db_manager.get_all_cookies(user_id)
+        
+        if not user_cookies:
+            return {
+                "success": True,
+                "data": [],
+                "total": 0,
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0
+            }
+        
+        # 如果指定了cookie_id，验证是否属于当前用户
+        if cookie_id and cookie_id not in user_cookies:
+            raise HTTPException(status_code=403, detail="无权访问该账号的聊天记录")
+        
+        # 获取聊天记录
+        offset = (page - 1) * page_size
+        
+        if cookie_id:
+            # 查询指定账号的聊天记录
+            conversations = db_manager.get_conversations_by_cookie(cookie_id, limit=page_size, offset=offset)
+            total = db_manager.count_conversations_by_cookie(cookie_id)
+        else:
+            # 查询所有账号的聊天记录
+            cookie_ids = list(user_cookies.keys())
+            conversations = db_manager.get_conversations_by_cookies(cookie_ids, limit=page_size, offset=offset)
+            total = db_manager.count_conversations_by_cookies(cookie_ids)
+        
+        total_pages = (total + page_size - 1) // page_size
+        
+        log_with_user('info', f"聊天记录查询成功: 共{total}条", current_user)
+        
+        return {
+            "success": True,
+            "data": conversations,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        log_with_user('error', f"查询聊天记录失败: {str(e)}", current_user)
+        raise HTTPException(status_code=500, detail=f"查询聊天记录失败: {str(e)}")
+
+
+@app.get('/api/conversations/{conversation_id}')
+def get_conversation_detail(
+    conversation_id: int,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """获取聊天记录详情"""
+    try:
+        user_id = current_user['user_id']
+        log_with_user('info', f"查询聊天记录详情: {conversation_id}", current_user)
+        
+        # 获取用户的所有Cookie
+        user_cookies = db_manager.get_all_cookies(user_id)
+        
+        # 获取聊天记录
+        conversation = db_manager.get_conversation_by_id(conversation_id)
+        
+        if not conversation:
+            raise HTTPException(status_code=404, detail="聊天记录不存在")
+        
+        # 验证是否属于当前用户
+        if conversation.get('cookie_id') not in user_cookies:
+            raise HTTPException(status_code=403, detail="无权访问该聊天记录")
+        
+        log_with_user('info', f"聊天记录详情查询成功: {conversation_id}", current_user)
+        
+        return {
+            "success": True,
+            "data": conversation
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        log_with_user('error', f"查询聊天记录详情失败: {str(e)}", current_user)
+        raise HTTPException(status_code=500, detail=f"查询聊天记录详情失败: {str(e)}")
+
+
 # ==================== 前端 SPA Catch-All 路由 ====================
 # 必须放在所有 API 路由之后，用于处理前端 SPA 的直接访问
 # 这样用户直接访问 /dashboard、/accounts 等前端路由时，会返回 index.html

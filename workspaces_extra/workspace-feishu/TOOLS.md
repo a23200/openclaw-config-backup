@@ -38,3 +38,8 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 ---
 
 Add whatever helps you do your job. This is your cheat sheet.
+
+### 汽水音乐控制 (Media Keys)
+- 播放/暂停: `/Users/mac/.openclaw/workspace-feishu/mac_media_key 16`
+- 下一首 (切歌): `/Users/mac/.openclaw/workspace-feishu/mac_media_key 17`
+- 上一首: `/Users/mac/.openclaw/workspace-feishu/mac_media_key 18`

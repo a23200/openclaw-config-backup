@@ -47,42 +47,22 @@ async def _start_search_captcha_session(session_id: str, cookie_id: str, keyword
         raise RuntimeError(f"Cookie不存在: {cookie_id}")
 
     playwright = await async_playwright().start()
-    cdp_url = os.getenv('LOCAL_BROWSER_CDP_URL') or os.getenv('BROWSER_CDP_URL')
-    using_cdp_browser = False
-
-    if cdp_url:
-        logger.info(f"连接本地浏览器 CDP 启动验证码会话: {cdp_url}")
-        browser = await playwright.chromium.connect_over_cdp(cdp_url)
-        using_cdp_browser = True
-        if browser.contexts:
-            context = browser.contexts[0]
-        else:
-            context = await browser.new_context(
-                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36',
-                viewport={'width': 1280, 'height': 720},
-                locale='zh-CN',
-            )
-        if context.pages:
-            page = context.pages[0]
-        else:
-            page = await context.new_page()
-    else:
-        browser = await playwright.chromium.launch(
-            headless=False,
-            args=[
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--lang=zh-CN',
-                '--accept-lang=zh-CN,zh,en-US,en',
-            ],
-        )
-        context = await browser.new_context(
-            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36',
-            viewport={'width': 1280, 'height': 720},
-            locale='zh-CN',
-        )
-        page = await context.new_page()
+    browser = await playwright.chromium.launch(
+        headless=False,
+        args=[
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--lang=zh-CN',
+            '--accept-lang=zh-CN,zh,en-US,en',
+        ],
+    )
+    context = await browser.new_context(
+        user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36',
+        viewport={'width': 1280, 'height': 720},
+        locale='zh-CN',
+    )
+    page = await context.new_page()
 
     cookies = []
     for cookie_pair in cookie_value.split(';'):
@@ -110,7 +90,6 @@ async def _start_search_captcha_session(session_id: str, cookie_id: str, keyword
     captcha_controller.active_sessions[session_id]['playwright'] = playwright
     captcha_controller.active_sessions[session_id]['browser'] = browser
     captcha_controller.active_sessions[session_id]['context'] = context
-    captcha_controller.active_sessions[session_id]['using_cdp_browser'] = using_cdp_browser
     logger.info(f"✅ 主服务内验证码搜索会话已启动: {session_id}")
     return session_info
 
