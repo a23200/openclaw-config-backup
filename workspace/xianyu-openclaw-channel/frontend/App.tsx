@@ -8,6 +8,7 @@ import CardList from './components/CardList';
 import ItemList from './components/ItemList';
 import ProductPublish from './components/ProductPublish';
 import BatchProductPublish from './components/BatchProductPublish';
+import MarketResearch from './components/MarketResearch';
 import Settings from './components/Settings';
 import Keywords from './components/Keywords';
 import { login, verifyToken } from './services/api';
@@ -166,6 +167,7 @@ const App: React.FC = () => {
       case 'items': return <ItemList />;
       case 'publish': return <ProductPublish />;
       case 'batch-publish': return <BatchProductPublish />;
+      case 'market-research': return <MarketResearch />;
       case 'keywords': return <Keywords />;
       case 'settings': return <Settings />;
       default: return <Dashboard />;

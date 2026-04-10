@@ -2,7 +2,8 @@ import { get, post, put, del } from '../lib/request';
 import {
   LoginResponse, AccountDetail, Order, PaginatedResponse,
   AdminStats, Card, SystemSettings, ApiResponse, OrderAnalytics,
-  Item, AIReplySettings, ShippingRule, ReplyRule, DefaultReply
+  Item, AIReplySettings, ShippingRule, ReplyRule, DefaultReply,
+  MarketResearchResponse
 } from '../types';
 
 // Auth
@@ -201,6 +202,34 @@ export const getValidOrders = async (dateRange: {start_date: string; end_date: s
     });
     return res.orders || [];
 }
+
+export const getMarketResearch = async (data: {
+  cookie_id: string;
+  keyword: string;
+  max_pages?: number;
+  include_terms?: string[];
+  exclude_terms?: string[];
+  min_price?: number;
+  max_price?: number;
+  sort?: 'price_asc' | 'price_desc' | 'want_desc' | 'latest';
+  captcha_mode?: 'local_browser' | 'remote_control';
+}): Promise<MarketResearchResponse> => {
+  return post('/api/bridge/market-research', data);
+};
+
+export const resumeMarketResearch = async (data: {
+  session_id: string;
+  cookie_id: string;
+  keyword: string;
+  max_pages?: number;
+  include_terms?: string[];
+  exclude_terms?: string[];
+  min_price?: number;
+  max_price?: number;
+  sort?: 'price_asc' | 'price_desc' | 'want_desc' | 'latest';
+}): Promise<MarketResearchResponse> => {
+  return post('/api/bridge/market-research/resume', data);
+};
 
 // Cards
 export const getCards = async (): Promise<Card[]> => {
@@ -473,4 +502,7 @@ export const deleteDefaultReply = async (cookieId: string): Promise<ApiResponse>
 
 export const clearDefaultReplyRecords = async (cookieId: string): Promise<ApiResponse> => {
   return post(`/api/default-reply/${cookieId}/clear-records`, {});
+};
+export const updateItemAiKnowledge = async (cookie_id: string, item_id: string, ai_knowledge: string): Promise<any> => {
+  return put(`/items/${cookie_id}/${item_id}/ai-knowledge`, { ai_knowledge });
 };

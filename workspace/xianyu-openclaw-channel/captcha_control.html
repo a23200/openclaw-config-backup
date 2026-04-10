@@ -11,624 +11,1151 @@
             box-sizing: border-box;
         }
 
+        :root {
+            color-scheme: light;
+            --bg-start: #0f172a;
+            --bg-end: #1d4ed8;
+            --panel: rgba(255, 255, 255, 0.96);
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: rgba(148, 163, 184, 0.24);
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
+            --accent: #2563eb;
+            --accent-soft: rgba(37, 99, 235, 0.14);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
             min-height: 100vh;
+            padding: 24px;
+            color: var(--text);
+        }
+
+        .app {
+            max-width: 1220px;
+            margin: 0 auto;
+            background: var(--panel);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 28px;
+            backdrop-filter: blur(20px);
+        }
+
+        .topbar {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            gap: 16px;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
-        .container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 30px;
-            max-width: 900px;
-            width: 100%;
+        .title h1 {
+            font-size: 30px;
+            line-height: 1.1;
+            margin-bottom: 8px;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
+        .title p {
+            color: var(--muted);
+            font-size: 15px;
         }
 
         .status {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+            font-weight: 700;
         }
 
         .status.connected {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status.disconnected {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--accent);
         }
 
         .status.completed {
-            background: #d1ecf1;
-            color: #0c5460;
+            background: rgba(34, 197, 94, 0.12);
+            color: var(--success);
         }
 
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: currentColor;
+            box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.55);
         }
 
-        .status.connected .status-indicator {
-            background: #28a745;
+        .session-bar {
+            display: grid;
+            grid-template-columns: minmax(260px, 1fr) auto auto auto;
+            gap: 12px;
+            margin-bottom: 18px;
         }
 
-        .status.disconnected .status-indicator {
-            background: #dc3545;
+        .session-bar input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 15px;
+            outline: none;
+            transition: box-shadow .2s ease, border-color .2s ease;
         }
 
-        .status.completed .status-indicator {
-            background: #17a2b8;
+        .session-bar input:focus {
+            border-color: rgba(37, 99, 235, 0.45);
+            box-shadow: 0 0 0 4px var(--accent-soft);
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .btn {
+            border: none;
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .16s ease, opacity .16s ease, background .16s ease;
         }
 
-        .canvas-container {
-            position: relative;
-            background: #f8f9fa;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(15, 23, 42, 0.06);
+            color: var(--text);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.95fr);
+            gap: 20px;
+        }
+
+        .panel {
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.88);
             overflow: hidden;
-            margin-bottom: 20px;
-            max-height: 600px;
+        }
+
+        .panel-head {
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+        }
+
+        .panel-head h2 {
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        .panel-head p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .preview-body {
+            padding: 16px;
+            background: linear-gradient(180deg, rgba(241, 245, 249, 0.76), rgba(248, 250, 252, 0.92));
+            min-height: 360px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        #captchaCanvas {
+        .preview-frame {
+            position: relative;
+            display: inline-block;
             max-width: 100%;
-            display: block;
-            cursor: crosshair;
-            touch-action: none;
-            user-select: none;
+            min-height: 120px;
         }
 
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        #captchaImage {
+            display: none;
+            max-width: 100%;
+            max-height: 560px;
+            border-radius: 18px;
+            box-shadow: 0 18px 60px rgba(15, 23, 42, 0.18);
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--muted);
+            min-height: 240px;
             text-align: center;
         }
 
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 46px;
+            height: 46px;
+            border-radius: 999px;
+            border: 4px solid rgba(37, 99, 235, 0.12);
+            border-top-color: var(--accent);
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
 
-        .info-panel {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+        .overlay-track,
+        .overlay-thumb,
+        .overlay-line {
+            position: absolute;
+            pointer-events: none;
+            display: none;
         }
 
-        .info-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
+        .overlay-track {
+            border: 2px dashed rgba(37, 99, 235, 0.85);
+            background: rgba(37, 99, 235, 0.12);
+            border-radius: 999px;
         }
 
-        .info-card h3 {
-            color: #666;
-            font-size: 12px;
-            text-transform: uppercase;
-            margin-bottom: 5px;
+        .overlay-thumb {
+            border: 2px solid rgba(249, 115, 22, 0.9);
+            background: rgba(249, 115, 22, 0.2);
+            border-radius: 999px;
+            box-shadow: 0 10px 30px rgba(249, 115, 22, 0.22);
         }
 
-        .info-card p {
-            color: #333;
-            font-size: 18px;
-            font-weight: bold;
+        .overlay-line {
+            height: 3px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.9), rgba(249, 115, 22, 0.9));
+            transform-origin: left center;
         }
 
-        .instructions {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
+        .side {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        .instructions h3 {
-            color: #856404;
-            margin-bottom: 10px;
-            font-size: 16px;
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 18px;
+            background: white;
         }
 
-        .instructions ol {
-            margin-left: 20px;
-            color: #856404;
+        .card h3 {
+            font-size: 17px;
+            margin-bottom: 8px;
         }
 
-        .instructions li {
-            margin-bottom: 5px;
+        .card p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55;
         }
 
-        .session-input {
+        .badge-row {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            flex-wrap: wrap;
+            margin-top: 14px;
         }
 
-        .session-input input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 14px;
+        .badge {
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            background: rgba(15, 23, 42, 0.06);
+            color: var(--text);
         }
 
-        .session-input button {
-            padding: 12px 24px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
+        .badge.ok {
+            background: rgba(22, 163, 74, 0.12);
+            color: var(--success);
         }
 
-        .session-input button:hover {
-            background: #5568d3;
+        .badge.warn {
+            background: rgba(217, 119, 6, 0.12);
+            color: var(--warning);
         }
 
-        .session-input button:disabled {
-            background: #ccc;
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .info-item {
+            border-radius: 18px;
+            background: rgba(15, 23, 42, 0.04);
+            padding: 14px;
+        }
+
+        .info-item span {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .info-item strong {
+            font-size: 18px;
+            line-height: 1.3;
+        }
+
+        .virtual-slider-wrap {
+            margin-top: 18px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.06), rgba(79, 70, 229, 0.08));
+            border: 1px solid rgba(37, 99, 235, 0.12);
+            padding: 16px;
+        }
+
+        .virtual-slider-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .virtual-slider-head strong {
+            font-size: 15px;
+        }
+
+        .virtual-slider-head span {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .virtual-slider {
+            position: relative;
+            width: 100%;
+            height: 72px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(148, 163, 184, 0.12), rgba(148, 163, 184, 0.2));
+            border: 1px solid rgba(148, 163, 184, 0.26);
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+            cursor: ew-resize;
+        }
+
+        .virtual-slider.disabled {
+            opacity: .48;
             cursor: not-allowed;
         }
 
+        .virtual-slider-fill {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0;
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.18), rgba(79, 70, 229, 0.22));
+        }
+
+        .virtual-slider-rail {
+            position: absolute;
+            left: 18px;
+            right: 18px;
+            top: 50%;
+            height: 8px;
+            transform: translateY(-50%);
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.34);
+        }
+
+        .virtual-slider-thumb {
+            position: absolute;
+            top: 50%;
+            left: 18px;
+            width: 56px;
+            height: 56px;
+            transform: translate(-50%, -50%);
+            border-radius: 999px;
+            background: linear-gradient(135deg, #f8fafc, #dbeafe);
+            border: 1px solid rgba(37, 99, 235, 0.26);
+            box-shadow: 0 12px 34px rgba(37, 99, 235, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .slider-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
         .log {
-            background: #2d3748;
-            color: #a0aec0;
-            border-radius: 8px;
-            padding: 15px;
-            max-height: 200px;
+            margin-top: 16px;
+            border-radius: 20px;
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 14px;
+            min-height: 140px;
+            max-height: 220px;
             overflow-y: auto;
-            font-family: 'Courier New', monospace;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             font-size: 12px;
+            line-height: 1.55;
         }
 
         .log-entry {
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            word-break: break-word;
         }
 
-        .log-entry.success {
-            color: #48bb78;
+        .log-entry.info { color: #93c5fd; }
+        .log-entry.success { color: #86efac; }
+        .log-entry.error { color: #fca5a5; }
+        .log-entry.warn { color: #fdba74; }
+
+        @media (max-width: 980px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .session-bar {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
-        .log-entry.error {
-            color: #f56565;
-        }
+        @media (max-width: 720px) {
+            body {
+                padding: 14px;
+            }
 
-        .log-entry.info {
-            color: #4299e1;
+            .app {
+                border-radius: 22px;
+                padding: 18px;
+            }
+
+            .session-bar {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎨 刮刮乐验证控制面板</h1>
-        </div>
-
-        <div id="status" class="status disconnected">
-            <div class="status-indicator"></div>
-            <span id="statusText">未连接</span>
-        </div>
-
-        <div class="session-input">
-            <input type="text" id="sessionIdInput" placeholder="输入会话ID（通常是用户ID）" />
-            <button id="connectBtn" onclick="connectSession()">连接</button>
-        </div>
-
-        <div class="instructions">
-            <h3>📋 使用说明</h3>
-            <ol>
-                <li>输入会话ID并点击"连接"按钮</li>
-                <li>等待页面截图加载</li>
-                <li>使用鼠标在滑块按钮上按下并拖动</li>
-                <li>释放鼠标完成验证</li>
-            </ol>
-        </div>
-
-        <div class="info-panel">
-            <div class="info-card">
-                <h3>会话ID</h3>
-                <p id="sessionIdDisplay">-</p>
+    <div class="app">
+        <div class="topbar">
+            <div class="title">
+                <h1>🎯 刮刮乐验证控制台</h1>
+                <p>重构为“截图预览 + 虚拟滑条”模式。你拖下面的控制条，系统会同步驱动真实验证码，不再要求你直接在截图上硬拖。</p>
             </div>
-            <div class="info-card">
-                <h3>连接状态</h3>
-                <p id="connectionStatus">未连接</p>
-            </div>
-            <div class="info-card">
-                <h3>验证状态</h3>
-                <p id="verificationStatus">待处理</p>
+            <div class="status disconnected" id="status">
+                <span class="status-dot"></span>
+                <span id="statusText">未连接</span>
             </div>
         </div>
 
-        <div class="canvas-container" id="canvasContainer">
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>加载中...</p>
-            </div>
-            <canvas id="captchaCanvas"></canvas>
+        <div class="session-bar">
+            <input type="text" id="sessionIdInput" placeholder="输入会话 ID（通常是 cookie_id / 用户 ID）">
+            <button class="btn btn-primary" id="connectBtn" onclick="connectSession()">连接会话</button>
+            <button class="btn btn-secondary" onclick="refreshSession()">刷新截图</button>
+            <button class="btn btn-secondary" onclick="resetVirtualSlider()">重置滑条</button>
         </div>
 
-        <div class="log" id="log">
-            <div class="log-entry info">等待连接...</div>
+        <div class="grid">
+            <div class="panel">
+                <div class="panel-head">
+                    <h2>验证码实时预览</h2>
+                    <p>蓝色虚线是识别到的轨道区域，橙色框是当前滑块按钮。下面的虚拟滑条会按同一轨迹控制真实页面。</p>
+                </div>
+                <div class="preview-body">
+                    <div class="preview-frame" id="previewFrame">
+                        <div class="placeholder" id="previewPlaceholder">
+                            <div class="spinner"></div>
+                            <div>等待连接或加载截图…</div>
+                        </div>
+                        <img id="captchaImage" alt="验证码截图">
+                        <div class="overlay-track" id="overlayTrack"></div>
+                        <div class="overlay-thumb" id="overlayThumb"></div>
+                        <div class="overlay-line" id="overlayLine"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side">
+                <div class="card">
+                    <h3>当前状态</h3>
+                    <p>建议流程：点击连接 → 等截图和轨道识别完成 → 按住下方虚拟滑条左右拖动 → 看到验证成功即可。</p>
+                    <div class="badge-row">
+                        <div class="badge" id="sessionBadge">会话：-</div>
+                        <div class="badge warn" id="sliderBadge">滑块未识别</div>
+                        <div class="badge" id="verifyBadge">状态：待处理</div>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span>连接状态</span>
+                            <strong id="connectionStatus">未连接</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>滑条位置</span>
+                            <strong id="ratioValue">0%</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>轨道识别</span>
+                            <strong id="trackValue">未就绪</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>验证结果</span>
+                            <strong id="verificationStatus">待处理</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>建议落点</span>
+                            <strong id="assistValue">无历史</strong>
+                        </div>
+                    </div>
+
+                    <div class="virtual-slider-wrap">
+                        <div class="virtual-slider-head">
+                            <div>
+                                <strong>虚拟滑条</strong>
+                                <span>按住拖动，后台同步控制真实滑块</span>
+                            </div>
+                            <span id="sliderHint">等待识别轨道…</span>
+                        </div>
+                        <div class="virtual-slider disabled" id="virtualSlider">
+                            <div class="virtual-slider-fill" id="virtualSliderFill"></div>
+                            <div class="virtual-slider-rail"></div>
+                            <div class="virtual-slider-thumb" id="virtualSliderThumb">↔</div>
+                        </div>
+                        <div class="slider-actions">
+                            <button class="btn btn-secondary" onclick="nudgeSlider(-0.03)">向左微调</button>
+                            <button class="btn btn-secondary" onclick="nudgeSlider(0.03)">向右微调</button>
+                            <button class="btn btn-primary" id="assistBtn" onclick="submitAssistDrag()" disabled>历史成功位提交</button>
+                            <button class="btn btn-secondary" onclick="finishVirtualSlider()">松开提交</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>操作日志</h3>
+                    <p>如果看起来没动，先点“刷新截图”；若轨道识别失败，通常刷新一次就会重新抓到。</p>
+                    <div class="log" id="log">
+                        <div class="log-entry info">等待连接…</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         let ws = null;
         let currentSessionId = null;
-        let canvas = null;
-        let ctx = null;
-        let isMouseDown = false;
-        let activePointerId = null;
-        let reconnectTimer = null;
         let reconnectAttempts = 0;
-        let lastMoveTime = 0;
-        let moveThrottle = 5; // 节流：每10ms最多发送一次（极致流畅）
-        let captchaOffset = {x: 0, y: 0}; // 滑块区域在页面中的偏移量
+        let reconnectTimer = null;
+        let shouldReconnect = false;
+        let sessionExpired = false;
+        let socketGeneration = 0;
+        let lastSocketErrorCode = null;
+        let deferredScreenshotPayload = null;
+        let lastScreenshotRenderedAt = 0;
+        let sessionPayload = null;
+        let pointerDragging = false;
+        let remoteDragging = false;
+        let activePointerId = null;
+        let lastMoveSentAt = 0;
+        let currentRatio = 0;
+        const moveThrottleMs = 14;
+        const screenshotRenderThrottleMs = 220;
 
-        // 初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            canvas = document.getElementById('captchaCanvas');
-            ctx = canvas.getContext('2d');
-
-            // 检查是否为嵌入模式（从URL参数或iframe检测）
-            const urlParams = new URLSearchParams(window.location.search);
-            const isEmbed = urlParams.get('embed') === '1' || window.self !== window.top;
-            
-            if (isEmbed) {
-                // 隐藏不必要的元素
-                document.querySelector('.header').style.display = 'none';
-                document.querySelector('.session-input').style.display = 'none';
-                document.querySelector('.instructions').style.display = 'none';
-                document.querySelector('.info-panel').style.display = 'none';
-                document.querySelector('.log').style.display = 'none';
-                document.getElementById('status').style.display = 'none';
-                
-                // 调整容器样式
-                document.querySelector('.container').style.padding = '0';
-                document.querySelector('.container').style.boxShadow = 'none';
-                document.querySelector('.container').style.background = 'transparent';
-                document.body.style.padding = '0';
-            }
-
-            // 检查是否有预设的会话ID
-            if (window.INITIAL_SESSION_ID) {
-                document.getElementById('sessionIdInput').value = window.INITIAL_SESSION_ID;
-                connectSession();
-            }
-
-            // 指针事件，兼容鼠标、触控板、触摸屏
-            canvas.addEventListener('pointerdown', handlePointerDown);
-            canvas.addEventListener('pointermove', handlePointerMove);
-            canvas.addEventListener('pointerup', handlePointerUp);
-            canvas.addEventListener('pointercancel', handlePointerUp);
-
-            // 兼容旧鼠标事件
-            canvas.addEventListener('mousedown', handleMouseDown);
-            canvas.addEventListener('mousemove', handleMouseMove);
-            canvas.addEventListener('mouseup', handleMouseUp);
-            canvas.addEventListener('mouseleave', handleMouseUp);
-        });
-
-        function handlePointerDown(event) {
-            if (event.pointerType === 'mouse' && event.button !== 0) {
-                return;
-            }
-            activePointerId = event.pointerId;
-            try {
-                canvas.setPointerCapture(event.pointerId);
-            } catch (_) {}
-            handleMouseDown(event);
-        }
-
-        function handlePointerMove(event) {
-            if (activePointerId !== null && event.pointerId !== activePointerId) {
-                return;
-            }
-            handleMouseMove(event);
-        }
-
-        function handlePointerUp(event) {
-            if (activePointerId !== null && event.pointerId !== activePointerId) {
-                return;
-            }
-            handleMouseUp(event);
-            if (activePointerId !== null) {
-                try {
-                    canvas.releasePointerCapture(activePointerId);
-                } catch (_) {}
-            }
-            activePointerId = null;
-        }
+        const el = (id) => document.getElementById(id);
 
         function log(message, type = 'info') {
-            const logEl = document.getElementById('log');
             const entry = document.createElement('div');
             entry.className = `log-entry ${type}`;
-            const timestamp = new Date().toLocaleTimeString();
-            entry.textContent = `[${timestamp}] ${message}`;
-            logEl.appendChild(entry);
-            logEl.scrollTop = logEl.scrollHeight;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            el('log').appendChild(entry);
+            el('log').scrollTop = el('log').scrollHeight;
         }
 
-        function updateStatus(status, text) {
-            const statusEl = document.getElementById('status');
-            const statusTextEl = document.getElementById('statusText');
-            
+        function clearReconnectTimer() {
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+        }
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function setStatus(status, text) {
+            const statusEl = el('status');
             statusEl.className = `status ${status}`;
-            statusTextEl.textContent = text;
-            
-            document.getElementById('connectionStatus').textContent = text;
+            el('statusText').textContent = text;
+            el('connectionStatus').textContent = text;
         }
 
-        async function connectSession() {
-            const sessionId = document.getElementById('sessionIdInput').value.trim();
-            
-            if (!sessionId) {
-                alert('请输入会话ID');
+        function setVerificationText(text) {
+            el('verificationStatus').textContent = text;
+            el('verifyBadge').textContent = `状态：${text}`;
+        }
+
+        function setAssistState(assist) {
+            const assistEnabled = !!assist?.enabled && typeof assist?.recommended_ratio === 'number';
+            const assistBtn = el('assistBtn');
+
+            if (!assistEnabled) {
+                el('assistValue').textContent = '无历史';
+                assistBtn.disabled = true;
+                if (!sessionExpired && !sessionPayload?.interactive?.drag_bounds) {
+                    el('sliderHint').textContent = '等待识别轨道…';
+                }
                 return;
             }
 
-            currentSessionId = sessionId;
-            document.getElementById('sessionIdDisplay').textContent = sessionId;
-            document.getElementById('connectBtn').disabled = true;
+            const ratio = Math.round(assist.recommended_ratio * 100);
+            const samples = assist.samples || 0;
+            el('assistValue').textContent = `${ratio}% (${samples}次)`;
+            assistBtn.disabled = false;
 
-            log(`正在连接会话: ${sessionId}`, 'info');
-
-            try {
-                // 建立 WebSocket 连接
-                const wsUrl = `ws://${window.location.host}/api/captcha/ws/${sessionId}`;
-                log(`WebSocket URL: ${wsUrl}`, 'info');
-                
-                ws = new WebSocket(wsUrl);
-
-                ws.onopen = () => {
-                    reconnectAttempts = 0;
-                    if (reconnectTimer) {
-                        clearTimeout(reconnectTimer);
-                        reconnectTimer = null;
-                    }
-                    log('WebSocket 连接成功', 'success');
-                    updateStatus('connected', '已连接');
-                };
-
-                ws.onmessage = async (event) => {
-                    const data = JSON.parse(event.data);
-                    handleWebSocketMessage(data);
-                };
-
-                ws.onerror = (error) => {
-                    log(`WebSocket 错误: ${error}`, 'error');
-                    updateStatus('disconnected', '连接错误');
-                    document.getElementById('connectBtn').disabled = false;
-                };
-
-                ws.onclose = () => {
-                    log('WebSocket 连接关闭', 'info');
-                    updateStatus('disconnected', '连接已关闭');
-                    document.getElementById('connectBtn').disabled = false;
-
-                    if (currentSessionId && document.getElementById('verificationStatus').textContent !== '已完成') {
-                        const delay = Math.min(3000, 500 * (reconnectAttempts + 1));
-                        reconnectAttempts += 1;
-                        log(`准备自动重连 (${reconnectAttempts})...`, 'info');
-                        reconnectTimer = setTimeout(() => {
-                            connectSession();
-                        }, delay);
-                    }
-                };
-
-            } catch (error) {
-                log(`连接失败: ${error}`, 'error');
-                updateStatus('disconnected', '连接失败');
-                document.getElementById('connectBtn').disabled = false;
+            if (!pointerDragging && !remoteDragging) {
+                el('sliderHint').textContent = assist.hint || `历史成功位约 ${ratio}%`;
             }
         }
 
-        function handleWebSocketMessage(data) {
-            const type = data.type;
+        function expireSession(message) {
+            sessionExpired = true;
+            shouldReconnect = false;
+            lastSocketErrorCode = 'session_not_found';
+            clearReconnectTimer();
+            pointerDragging = false;
+            remoteDragging = false;
+            activePointerId = null;
+            setStatus('disconnected', '会话已失效');
+            setVerificationText('会话已失效');
+            setSliderEnabled(false);
+            setAssistState(null);
+            el('sliderHint').textContent = '请回市场调研页重新发起一次查询';
+            el('trackValue').textContent = '会话失效';
+            el('connectBtn').disabled = false;
+            log(message || '当前验证码会话已失效', 'error');
+        }
 
-            if (type === 'session_info') {
-                log('收到会话信息', 'success');
-                
-                // 保存验证码容器偏移量
-                if (data.captcha_info && data.captcha_info.x !== undefined) {
-                    captchaOffset.x = Math.max(0, data.captcha_info.x - 10);
-                    captchaOffset.y = Math.max(0, data.captcha_info.y - 10);
-                    log(`验证码容器偏移: (${captchaOffset.x}, ${captchaOffset.y})`, 'info');
-                    log(`容器大小: ${data.captcha_info.width}x${data.captcha_info.height}`, 'info');
-                }
-                
-                displayScreenshot(data.screenshot);
-            }
+        function setSliderEnabled(enabled) {
+            const slider = el('virtualSlider');
+            slider.classList.toggle('disabled', !enabled);
+            el('sliderBadge').textContent = enabled ? '滑块已识别' : '滑块未识别';
+            el('sliderBadge').className = enabled ? 'badge ok' : 'badge warn';
+            el('sliderHint').textContent = enabled ? '按住横向拖动即可' : '等待识别轨道…';
+            el('trackValue').textContent = enabled ? '已识别' : '未就绪';
+        }
 
-            else if (type === 'screenshot_update') {
-                displayScreenshot(data.screenshot);
-                
-                // 如果是在等待验证结果时收到截图更新，说明验证失败
-                const currentStatus = document.getElementById('verificationStatus').textContent;
-                if (currentStatus === '验证中...') {
-                    log('⚠️ 验证未通过，请重试', 'error');
-                    document.getElementById('verificationStatus').textContent = '待处理';
-                }
-            }
-
-            else if (type === 'completed') {
-                log('✅ 验证成功！', 'success');
-                updateStatus('completed', '验证成功');
-                document.getElementById('verificationStatus').textContent = '已完成';
-                
-                // 显示成功提示
-                setTimeout(() => {
-                    alert('✅ 验证成功！页面即将关闭...');
-                    if (ws) {
-                        ws.close();
-                    }
-                }, 500);
-            }
-
-            else if (type === 'error') {
-                log(`错误: ${data.message}`, 'error');
-            }
+        function getSocketUrl(sessionId) {
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            return `${protocol}://${window.location.host}/api/captcha/ws/${sessionId}`;
         }
 
         function displayScreenshot(base64Image) {
-            const img = new Image();
+            const img = el('captchaImage');
+            const placeholder = el('previewPlaceholder');
+
             img.onload = () => {
-                // 调整 canvas 大小（只在必要时调整）
-                if (canvas.width !== img.width || canvas.height !== img.height) {
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                }
-                
-                // 使用 imageSmoothingEnabled 优化渲染
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'low'; // 低质量平滑，提升性能
-                
-                // 绘制图片
-                ctx.drawImage(img, 0, 0);
-                
-                // 隐藏加载提示
-                document.getElementById('loading').style.display = 'none';
-                canvas.style.display = 'block';
+                placeholder.style.display = 'none';
+                img.style.display = 'block';
+                const frame = el('previewFrame');
+                frame.style.width = `${img.clientWidth}px`;
+                frame.style.height = `${img.clientHeight}px`;
+                renderOverlay();
             };
-            // 使用 JPEG 格式（后端已改为 JPEG）
+
             img.src = `data:image/jpeg;base64,${base64Image}`;
+            lastScreenshotRenderedAt = Date.now();
         }
 
-        function handleMouseDown(event) {
+        function flushDeferredScreenshot(force = false) {
+            if (!deferredScreenshotPayload) {
+                return;
+            }
+
+            if (!force && (pointerDragging || remoteDragging)) {
+                return;
+            }
+
+            const payload = deferredScreenshotPayload;
+            deferredScreenshotPayload = null;
+            if (payload?.screenshot) {
+                displayScreenshot(payload.screenshot);
+            }
+        }
+
+        function applyBoxStyle(node, box, naturalWidth, naturalHeight) {
+            if (!box || !naturalWidth || !naturalHeight) {
+                node.style.display = 'none';
+                return;
+            }
+
+            node.style.display = 'block';
+            node.style.left = `${(box.x / naturalWidth) * 100}%`;
+            node.style.top = `${(box.y / naturalHeight) * 100}%`;
+            node.style.width = `${(box.width / naturalWidth) * 100}%`;
+            node.style.height = `${(box.height / naturalHeight) * 100}%`;
+        }
+
+        function renderOverlay() {
+            const img = el('captchaImage');
+            const interactive = sessionPayload?.interactive;
+            const naturalWidth = img.naturalWidth || interactive?.clip_rect?.width;
+            const naturalHeight = img.naturalHeight || interactive?.clip_rect?.height;
+
+            applyBoxStyle(el('overlayTrack'), interactive?.relative_track_box, naturalWidth, naturalHeight);
+            applyBoxStyle(el('overlayThumb'), interactive?.relative_slider_box, naturalWidth, naturalHeight);
+
+            const line = el('overlayLine');
+            const dragBounds = interactive?.drag_bounds;
+            if (dragBounds && naturalWidth && naturalHeight) {
+                line.style.display = 'block';
+                line.style.left = `${(dragBounds.relative_min_x / naturalWidth) * 100}%`;
+                line.style.top = `${(dragBounds.relative_y / naturalHeight) * 100}%`;
+                line.style.width = `${((dragBounds.relative_max_x - dragBounds.relative_min_x) / naturalWidth) * 100}%`;
+            } else {
+                line.style.display = 'none';
+            }
+        }
+
+        function updateVirtualSlider(ratio) {
+            const slider = el('virtualSlider');
+            const thumb = el('virtualSliderThumb');
+            const fill = el('virtualSliderFill');
+            const trackRect = slider.getBoundingClientRect();
+            const minLeft = 18;
+            const maxLeft = Math.max(minLeft, trackRect.width - 18);
+            const px = minLeft + (maxLeft - minLeft) * ratio;
+
+            currentRatio = ratio;
+            thumb.style.left = `${px}px`;
+            fill.style.width = `${px}px`;
+            el('ratioValue').textContent = `${Math.round(ratio * 100)}%`;
+        }
+
+        function resetVirtualSlider() {
+            pointerDragging = false;
+            remoteDragging = false;
+            activePointerId = null;
+            updateVirtualSlider(0);
+            flushDeferredScreenshot(true);
+            log('虚拟滑条已重置', 'info');
+        }
+
+        function getDragRatioFromEvent(event) {
+            const slider = el('virtualSlider');
+            const rect = slider.getBoundingClientRect();
+            const raw = (event.clientX - rect.left - 18) / Math.max(1, rect.width - 36);
+            return clamp(raw, 0, 1);
+        }
+
+        function sendWs(payload) {
             if (!ws || ws.readyState !== WebSocket.OPEN) {
-                return;
+                return false;
             }
-
-            event.preventDefault();
-
-            isMouseDown = true;
-            const coords = getMouseCoords(event);
-            
-            log(`鼠标按下: (${coords.x}, ${coords.y})`, 'info');
-            
-            ws.send(JSON.stringify({
-                type: 'mouse_event',
-                event_type: 'down',
-                x: coords.x,
-                y: coords.y
-            }));
+            ws.send(JSON.stringify(payload));
+            return true;
         }
 
-        function handleMouseMove(event) {
-            if (!ws || ws.readyState !== WebSocket.OPEN || !isMouseDown) {
-                return;
+        function beginRemoteDrag() {
+            if (remoteDragging) {
+                return true;
             }
 
-            event.preventDefault();
+            const ok = sendWs({ type: 'drag_event', phase: 'start', ratio: 0 });
+            if (ok) {
+                remoteDragging = true;
+                log('开始控制真实滑块', 'info');
+            }
+            return ok;
+        }
 
-            // 节流：限制发送频率，避免卡顿
+        function sendMoveRatio(ratio, force = false) {
             const now = Date.now();
-            if (now - lastMoveTime < moveThrottle) {
-                return; // 跳过这次事件
+            if (!force && now - lastMoveSentAt < moveThrottleMs) {
+                return;
             }
-            lastMoveTime = now;
-
-            const coords = getMouseCoords(event);
-            
-            ws.send(JSON.stringify({
-                type: 'mouse_event',
-                event_type: 'move',
-                x: coords.x,
-                y: coords.y
-            }));
+            lastMoveSentAt = now;
+            sendWs({ type: 'drag_event', phase: 'move', ratio });
         }
 
-        function handleMouseUp(event) {
-            if (!ws || ws.readyState !== WebSocket.OPEN || !isMouseDown) {
+        function finishVirtualSlider() {
+            if (!remoteDragging && !pointerDragging) {
+                return;
+            }
+
+            pointerDragging = false;
+            activePointerId = null;
+
+            if (remoteDragging) {
+                sendWs({ type: 'drag_event', phase: 'end', ratio: currentRatio });
+                remoteDragging = false;
+                setVerificationText('验证中...');
+                flushDeferredScreenshot();
+                log(`提交拖拽位置 ${Math.round(currentRatio * 100)}%`, 'info');
+            }
+        }
+
+        function submitAssistDrag() {
+            const assist = sessionPayload?.assist;
+            if (!assist?.enabled || typeof assist?.recommended_ratio !== 'number') {
+                log('当前没有可用的历史成功辅助', 'warn');
+                return;
+            }
+
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('WebSocket 未连接，无法执行辅助提交', 'error');
+                return;
+            }
+
+            pointerDragging = false;
+            remoteDragging = false;
+            activePointerId = null;
+
+            const ratio = clamp(assist.recommended_ratio, 0, 1);
+            updateVirtualSlider(ratio);
+            setVerificationText('验证中...');
+            flushDeferredScreenshot();
+            sendWs({ type: 'assist_submit', ratio });
+            log(`按历史成功位提交 ${Math.round(ratio * 100)}%`, 'info');
+        }
+
+        function nudgeSlider(delta) {
+            const enabled = !!sessionPayload?.interactive?.drag_bounds;
+            if (!enabled) {
+                log('当前还没有识别到滑块轨道，无法微调', 'warn');
+                return;
+            }
+
+            const nextRatio = clamp(currentRatio + delta, 0, 1);
+            if (!remoteDragging && !beginRemoteDrag()) {
+                return;
+            }
+
+            updateVirtualSlider(nextRatio);
+            sendMoveRatio(nextRatio, true);
+            log(`微调到 ${Math.round(nextRatio * 100)}%`, 'info');
+        }
+
+        function refreshSession() {
+            if (!currentSessionId) {
+                log('请先连接会话', 'warn');
+                return;
+            }
+
+            if (sendWs({ type: 'refresh_session' })) {
+                log('已请求刷新截图', 'info');
+            }
+        }
+
+        async function preflightSession(sessionId) {
+            try {
+                const response = await fetch(`/api/captcha/session/${encodeURIComponent(sessionId)}`, {
+                    cache: 'no-store'
+                });
+
+                if (response.ok) {
+                    const payload = await response.json();
+                    updateSessionPayload(payload);
+                    return true;
+                }
+
+                if (response.status === 404) {
+                    expireSession('当前验证码会话已失效，请回市场调研页重新发起一次查询');
+                    return false;
+                }
+
+                log(`会话预检查失败（HTTP ${response.status}），继续尝试连接`, 'warn');
+                return true;
+            } catch (error) {
+                log(`会话预检查失败：${error.message}`, 'warn');
+                return true;
+            }
+        }
+
+        function handleSliderPointerDown(event) {
+            const enabled = !!sessionPayload?.interactive?.drag_bounds;
+            if (!enabled || !ws || ws.readyState !== WebSocket.OPEN) {
                 return;
             }
 
             event.preventDefault();
+            pointerDragging = true;
+            activePointerId = event.pointerId;
+            try {
+                el('virtualSlider').setPointerCapture(event.pointerId);
+            } catch (_) {}
 
-            isMouseDown = false;
-            const coords = getMouseCoords(event);
-            
-            log(`鼠标释放: (${coords.x}, ${coords.y})`, 'info');
-            log(`等待验证结果...`, 'info');
-            
-            // 更新状态显示
-            document.getElementById('verificationStatus').textContent = '验证中...';
-            
-            ws.send(JSON.stringify({
-                type: 'mouse_event',
-                event_type: 'up',
-                x: coords.x,
-                y: coords.y
-            }));
+            if (!beginRemoteDrag()) {
+                pointerDragging = false;
+                activePointerId = null;
+                return;
+            }
+
+            const ratio = getDragRatioFromEvent(event);
+            updateVirtualSlider(ratio);
+            sendMoveRatio(ratio, true);
         }
 
-        function getMouseCoords(event) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            
-            // 计算canvas上的坐标
-            const canvasX = Math.round((event.clientX - rect.left) * scaleX);
-            const canvasY = Math.round((event.clientY - rect.top) * scaleY);
-            
-            // 转换为页面上的实际坐标（加上偏移量）
-            return {
-                x: canvasX + captchaOffset.x,
-                y: canvasY + captchaOffset.y
+        function handleSliderPointerMove(event) {
+            if (!pointerDragging || activePointerId !== event.pointerId) {
+                return;
+            }
+
+            event.preventDefault();
+            const ratio = getDragRatioFromEvent(event);
+            updateVirtualSlider(ratio);
+            sendMoveRatio(ratio);
+        }
+
+        function handleSliderPointerUp(event) {
+            if (!pointerDragging || activePointerId !== event.pointerId) {
+                return;
+            }
+
+            event.preventDefault();
+            const ratio = getDragRatioFromEvent(event);
+            updateVirtualSlider(ratio);
+            finishVirtualSlider();
+
+            try {
+                el('virtualSlider').releasePointerCapture(event.pointerId);
+            } catch (_) {}
+        }
+
+        function updateSessionPayload(data) {
+            sessionPayload = data;
+            el('sessionBadge').textContent = `会话：${data.session_id || '-'}`;
+
+            if (data.interactive?.relative_track_box) {
+                const w = Math.round(data.interactive.relative_track_box.width || 0);
+                const h = Math.round(data.interactive.relative_track_box.height || 0);
+                el('trackValue').textContent = `${w}×${h}`;
+            } else if (data.captcha_info) {
+                const w = Math.round(data.captcha_info.width || 0);
+                const h = Math.round(data.captcha_info.height || 0);
+                el('trackValue').textContent = `${w}×${h}`;
+            }
+
+            if (data.screenshot) {
+                if (pointerDragging || remoteDragging) {
+                    const now = Date.now();
+                    if (now - lastScreenshotRenderedAt >= screenshotRenderThrottleMs) {
+                        deferredScreenshotPayload = null;
+                        displayScreenshot(data.screenshot);
+                    } else {
+                        deferredScreenshotPayload = data;
+                    }
+                } else {
+                    deferredScreenshotPayload = null;
+                    displayScreenshot(data.screenshot);
+                }
+            }
+
+            const hasBounds = !!data.interactive?.drag_bounds;
+            setSliderEnabled(hasBounds);
+            setAssistState(data.assist);
+            renderOverlay();
+
+            if (!pointerDragging && !remoteDragging && !data.completed) {
+                updateVirtualSlider(0);
+            }
+
+            if (data.completed) {
+                shouldReconnect = false;
+                setStatus('completed', '验证成功');
+                setVerificationText('已完成');
+            } else if (el('verificationStatus').textContent === '验证中...') {
+                setVerificationText('待处理');
+            }
+        }
+
+        function handleSocketMessage(data) {
+            if (data.type === 'session_info' || data.type === 'screenshot_update') {
+                updateSessionPayload(data);
+                if (data.type === 'session_info') {
+                    log('会话已就绪', 'success');
+                    if (data.assist?.enabled && data.assist?.hint) {
+                        log(data.assist.hint, 'info');
+                    }
+                }
+                return;
+            }
+
+            if (data.type === 'completed') {
+                shouldReconnect = false;
+                flushDeferredScreenshot(true);
+                setStatus('completed', '验证成功');
+                setVerificationText('已完成');
+                log('✅ 验证成功', 'success');
+                return;
+            }
+
+            if (data.type === 'failed') {
+                flushDeferredScreenshot(true);
+                setVerificationText('验证失败');
+                log(data.message || '验证失败，请重试', 'error');
+                return;
+            }
+
+            if (data.type === 'completion_status') {
+                if (data.completed) {
+                    shouldReconnect = false;
+                    setStatus('completed', '验证成功');
+                    setVerificationText('已完成');
+                }
+                return;
+            }
+
+            if (data.type === 'error') {
+                lastSocketErrorCode = data.code || null;
+                if (data.code === 'session_not_found' || (data.message || '').includes('会话不存在')) {
+                    expireSession('当前验证码会话已失效，请回市场调研页重新发起一次查询');
+                    return;
+                }
+                log(data.message || '未知错误', 'error');
+            }
+        }
+
+        async function connectSession(options = {}) {
+            const { isReconnect = false } = options;
+            const sessionId = el('sessionIdInput').value.trim();
+            if (!sessionId) {
+                alert('请输入会话 ID');
+                return;
+            }
+
+            clearReconnectTimer();
+
+            if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+                const previousSocket = ws;
+                ws = null;
+                try {
+                    previousSocket.close();
+                } catch (_) {}
+            }
+
+            currentSessionId = sessionId;
+            sessionExpired = false;
+            shouldReconnect = true;
+            lastSocketErrorCode = null;
+            el('connectBtn').disabled = true;
+            el('sessionBadge').textContent = `会话：${sessionId}`;
+            setStatus('disconnected', '连接中...');
+            log(`正在连接会话 ${sessionId}`, 'info');
+
+            const sessionExists = await preflightSession(sessionId);
+            if (!sessionExists) {
+                return;
+            }
+
+            const generation = ++socketGeneration;
+            const socket = new WebSocket(getSocketUrl(sessionId));
+            ws = socket;
+
+            socket.onopen = () => {
+                if (ws !== socket || generation !== socketGeneration) {
+                    return;
+                }
+                reconnectAttempts = 0;
+                clearReconnectTimer();
+                setStatus('connected', '已连接');
+                el('connectBtn').disabled = false;
+                log('WebSocket 连接成功', 'success');
+            };
+
+            socket.onmessage = (event) => {
+                if (ws !== socket || generation !== socketGeneration) {
+                    return;
+                }
+                const data = JSON.parse(event.data);
+                handleSocketMessage(data);
+            };
+
+            socket.onerror = () => {
+                if (ws !== socket || generation !== socketGeneration) {
+                    return;
+                }
+                setStatus('disconnected', '连接异常');
+                el('connectBtn').disabled = false;
+                log('WebSocket 连接异常', 'error');
+            };
+
+            socket.onclose = () => {
+                if (ws === socket) {
+                    ws = null;
+                }
+                if (generation !== socketGeneration) {
+                    return;
+                }
+
+                setStatus('disconnected', '已断开');
+                el('connectBtn').disabled = false;
+                remoteDragging = false;
+                pointerDragging = false;
+                flushDeferredScreenshot(true);
+
+                if (
+                    currentSessionId &&
+                    shouldReconnect &&
+                    !sessionExpired &&
+                    lastSocketErrorCode !== 'session_not_found' &&
+                    el('verificationStatus').textContent !== '已完成'
+                ) {
+                    reconnectAttempts += 1;
+                    const delay = Math.min(3000, 700 * reconnectAttempts);
+                    log(`连接关闭，${delay}ms 后自动重连`, 'warn');
+                    reconnectTimer = setTimeout(() => connectSession({ isReconnect: true }), delay);
+                } else if (sessionExpired && !isReconnect) {
+                    log('已停止自动重连，请重新触发新的验证码会话', 'warn');
+                }
             };
         }
 
-        canvas && canvas.addEventListener('dragstart', (event) => event.preventDefault());
+        document.addEventListener('DOMContentLoaded', () => {
+            const slider = el('virtualSlider');
+            slider.addEventListener('pointerdown', handleSliderPointerDown);
+            slider.addEventListener('pointermove', handleSliderPointerMove);
+            slider.addEventListener('pointerup', handleSliderPointerUp);
+            slider.addEventListener('pointercancel', handleSliderPointerUp);
+
+            updateVirtualSlider(0);
+
+            if (window.INITIAL_SESSION_ID) {
+                el('sessionIdInput').value = window.INITIAL_SESSION_ID;
+                connectSession();
+            }
+        });
     </script>
 </body>
 </html>

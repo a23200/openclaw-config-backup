@@ -4512,6 +4512,36 @@ def get_item_detail(cookie_id: str, item_id: str, current_user: Dict[str, Any] =
         raise HTTPException(status_code=500, detail=f"获取商品详情失败: {str(e)}")
 
 
+
+class ItemAIKnowledgeUpdate(BaseModel):
+    ai_knowledge: str
+
+@app.put("/items/{cookie_id}/{item_id}/ai-knowledge")
+def update_item_ai_knowledge(
+    cookie_id: str,
+    item_id: str,
+    update_data: ItemAIKnowledgeUpdate,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """更新商品的AI专属知识库"""
+    try:
+        user_id = current_user['user_id']
+        from db_manager import db_manager
+        user_cookies = db_manager.get_all_cookies(user_id)
+        if cookie_id not in user_cookies:
+            raise HTTPException(status_code=403, detail="无权限操作该Cookie")
+
+        success = db_manager.update_item_ai_knowledge(cookie_id, item_id, update_data.ai_knowledge)
+        if success:
+            return {"message": "商品AI知识库更新成功"}
+        else:
+            raise HTTPException(status_code=400, detail="更新失败，商品不存在")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update item ai_knowledge: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 class ItemDetailUpdate(BaseModel):
     item_detail: str
 

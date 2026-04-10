@@ -383,7 +383,7 @@ def main():
         rel_subtitle_path = os.path.basename(subtitle_path)
 
         if has_subtitles:
-            subtitle_filter = f"subtitles=filename={rel_subtitle_path}"
+            subtitle_filter = f"subtitles=filename={rel_subtitle_path}:force_style='FontName=PingFang SC,FontSize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=2.5,Shadow=1.5,Alignment=2,MarginV=150,Bold=1'"
             assembly_command = [
                 ffmpeg_bin, '-y', '-i', silent_video_path, '-i', final_audio_path,
                 '-vf', subtitle_filter,

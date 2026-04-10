@@ -6,6 +6,7 @@
 """
 
 import os
+import re
 import sys
 import shutil
 from pathlib import Path
@@ -157,6 +158,11 @@ def _check_and_install_playwright():
     # 检查Playwright浏览器是否存在
     playwright_installed = False
     possible_paths = []
+
+    # 优先检查环境变量指定的浏览器目录
+    env_browser_path = os.getenv('PLAYWRIGHT_BROWSERS_PATH')
+    if env_browser_path:
+        possible_paths.append(Path(env_browser_path))
     
     # 如果是打包后的exe，优先检查exe同目录
     if getattr(sys, 'frozen', False):
@@ -200,7 +206,14 @@ def _check_and_install_playwright():
         appdata = os.getenv('APPDATA')
         if appdata:
             possible_paths.append(Path(appdata) / 'ms-playwright')
-    
+    elif sys.platform == 'darwin':
+        # macOS 常见缓存目录
+        possible_paths.append(Path.home() / 'Library' / 'Caches' / 'ms-playwright')
+        possible_paths.append(Path.home() / '.cache' / 'ms-playwright')
+    else:
+        # Linux / 其他 Unix
+        possible_paths.append(Path.home() / '.cache' / 'ms-playwright')
+
     # 检查是否存在chromium浏览器
     for path in possible_paths:
         if path.exists():
@@ -208,10 +221,14 @@ def _check_and_install_playwright():
             chromium_dirs = list(path.glob('chromium-*'))
             if chromium_dirs:
                 for chromium_dir in chromium_dirs:
-                    chrome_win = chromium_dir / 'chrome-win'
-                    chrome_exe = chrome_win / 'chrome.exe'
-                    if chrome_exe.exists():
-                        print(f"{_OK} 找到Playwright浏览器: {chrome_exe}")
+                    chrome_candidates = [
+                        chromium_dir / 'chrome-win' / 'chrome.exe',
+                        chromium_dir / 'chrome-mac' / 'Chromium.app' / 'Contents' / 'MacOS' / 'Chromium',
+                        chromium_dir / 'chrome-linux' / 'chrome',
+                    ]
+                    browser_exe = next((candidate for candidate in chrome_candidates if candidate.exists()), None)
+                    if browser_exe:
+                        print(f"{_OK} 找到Playwright浏览器: {browser_exe}")
                         # 设置环境变量
                         os.environ['PLAYWRIGHT_BROWSERS_PATH'] = str(path)
                         playwright_installed = True
@@ -439,6 +456,31 @@ def _build_frontend():
 
     print("检查前端构建状态...")
 
+    def _referenced_assets_exist(index_file: Path) -> bool:
+        """检查 index.html 引用的静态资源是否都存在。"""
+        try:
+            html_content = index_file.read_text(encoding='utf-8')
+        except Exception as exc:
+            print(f"{_WARN} 读取 static/index.html 失败: {exc}")
+            return False
+
+        asset_names = {
+            match
+            for match in re.findall(r'/(?:static/)?assets/([^"\']+)', html_content)
+        }
+        if not asset_names:
+            return True
+
+        missing_assets = [
+            asset_name
+            for asset_name in sorted(asset_names)
+            if not (static_dir / "assets" / asset_name).exists()
+        ]
+        if missing_assets:
+            print(f"{_INFO} 检测到缺失前端资源，需要重新构建: {', '.join(missing_assets[:3])}")
+            return False
+        return True
+
     # 检查是否需要重新构建
     need_build = False
 
@@ -452,6 +494,8 @@ def _build_frontend():
         if not index_html.exists():
             need_build = True
             print(f"{_INFO} static/index.html 不存在，需要构建前端")
+        elif not _referenced_assets_exist(index_html):
+            need_build = True
         else:
             print(f"{_OK} 前端已构建，跳过")
 
@@ -472,10 +516,31 @@ def _build_frontend():
         if sys.platform == 'win32' and hasattr(subprocess, 'CREATE_NO_WINDOW'):
             creation_flags = subprocess.CREATE_NO_WINDOW
 
-        # 1. npm install
+        package_lock = build_dir / "package-lock.json"
+        pnpm_lock = build_dir / "pnpm-lock.yaml"
+        if pnpm_lock.exists():
+            install_cmd = ['pnpm', 'install', '--frozen-lockfile']
+            build_cmd = ['pnpm', 'build']
+            install_desc = 'pnpm install --frozen-lockfile'
+            build_desc = 'pnpm build'
+            missing_tool_hint = 'Node.js、npm 和 pnpm'
+        elif package_lock.exists():
+            install_cmd = ['npm', 'ci']
+            build_cmd = ['npm', 'run', 'build']
+            install_desc = 'npm ci'
+            build_desc = 'npm run build'
+            missing_tool_hint = 'Node.js 和 npm'
+        else:
+            install_cmd = ['npm', 'install']
+            build_cmd = ['npm', 'run', 'build']
+            install_desc = 'npm install'
+            build_desc = 'npm run build'
+            missing_tool_hint = 'Node.js 和 npm'
+
+        # 1. 安装依赖
         try:
             result = subprocess.run(
-                ['npm', 'install'],
+                install_cmd,
                 cwd=str(build_dir),
                 capture_output=True,
                 text=True,
@@ -484,30 +549,30 @@ def _build_frontend():
             )
 
             if result.returncode == 0:
-                print(f"{_OK} npm 依赖安装成功")
+                print(f"{_OK} {install_desc} 成功")
             else:
-                print(f"{_WARN} npm install 失败")
+                print(f"{_WARN} {install_desc} 失败")
                 if result.stdout:
                     print(f"   输出: {result.stdout[-500:]}")
                 if result.stderr:
                     print(f"   错误: {result.stderr[-500:]}")
                 return False
         except subprocess.TimeoutExpired:
-            print(f"{_WARN} npm install 超时（超过5分钟）")
+            print(f"{_WARN} {install_desc} 超时（超过5分钟）")
             return False
         except FileNotFoundError:
-            print(f"{_WARN} 未找到 npm，请确保已安装 Node.js 和 npm")
-            print(f"   你可以手动运行: cd {build_dir} && npm install && npm run build")
+            print(f"{_WARN} 未找到前端构建工具，请确保已安装 {missing_tool_hint}")
+            print(f"   你可以手动运行: cd {build_dir} && {' '.join(install_cmd)} && {' '.join(build_cmd)}")
             return False
         except Exception as e:
-            print(f"{_WARN} npm install 失败: {e}")
+            print(f"{_WARN} {install_desc} 失败: {e}")
             return False
 
-        # 2. npm run build
+        # 2. 构建前端
         print(f"   2. 构建前端...")
         try:
             result = subprocess.run(
-                ['npm', 'run', 'build'],
+                build_cmd,
                 cwd=str(build_dir),
                 capture_output=True,
                 text=True,
@@ -519,17 +584,17 @@ def _build_frontend():
                 print(f"{_OK} 前端构建成功")
                 return True
             else:
-                print(f"{_WARN} npm run build 失败")
+                print(f"{_WARN} {build_desc} 失败")
                 if result.stdout:
                     print(f"   输出: {result.stdout[-500:]}")
                 if result.stderr:
                     print(f"   错误: {result.stderr[-500:]}")
                 return False
         except subprocess.TimeoutExpired:
-            print(f"{_WARN} npm run build 超时（超过5分钟）")
+            print(f"{_WARN} {build_desc} 超时（超过5分钟）")
             return False
         except Exception as e:
-            print(f"{_WARN} npm run build 失败: {e}")
+            print(f"{_WARN} {build_desc} 失败: {e}")
             return False
 
     except Exception as e:
@@ -573,8 +638,8 @@ def _start_api_server():
     api_conf = AUTO_REPLY.get('api', {})
 
     # 优先使用环境变量配置
-    host = os.getenv('API_HOST', '0.0.0.0')  # 默认绑定所有接口
-    port = int(os.getenv('API_PORT', '8080'))  # 默认端口8080
+    host = os.getenv('API_HOST', '127.0.0.1')  # 默认仅绑定本机，兼容本地测试环境
+    port = int(os.getenv('API_PORT', '18444'))  # 默认端口18444
 
     # 如果配置文件中有特定配置，则使用配置文件
     if 'host' in api_conf:
@@ -584,11 +649,11 @@ def _start_api_server():
 
     # 兼容旧的URL配置方式
     if 'url' in api_conf and 'host' not in api_conf and 'port' not in api_conf:
-        url = api_conf.get('url', 'http://0.0.0.0:8080/xianyu/reply')
+        url = api_conf.get('url', 'http://127.0.0.1:18444/xianyu/reply')
         parsed = urlparse(url)
         if parsed.hostname and parsed.hostname != 'localhost':
             host = parsed.hostname
-        port = parsed.port or 8080
+        port = parsed.port or 18444
 
     logger.info(f"启动Web服务器: http://{host}:{port}")
     # 在后台线程中创建独立事件循环并直接运行 server.serve()

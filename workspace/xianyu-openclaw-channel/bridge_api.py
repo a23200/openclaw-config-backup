@@ -13,7 +13,7 @@ from typing import Optional
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from loguru import logger
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from bridge_message_queue import bridge_queue
 
@@ -59,6 +59,15 @@ class SendMediaRequest(BaseModel):
 class ConfirmDeliveryRequest(BaseModel):
     orderId: str
     accountId: Optional[str] = "default"
+
+
+class OutreachLeadRequest(BaseModel):
+    accountId: Optional[str] = "default"
+    targetUrl: str = Field(..., description="目标视频/帖子 URL")
+    intentKeywords: list[str] = Field(default_factory=list, description="意向关键词")
+    messageTemplate: str = Field(..., description="私信模板")
+    maxLeads: int = Field(default=20, ge=1, le=200)
+    dryRun: bool = Field(default=True, description="是否只抓取不发信")
 
 
 # ---------------------------------------------------------------------------
@@ -258,6 +267,30 @@ async def confirm_delivery(body: ConfirmDeliveryRequest):
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"[Bridge] 确认发货失败: {e}")
+        return {"ok": False, "error": str(e)}
+
+
+@bridge_router.post("/outreach-leads")
+async def outreach_leads(body: OutreachLeadRequest):
+    """引流雏形接口：抓取评论意向用户，后续可扩展主页访问与私信发送"""
+    try:
+        from outreach_pipeline import run_outreach_pipeline
+
+        result = await run_outreach_pipeline(
+            account_id=body.accountId or "default",
+            target_url=body.targetUrl,
+            intent_keywords=body.intentKeywords,
+            message_template=body.messageTemplate,
+            max_leads=body.maxLeads,
+            dry_run=body.dryRun,
+        )
+        return {"ok": True, "result": result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Bridge] 引流任务失败: {e}")
+        return {"ok": False, "error": str(e)}
         logger.error(f"[Bridge] 确认发货失败: {e}")
         return {"ok": False, "error": str(e)}
 
@@ -958,6 +991,32 @@ class SearchProductsMultiRequest(BaseModel):
     max_pages: int = 5
 
 
+class MarketResearchRequest(BaseModel):
+    """市场调研请求"""
+    cookie_id: str
+    keyword: str
+    max_pages: int = 3
+    include_terms: list[str] = Field(default_factory=list)
+    exclude_terms: list[str] = Field(default_factory=list)
+    min_price: Optional[float] = None
+    max_price: Optional[float] = None
+    sort: str = "price_asc"
+    captcha_mode: str = "local_browser"
+
+
+class MarketResearchResumeRequest(BaseModel):
+    """市场调研恢复请求"""
+    session_id: str
+    cookie_id: str
+    keyword: str
+    max_pages: int = 3
+    include_terms: list[str] = Field(default_factory=list)
+    exclude_terms: list[str] = Field(default_factory=list)
+    min_price: Optional[float] = None
+    max_price: Optional[float] = None
+    sort: str = "price_asc"
+
+
 def _get_link_unique_key(link: str) -> str:
     parts = link.split('&', 1)
     if len(parts) >= 2:
@@ -1154,6 +1213,167 @@ async def search_products_multi(body: SearchProductsMultiRequest):
         
     except Exception as e:
         logger.error(f"[Bridge] 多页搜索商品失败: {e}")
+        import traceback
+        logger.error(f"[Bridge] 错误堆栈:\n{traceback.format_exc()}")
+        return {"ok": False, "error": str(e)}
+
+
+@bridge_router.post("/market-research")
+async def market_research(body: MarketResearchRequest):
+    """闲鱼市场调研分析接口"""
+    try:
+        from db_manager import db_manager
+        from market_research import build_market_analysis, serialize_market_item
+        from utils.item_search import (
+            search_multiple_pages_xianyu_with_cookie_mode,
+            search_multiple_pages_xianyu_with_cookie,
+            search_xianyu_items_with_cookie,
+        )
+
+        sort_value = body.sort if body.sort in {"price_asc", "price_desc", "want_desc", "latest"} else "price_asc"
+
+        cookie_info = db_manager.get_cookie_by_id(body.cookie_id)
+        cookie_value = str((cookie_info or {}).get("cookies_str") or "").strip()
+        if len(cookie_value) < 50:
+            logger.error(f"[Bridge] 市场调研失败，Cookie不存在或无效: {body.cookie_id}")
+            return {"ok": False, "error": f"Cookie不存在或无效: {body.cookie_id}"}
+
+        logger.info(
+            f"[Bridge] 开始市场调研: cookie_id={body.cookie_id}, keyword={body.keyword}, "
+            f"max_pages={body.max_pages}, include={body.include_terms}, exclude={body.exclude_terms}"
+        )
+
+        if body.max_pages > 1:
+            result = await search_multiple_pages_xianyu_with_cookie_mode(
+                cookie_id=body.cookie_id,
+                keyword=body.keyword,
+                total_pages=body.max_pages,
+                captcha_mode=body.captcha_mode or "local_browser",
+            )
+        else:
+            result = await search_xianyu_items_with_cookie(
+                cookie_id=body.cookie_id,
+                keyword=body.keyword,
+                page=1,
+                page_size=20,
+                captcha_mode=body.captcha_mode or "local_browser",
+            )
+
+        if result.get("captcha_required"):
+            logger.warning(f"[Bridge] 市场调研触发验证码: keyword={body.keyword}, captcha_info={result.get('captcha_info')}")
+            return {
+                "ok": True,
+                "keyword": body.keyword,
+                "cookie_id": body.cookie_id,
+                "items": [],
+                "summary": {},
+                "raw_count": 0,
+                "deduped_count": 0,
+                "filtered_count": 0,
+                "captcha_required": True,
+                "error": result.get("error") or "需要人工完成刮刮乐验证码",
+                "captcha_info": result.get("captcha_info", {}),
+            }
+
+        if result.get("error"):
+            logger.error(f"[Bridge] 市场调研搜索失败: {result['error']}")
+            return {"ok": False, "error": result["error"]}
+
+        analysis = build_market_analysis(
+            result.get("items", []),
+            include_terms=body.include_terms,
+            exclude_terms=body.exclude_terms,
+            min_price=body.min_price,
+            max_price=body.max_price,
+            sort_by=sort_value,
+        )
+
+        items = [serialize_market_item(item) for item in analysis["items"]]
+        logger.info(
+            f"[Bridge] 市场调研完成: keyword={body.keyword}, raw={analysis['raw_count']}, "
+            f"deduped={analysis['deduped_count']}, filtered={analysis['filtered_count']}"
+        )
+
+        return {
+            "ok": True,
+            "keyword": body.keyword,
+            "cookie_id": body.cookie_id,
+            "items": items,
+            "summary": analysis["summary"],
+            "raw_count": analysis["raw_count"],
+            "deduped_count": analysis["deduped_count"],
+            "filtered_count": analysis["filtered_count"],
+            "source": result.get("source"),
+            "is_real_data": result.get("is_real_data", False),
+            "sort": sort_value,
+        }
+
+    except Exception as e:
+        logger.error(f"[Bridge] 市场调研失败: {e}")
+        import traceback
+        logger.error(f"[Bridge] 错误堆栈:\n{traceback.format_exc()}")
+        return {"ok": False, "error": str(e)}
+
+
+@bridge_router.post("/market-research/resume")
+async def resume_market_research(body: MarketResearchResumeRequest):
+    """验证码通过后，恢复市场调研抓取。"""
+    try:
+        from market_research import build_market_analysis, serialize_market_item
+        from utils.item_search import resume_market_research_session
+
+        sort_value = body.sort if body.sort in {"price_asc", "price_desc", "want_desc", "latest"} else "price_asc"
+
+        result = await resume_market_research_session(
+            session_id=body.session_id,
+            cookie_id=body.cookie_id,
+            keyword=body.keyword,
+            max_pages=body.max_pages,
+        )
+
+        if result.get("captcha_required"):
+            return {
+                "ok": True,
+                "keyword": body.keyword,
+                "cookie_id": body.cookie_id,
+                "items": [],
+                "summary": {},
+                "raw_count": 0,
+                "deduped_count": 0,
+                "filtered_count": 0,
+                "captcha_required": True,
+                "error": result.get("error") or "请先在本机浏览器完成验证码",
+                "captcha_info": result.get("captcha_info", {}),
+            }
+
+        if result.get("error"):
+            return {"ok": False, "error": result["error"]}
+
+        analysis = build_market_analysis(
+            result.get("items", []),
+            include_terms=body.include_terms,
+            exclude_terms=body.exclude_terms,
+            min_price=body.min_price,
+            max_price=body.max_price,
+            sort_by=sort_value,
+        )
+
+        items = [serialize_market_item(item) for item in analysis["items"]]
+        return {
+            "ok": True,
+            "keyword": body.keyword,
+            "cookie_id": body.cookie_id,
+            "items": items,
+            "summary": analysis["summary"],
+            "raw_count": analysis["raw_count"],
+            "deduped_count": analysis["deduped_count"],
+            "filtered_count": analysis["filtered_count"],
+            "source": result.get("source"),
+            "is_real_data": result.get("is_real_data", False),
+            "sort": sort_value,
+        }
+    except Exception as e:
+        logger.error(f"[Bridge] 恢复市场调研失败: {e}")
         import traceback
         logger.error(f"[Bridge] 错误堆栈:\n{traceback.format_exc()}")
         return {"ok": False, "error": str(e)}

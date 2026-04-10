@@ -3,6 +3,17 @@
 .gitignore
 .gitattributes
 
+# 本地环境与缓存
+.venv/
+.venv312/
+venv/
+browser_data/
+frontend_backup/
+openclaw-plugin/node_modules/
+.claude/
+.spec-workflow/
+.DS_Store
+
 # Python相关
 __pycache__/
 *.py[cod]
@@ -228,6 +239,9 @@ xianyu_data_backup_*.db
 *.db-wal
 *.db-shm
 realtime.log
+run.log
+run312.log
+service.log
 
 # 用户上传的文件（运行时挂载）
 static/uploads/*
@@ -236,6 +250,7 @@ static/uploads/*
 # 轨迹历史数据
 trajectory_history/*.json
 trajectory_history/*.trajectory
+trajectory_history/
 
 # Python编译缓存（补充）
 __pycache__/

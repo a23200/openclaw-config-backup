@@ -12,8 +12,8 @@ Before doing anything else:
 
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
-3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
+
+(Note: Memory is now fully automated via LanceDB Pro. No need to read markdown memory files during startup.)
 
 Don't ask permission. Just do it.
 
@@ -182,22 +182,13 @@ You are free to edit `HEARTBEAT.md` with a short checklist or reminders. Keep it
 
 **Proactive work you can do without asking:**
 
-- Read and organize memory files
 - Check on projects (git status, etc.)
 - Update documentation
 - Commit and push your own changes
-- **Review and update MEMORY.md** (see below)
 
-### 🔄 Memory Maintenance (During Heartbeats)
+### 🔄 Proactive Operations (During Heartbeats)
 
-Periodically (every few days), use a heartbeat to:
-
-1. Read through recent `memory/YYYY-MM-DD.md` files
-2. Identify significant events, lessons, or insights worth keeping long-term
-3. Update `MEMORY.md` with distilled learnings
-4. Remove outdated info from MEMORY.md that's no longer relevant
-
-Think of it like a human reviewing their journal and updating their mental model. Daily files are raw notes; MEMORY.md is curated wisdom.
+Your memory system (memory-lancedb-pro) is fully automated. You do NOT need to perform manual text-file memory maintenance during heartbeats.
 
 The goal: Be helpful without being annoying. Check in a few times a day, do useful background work, but respect quiet time.
 

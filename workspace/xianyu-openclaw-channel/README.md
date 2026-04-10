@@ -18,6 +18,12 @@
 - 🔍 **商品搜索** — 爬取闲鱼商品信息，市场调研
 - 🔒 **Bridge 模式** — TypeScript 插件通过 HTTP/SSE 桥接 Python 闲鱼服务，安全隔离
 
+## 📝 本地运行记忆
+
+- 今日已验证可行的验证码方案记录：`TODAY_LOCAL_BROWSER_CAPTCHA_MEMORY_2026-04-09.md`
+- 长期经验沉淀：`.learnings/LEARNINGS.md`
+- 当前市场调研验证码方案：**接管本机正在运行的 Chrome，新开标签页人工过验证，然后自动继续抓取**
+
 ## 🏗️ 架构
 
 ```

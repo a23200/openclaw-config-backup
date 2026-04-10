@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 import asyncio
 import os
+import time
 from loguru import logger
 
 from db_manager import db_manager
@@ -87,6 +88,7 @@ async def _start_search_captcha_session(session_id: str, cookie_id: str, keyword
     await asyncio.sleep(5)
 
     session_info = await captcha_controller.create_session(session_id, page)
+    captcha_controller.active_sessions[session_id]['owns_browser'] = True
     captcha_controller.active_sessions[session_id]['playwright'] = playwright
     captcha_controller.active_sessions[session_id]['browser'] = browser
     captcha_controller.active_sessions[session_id]['context'] = context
@@ -110,14 +112,49 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
     captcha_controller.websocket_connections[session_id] = websocket
     
     try:
+        async def finalize_drag_result(log_label: str):
+            await asyncio.sleep(0.8)
+            completed = await captcha_controller.check_completion(session_id)
+
+            if completed:
+                await websocket.send_json({
+                    'type': 'completed',
+                    'message': '验证成功！'
+                })
+                logger.success(f"✅ {log_label}: {session_id}")
+                return True
+
+            failed = await captcha_controller.check_failure(session_id)
+            if failed:
+                await websocket.send_json({
+                    'type': 'failed',
+                    'message': '验证失败，请重试',
+                })
+
+            session_payload = await captcha_controller.get_session_payload(
+                session_id,
+                refresh_screenshot=True,
+                refresh_geometry=True,
+                quality=70,
+            )
+            if session_payload and session_payload.get('screenshot'):
+                await websocket.send_json({
+                    'type': 'screenshot_update',
+                    **session_payload
+                })
+
+            return False
+
         # 发送初始会话信息
         if session_id in captcha_controller.active_sessions:
-            session_data = captcha_controller.active_sessions[session_id]
+            session_payload = await captcha_controller.get_session_payload(
+                session_id,
+                refresh_screenshot=True,
+                refresh_geometry=True,
+            )
             await websocket.send_json({
                 'type': 'session_info',
-                'screenshot': session_data['screenshot'],
-                'captcha_info': session_data['captcha_info'],
-                'viewport': session_data['viewport']
+                **(session_payload or {})
             })
             
             # 不启动自动刷新，改为只在操作时更新（极速优化）
@@ -127,6 +164,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
         else:
             await websocket.send_json({
                 'type': 'error',
+                'code': 'session_not_found',
                 'message': '会话不存在'
             })
             await websocket.close()
@@ -170,24 +208,110 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                             break
                         else:
                             # 更新截图显示验证结果
-                            screenshot = await captcha_controller.update_screenshot(session_id)
-                            if screenshot:
+                            session_payload = await captcha_controller.get_session_payload(
+                                session_id,
+                                refresh_screenshot=True,
+                                refresh_geometry=True,
+                            )
+                            if session_payload and session_payload.get('screenshot'):
                                 await websocket.send_json({
                                     'type': 'screenshot_update',
-                                    'screenshot': screenshot
+                                    **session_payload
                                 })
                     else:
                         # 按下或移动时，实时更新截图（截取整个验证码容器）
                         if event_type in ['down', 'move']:
                             # 截取整个验证码容器，降低质量换取速度
-                            screenshot = await captcha_controller.update_screenshot(session_id, quality=30)
-                            if screenshot:
+                            session_payload = await captcha_controller.get_session_payload(
+                                session_id,
+                                refresh_screenshot=True,
+                                quality=40,
+                            )
+                            if session_payload and session_payload.get('screenshot'):
                                 await websocket.send_json({
                                     'type': 'screenshot_update',
-                                    'screenshot': screenshot
+                                    **session_payload
                                 })
+
+            elif msg_type == 'drag_event':
+                phase = data.get('phase')
+                ratio = data.get('ratio', 0)
+                session = captcha_controller.active_sessions.get(session_id)
+                drag_preview_state = session.setdefault('drag_preview_state', {}) if session else {}
+
+                success = await captcha_controller.handle_drag_event(
+                    session_id, phase, ratio
+                )
+
+                if not success and session_id not in captcha_controller.active_sessions:
+                    await websocket.send_json({
+                        'type': 'error',
+                        'code': 'session_not_found',
+                        'message': '会话不存在'
+                    })
+                    await websocket.close()
+                    break
+
+                if success:
+                    if phase == 'end':
+                        drag_preview_state.clear()
+                        done = await finalize_drag_result("虚拟滑条验证完成")
+                        if done:
+                            break
+
+                    elif phase in {'start', 'move'}:
+                        should_push_preview = phase == 'start'
+
+                        if phase == 'start':
+                            drag_preview_state['last_preview_at'] = time.monotonic()
+                        else:
+                            now = time.monotonic()
+                            last_preview_at = drag_preview_state.get('last_preview_at', 0.0)
+                            if now - last_preview_at >= 0.18:
+                                should_push_preview = True
+                                drag_preview_state['last_preview_at'] = now
+
+                        if should_push_preview:
+                            session_payload = await captcha_controller.get_session_payload(
+                                session_id,
+                                refresh_screenshot=True,
+                                refresh_geometry=(phase == 'start'),
+                                quality=38,
+                            )
+                            if session_payload and session_payload.get('screenshot'):
+                                await websocket.send_json({
+                                    'type': 'screenshot_update',
+                                    **session_payload
+                                })
+
+            elif msg_type == 'assist_submit':
+                ratio = data.get('ratio')
+                success = await captcha_controller.assist_submit(session_id, ratio=ratio)
+
+                if not success and session_id not in captcha_controller.active_sessions:
+                    await websocket.send_json({
+                        'type': 'error',
+                        'code': 'session_not_found',
+                        'message': '会话不存在'
+                    })
+                    await websocket.close()
+                    break
+
+                if success:
+                    done = await finalize_drag_result("历史成功辅助提交完成")
+                    if done:
+                        break
             
             elif msg_type == 'check_completion':
+                if session_id not in captcha_controller.active_sessions:
+                    await websocket.send_json({
+                        'type': 'error',
+                        'code': 'session_not_found',
+                        'message': '会话不存在'
+                    })
+                    await websocket.close()
+                    break
+
                 # 手动检查完成状态
                 completed = await captcha_controller.check_completion(session_id)
                 await websocket.send_json({
@@ -197,6 +321,28 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                 
                 if completed:
                     break
+
+            elif msg_type == 'refresh_session':
+                if session_id not in captcha_controller.active_sessions:
+                    await websocket.send_json({
+                        'type': 'error',
+                        'code': 'session_not_found',
+                        'message': '会话不存在'
+                    })
+                    await websocket.close()
+                    break
+
+                session_payload = await captcha_controller.get_session_payload(
+                    session_id,
+                    refresh_screenshot=True,
+                    refresh_geometry=True,
+                    quality=70,
+                )
+                if session_payload:
+                    await websocket.send_json({
+                        'type': 'screenshot_update',
+                        **session_payload
+                    })
             
             elif msg_type == 'ping':
                 # 心跳
@@ -253,11 +399,14 @@ async def start_search_session(body: SearchCaptchaStartRequest):
             keyword=body.keyword,
         )
 
+        import os
+        server_port = os.getenv('API_PORT') or os.getenv('SERVER_PORT', '18444')
+
         return {
             'ok': True,
             'captcha_required': True,
             'session_id': session_id,
-            'control_url': f'http://127.0.0.1:8080/api/captcha/control/{session_id}',
+            'control_url': f'http://127.0.0.1:{server_port}/api/captcha/control/{session_id}',
         }
     except Exception as e:
         logger.error(f"启动搜索验证码会话失败: {e}")
@@ -274,16 +423,12 @@ async def get_session_info(session_id: str):
     """获取指定会话的信息"""
     if session_id not in captcha_controller.active_sessions:
         raise HTTPException(status_code=404, detail="会话不存在")
-    
-    session_data = captcha_controller.active_sessions[session_id]
-    
-    return {
-        'session_id': session_id,
-        'screenshot': session_data['screenshot'],
-        'captcha_info': session_data['captcha_info'],
-        'viewport': session_data['viewport'],
-        'completed': session_data.get('completed', False)
-    }
+
+    return await captcha_controller.get_session_payload(
+        session_id,
+        refresh_screenshot=True,
+        refresh_geometry=True,
+    )
 
 
 @router.get("/screenshot/{session_id}")
@@ -348,14 +493,27 @@ async def get_captcha_status(session_id: str):
     用于前端轮询检查验证是否完成
     """
     try:
-        is_completed = captcha_controller.is_completed(session_id)
         session_exists = captcha_controller.session_exists(session_id)
+        is_completed = await captcha_controller.check_completion(session_id) if session_exists else False
+        session = captcha_controller.active_sessions.get(session_id) or {}
+        handoff_info = session.get('handoff_info') or {}
+        captured_items = session.get('captured_items') or []
+        current_url = None
+        page = session.get('page')
+        if page is not None:
+            try:
+                current_url = page.url
+            except Exception:
+                current_url = None
         
         return {
             "success": True,
             "completed": is_completed,
             "session_exists": session_exists,
-            "session_id": session_id
+            "session_id": session_id,
+            "captured_count": int(session.get('captured_count') or len(captured_items)),
+            "browser_hint": handoff_info.get('browser_hint'),
+            "current_url": current_url,
         }
     except Exception as e:
         logger.error(f"获取验证状态失败: {e}")

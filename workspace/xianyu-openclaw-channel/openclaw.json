@@ -353,11 +353,11 @@
   "channels": {
     "xianyu": {
       "enabled": true,
-      "apiUrl": "http://localhost:8080",
+      "apiUrl": "http://localhost:18444",
       "bridgeToken": "changeme",
       "accounts": {
         "2207836320265": {
-          "apiUrl": "http://localhost:8080",
+          "apiUrl": "http://localhost:18444",
           "bridgeToken": "changeme",
           "enabled": true
         }

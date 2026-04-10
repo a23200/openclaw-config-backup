@@ -1,0 +1,460 @@
+========= TOTAL RECORDS: 153 =========
+--- Record 1 ---
+[]
+我最喜欢喝冰美式。
+--- Record 2 ---
+[]
+升级记忆系统需要使用 LanceDB。
+--- Record 3 ---
+[]
+用户喜欢简洁、直接的沟通方式。
+--- Record 4 ---
+[]
+备份文件应该上传到 a23200/openclaw-config-backup 仓库。
+--- Record 5 ---
+[]
+- **[ERROR]** Daily backup to GitHub failed due to SSH key permission denied. The script could not clone the repository `git@github.com:a23200/openclaw-config-backup.git`.
+--- Record 6 ---
+[]
+- **[TODO]** Need to check the SSH key configuration for GitHub access.
+--- Record 7 ---
+[]
+- [ ] **Task:** Deploy an OpenClaw Skill to control an Elephant Robotics arm, incorporating vision and voice control.
+--- Record 8 ---
+[]
+- **Context:** Based on research from 2026-03-22, the plan is to use ROS 2 as a bridge for the arm. The user has added requirements for camera vision and voice commands.
+--- Record 9 ---
+[]
+- **Prerequisites:** User will provide the specific arm model and tech docs.
+--- Record 10 ---
+[]
+- **Components:**
+--- Record 11 ---
+[]
+- **Manipulation:** Create a new Skill to interface with the arm via ROS 2.
+--- Record 12 ---
+[]
+- **Vision:** Use the existing `camsnap` skill (or similar) to capture images from an external camera. The image will be analyzed by a vision model to provide context for the arm's actions.
+--- Record 13 ---
+[]
+- **Voice:** Use the existing `openai-whisper` skill to transcribe voice commands into text prompts for OpenClaw.
+--- Record 14 ---
+[]
+- **Goal:** Build an integrated system where the user can speak a command, the system "sees" the workspace with a camera, and the robotic arm executes the task.
+--- Record 15 ---
+[]
+- Successfully built a Python voice assistant (`voice_assistant_final.py` saved to workspace).
+--- Record 16 ---
+[]
+- Uses Whisper (base model) for Wake Word ("老弟") + VAD + Command Transcription.
+--- Record 17 ---
+[]
+- Uses `subprocess` and `openclaw system event` to bridge transcribed commands into the OpenClaw agent's context.
+--- Record 18 ---
+[]
+- **Ready for tomorrow:** Connect this working voice pipeline to the Elephant Robotics arm via ROS 2.
+--- Record 19 ---
+[]
+1. **视频质量提升**：优化 Veo 3.1 的 Prompt 生成逻辑，增加高清、电影级光影等提示词；检查 FFmpeg 合并时的码率（Bitrate）和分辨率设置，拒绝高糊画质。
+--- Record 20 ---
+[]
+2. **文案缺失Bug修复**：目前的 Playwright 自动发布脚本漏掉了“填写简介文案”的步骤。明天需要重构 `publish-video.mjs` 中的输入逻辑，确保 AI 生成的文案和 #话题 能够精准填入抖音的编辑框中。
+--- Record 21 ---
+[]
+老板已通过《赛博朋克演示视频》的质量验收。
+--- Record 22 ---
+[]
+1. **画质与渲染标准**：Veo 3.1 提示词必须附带电影级画质强化 (`cinematic lighting, 8k resolution, photorealistic, ultra-detailed`)。
+--- Record 23 ---
+[]
+2. **声音与字幕标准**：继续使用 `composite-video.js` 方案：采用高清男声（Edge TTS 晓晓/云希），配合自带透明黑底阴影的高级硬核字幕（`.srt`烧录）。
+--- Record 24 ---
+[]
+3. **内容**：明天实战时，将测试文案全部替换为“真实的每日AI科技前沿资讯”，生成完整版播报视频。
+--- Record 25 ---
+[]
+今天在测试 `all-auto-douyin-video` 技能时，踩了三个严重影响出片质量的坑，已全部修复并沉淀至 `SKILL.md`：
+--- Record 26 ---
+[]
+1. **画面被旁白截断（时长变短）**:
+--- Record 27 ---
+[]
+- **表现**: 原本10秒的生成视频画面，因为旁白只有5秒，最终成片被切成了5秒。
+--- Record 28 ---
+[]
+- **原因**: ffmpeg 混音滤镜 `amix` 默认或错误配置了 `duration=first`（以第一个输入——即短旁白——的时长为准）。
+--- Record 29 ---
+[]
+- **解决**: 修改 `run.py`，混音滤镜必须使用 `amix=inputs=2:duration=longest`，保证音频流跟底噪/BGM一样长。最后在音画合成 (`-map`) 时使用 `-shortest` 截断，确保成片时长严格等于视频画面的实际时长。
+--- Record 30 ---
+[]
+2. **旁白声音过于生硬**:
+--- Record 31 ---
+[]
+- **表现**: 默认的 TTS 音色有机器感。
+--- Record 32 ---
+[]
+- **解决**: 从普通的 `tts-1` / `alloy` 升级为 `tts-1-hd` / `nova`。Nova 是最适合短视频旁白的温暖自然女声。
+--- Record 33 ---
+[]
+3. **Whisper 本地识别在 macOS 上崩溃**:
+--- Record 34 ---
+[]
+- **表现**: 调用 `whisper` 命令行时，触发 `OMP: Error #15: Initializing libomp.dylib...` 致命报错直接闪退。这是由于多个 OpenMP 库冲突导致的。
+--- Record 35 ---
+[]
+- **解决**: 在 Python `subprocess.run` 调用 whisper 之前，必须在环境变量中注入 `KMP_DUPLICATE_LIB_OK=TRUE` 绕过该报错。并且使用 `--model base` 和 `--output_format srt` 直接生成同步字幕轨。
+--- Record 36 ---
+[]
+*以上教训已硬编码至脚本与技能文档中。*
+--- Record 37 ---
+[]
+- **初始任务**：用户提供一个语雀链接，要求学习并控制其中的硬件。
+--- Record 38 ---
+[]
+- **错误识别**：我基于链接URL中的型号`WT901C-485`，判断目标是一个IMU传感器，并围绕它展开了协议搜索。
+--- Record 39 ---
+[]
+- **用户纠正**：用户明确指出，他真实想控制的是文档**内容**里提到的“安思疆 Nuwa-HP60C”深度相机，而不是URL里的IMU。
+--- Record 40 ---
+[]
+- **核心问题**：
+--- Record 41 ---
+[]
+1. 最初的语雀文档仅为产品介绍，不含任何SDK或通信协议，无法用于开发。
+--- Record 42 ---
+[]
+2. 我尝试使用`curl`命令在DuckDuckGo上搜索正确的开发文档（无论是IMU还是后来的相机），但屡次被CAPTCHA（验证码）拦截，即使更换User-Agent也无效。
+--- Record 43 ---
+[]
+- **暴露的局限性**：我向用户解释了我没有内置的浏览器或专用搜索工具，依赖的`curl`方法很容易被反爬虫机制屏蔽。
+--- Record 44 ---
+[]
+- **解决方案**：在我的搜索能力被限制后，我向用户解释了控制硬件的几种方式（SDK > 协议文档 > 逆向工程），并请求他帮助搜索相机的SDK或协议文档。
+--- Record 45 ---
+[]
+- **当前状态**：正在等待用户提供搜索结果。
+--- Record 46 ---
+[]
+**教训**：处理用户提供的链接时，需同时关注URL和页面内容，并在意图不明确时进行澄清。当基础工具（如`curl`）被限制时，应及时向用户说明情况并请求协助，而不是反复无效尝试。
+--- Record 47 ---
+[]
+今天帮大哥调试闲鱼插件的 AI 自动回复功能，过程一波三折，最终定位了两个核心问题。
+--- Record 48 ---
+[]
+**第一个问题：测试脚本与 Web 界面数据不一致**
+--- Record 49 ---
+[]
+*   **现象**: 我写的 `test_api.py` 脚本始终报告“找不到启用的账号”，但用户截图显示 Web 管理后台的账号是“在线”状态。
+--- Record 50 ---
+[]
+*   **排查过程**:
+--- Record 51 ---
+[]
+1.  最初我怀疑是数据库字段名或数据结构理解错误，反复修改脚本的判断逻辑，但都失败了。
+--- Record 52 ---
+[]
+2.  最终通过阅读 `db_manager.py` 源码发现，数据库路径是通过 `os.getenv('DB_PATH', 'data/xianyu_data.db')` 决定的。
+--- Record 53 ---
+[]
+*   **根本原因**: Web 服务 (`Start.py`) 和我的测试脚本 (`test_api.py`) **在不同的工作目录下运行**，导致它们访问了两个不同的 `xianyu_data.db` 文件。Web 界面修改的是 A 文件，而我的脚本一直在读 B 文件。
+--- Record 54 ---
+[]
+*   **解决方案**: 在运行测试脚本前，先 `cd` 到与 `Start.py` 服务的相同工作目录 (`./xianyu-openclaw-channel/`)，确保双方操作的是同一个数据库。
+--- Record 55 ---
+[]
+**第二个问题：AI 自动回复不触发**
+--- Record 56 ---
+[]
+*   **现象**: 确认 API 连通性后，用户测试发现机器人还是不回复消息。
+--- Record 57 ---
+[]
+*   **排查过程**:
+--- Record 58 ---
+[]
+1.  我使用 `process poll` 命令持续监控正在运行的 `Start.py` 服务的实时日志。
+--- Record 59 ---
+[]
+2.  分析日志发现，程序在稳定运行（心跳、Cookie刷新等都正常），但**完全没有收到任何来自闲鱼的“新消息”事件**。
+--- Record 60 ---
+[]
+*   **根本原因**: 问题不在于 AI 逻辑或代码执行，而在于程序和闲鱼服务器之间的 WebSocket 连接没有正确推送消息。这可能是网络延迟、连接状态异常或闲鱼服务器本身的问题。
+--- Record 61 ---
+[]
+*   **解决方案**: **重启服务**。通过 `process kill` 和 `exec` 重启了 `Start.py` 进程，强制它与闲鱼服务器重建一个新的、干净的 WebSocket 连接，这是解决此类网络问题的标准有效方法。
+--- Record 62 ---
+[]
+**核心教训**:
+--- Record 63 ---
+[]
+1.  **情境（Context）至关重要**: 运行环境，特别是工作目录，对于依赖相对路径的程序是致命的。必须确保所有相关的进程和脚本在同一情境下工作。
+--- Record 64 ---
+[]
+2.  **日志是第一真相**: 在排查复杂问题时，必须信任并深入分析日志。从日志中可以清晰地看到程序的实际行为，而不是基于假设去猜测。
+--- Record 65 ---
+[]
+3.  **分段排查**: 将问题分解。先把“数据读写”的问题解决，再解决“消息收发”的问题。如果混在一起，会非常难以定位。
+--- Record 66 ---
+[]
+- **Objective**: Automate publishing an image-text post (`~/Desktop/10.png`) to Douyin.
+--- Record 67 ---
+[]
+- **Initial Approach**: Attempted using `agent-browser` directly. This failed due to several issues:
+--- Record 68 ---
+[]
+1.  Inability to programmatically trigger the OS file selection dialog.
+--- Record 69 ---
+[]
+2.  Incorrect command formatting for high-level natural language prompts.
+--- Record 70 ---
+[]
+3.  Conflicts with lingering headless browser processes locking the user profile.
+--- Record 71 ---
+[]
+- **Revised Approach**: At the user's direction, switched to leveraging the existing `douyin-creator-tools` skill, which is built on a more robust Playwright and Node.js foundation.
+--- Record 72 ---
+[]
+- **Debugging Journey**: The existing `publish-imagetext.mjs` script was not working correctly. The session involved a lengthy debugging process with significant user guidance:
+--- Record 73 ---
+[]
+1.  **File Path Error**: Corrected a `~` path expansion issue by using an absolute file path in the input JSON.
+--- Record 74 ---
+[]
+2.  **Hashtag Limit**: The user pointed out that Douyin only allows 5 hashtags; my generated caption had more. Corrected the input JSON.
+--- Record 75 ---
+[]
+3.  **UI Automation Flaw**: The most critical error was repeatedly failing to select a background music track. My script was waiting for a modal dialog to appear, but the actual UI opens a right-hand sidebar. The user provided multiple screenshots to correct my flawed understanding of the UI flow. This was a major failure on my part and a crucial learning experience.
+--- Record 76 ---
+[]
+- **Learning Logged**: Logged the key takeaway from the UI automation failure to `.learnings/LEARNINGS.md` (Ref: `LRN-20260319-001`), emphasizing the need to avoid assumptions about UI behavior and to rely on user-provided ground truth.
+--- Record 77 ---
+[]
+- **Final Status**: The final, corrected script (with precise selectors and waits based on user feedback) is currently running.
+--- Record 78 ---
+[]
+- **Moss MCP Connection Setup**: Successfully established a persistent MCP connection to the user's Moss agent (`wss://api.xiaozhi.me/mcp/`). This involved a lengthy debugging process:
+--- Record 79 ---
+[]
+- Initial attempts using `mcporter` failed due to WebSocket protocol incompatibility.
+--- Record 80 ---
+[]
+- Switched to the provided `mcp_pipe.py` script from the `mcp-calculator` GitHub repository.
+--- Record 81 ---
+[]
+- Resolved a series of errors:
+--- Record 82 ---
+[]
+- `ModuleNotFoundError: No module named 'dotenv'`: Fixed by creating a Python virtual environment and installing dependencies.
+--- Record 83 ---
+[]
+- `Argument must be a local Python script path`: Debugged by reading the script's source code and switching to a `mcp_config.json` based setup instead of command-line arguments.
+--- Record 84 ---
+[]
+- `[Errno 2] No such file or directory`: The core issue, which turned out to be a wrong filename (`server.py` instead of the actual `calculator.py`). This was discovered by running `ls -l`.
+--- Record 85 ---
+[]
+- `ModuleNotFoundError: No module named 'fastmcp'`: Fixed by installing the final required dependency.
+--- Record 86 ---
+[]
+- The final, stable connection is running as a background process (session ID `fast-summit`).
+--- Record 87 ---
+[]
+- **New Operational Directive**: The user instructed me to accept future commands from them via the Moss agent connection. I am to execute these commands and return simplified, concise answers back to Moss, which will then relay them to the user. I stored this new interaction model in long-term memory.
+--- Record 88 ---
+[]
+- 2026-03-30：排查 all-auto-douyin-video 失败根因，确认 Google Veo API 当前报 429 RESOURCE_EXHAUSTED，且已超过 spending cap；不是脚本主流程问题。
+--- Record 89 ---
+[]
+- 2026-03-30：确认 workspace 根目录 /Users/mac/.openclaw/workspace/.env.local 已有 OPENAI_API_KEY 和 GOOGLE_API_KEY，但 all-auto-douyin-video/run.py 仍默认读取技能目录下 googlek.env，造成新 key 不会自动生效；后续应统一优先读取 workspace/.env.local。
+--- Record 90 ---
+[]
+- 2026-03-30：统计本地 Veo 产物，workspace 下 segment 视频累计约 175 秒；存在多批 8KB 左右的异常空壳 mp4，以及至少 1 个 moov atom not found 的坏文件。
+--- Record 91 ---
+[]
+- 2026-03-30：尝试改走浏览器端 Google AI Studio / Flow 生成视频；已确认 AI Studio 中 Veo 3.1 fast 需要 paid API key，Flow 免费版首页可见但创作台入口/登录落地不稳定，后续可继续从 Flow 路线推进以规避 API 直连消耗。
+--- Record 92 ---
+[]
+- **Objective**: Create a skill to scrape post content (titles, authors, URLs, and eventually images/text) from Xiaohongshu's explore feed.
+--- Record 93 ---
+[]
+- **Initial Challenge & Solution**: The initial scraping attempts were blocked by Xiaohongshu's anti-bot security which flagged the server IP.
+--- Record 94 ---
+[]
+- **Learning**: Successfully bypassed this by using `agent-browser` with a persistent profile (`--profile`) that was primed by a one-time manual, headed login by the user. This is a critical technique for sites with robust bot detection.
+--- Record 95 ---
+[]
+- **URL Discovery Failure**: The primary goal of automatically discovering post URLs from the explore feed ultimately failed due to tooling limitations.
+--- Record 96 ---
+[]
+- **Method**: The `agent-browser snapshot` command could successfully capture a list of on-screen elements (titles, authors).
+--- Record 97 ---
+[]
+- **Root Cause of Failure**: The snapshot does not contain `href` attributes (URLs). All subsequent attempts to query the live browser for the `href` attribute of a captured element (`get attr href @ref`) failed reliably in any scripted context (Node.js or shell). This appears to be a bug or limitation in how `agent-browser` maintains session context for element references across commands.
+--- Record 98 ---
+[]
+- **Scripting Iteration & Bugs**: The attempt to create a robust script was fraught with errors, which served as valuable learning experiences.
+--- Record 99 ---
+[]
+- Incorrect session handling in Node.js.
+--- Record 100 ---
+[]
+- Multiple shell scripting bugs, including incorrect quoting (single vs. double), flawed loop logic for multi-line variables, and fragile text parsing.
+--- Record 101 ---
+[]
+- **Current Status & Pivot**:
+--- Record 102 ---
+[]
+- The skill, as it stands, can reliably produce a list of **titles and authors** from the explore page, but not their URLs.
+--- Record 103 ---
+[]
+- The user pivoted the task to providing a specific post URL manually for content extraction.
+--- Record 104 ---
+[]
+- The first attempt to navigate to the user-provided detail URL failed; the browser was redirected to the explore feed. This is the immediate problem to be solved next.
+--- Record 105 ---
+[]
+*   **坑：`send_coords` 多轴直线插补的畸变。** 试图让机械臂在保持高度的同时平移，或者全坐标下发时，老版本固件会发生严重的“掉高”（比如前伸时 Z 轴下坠 7 厘米）。底层 IK 解算极其不稳定。
+--- Record 106 ---
+[]
+*   **真理：`send_coord` 单轴绝对锁死。** 这是今天的最大收获！如果想绝对笔直下降（只改 Z），或者绝对原地旋转手腕（只改 Rx/Ry），必须调用 `send_coord(id, val, speed)`。它能物理死锁其他 5 个自由度，靠自身代偿完美走出一条直线或完成定点自转。
+--- Record 107 ---
+[]
+*   `id=3`: Z轴（控制垂直高度，如砸下去 `z_drop_30.py`）
+--- Record 108 ---
+[]
+*   `id=4`: Rx（控制横滚角，如手腕翻转 `rx_to_minus_10.py`）
+--- Record 109 ---
+[]
+*   `id=5`: Ry（控制俯仰/偏航，如 `ry_to_90.py`）
+--- Record 110 ---
+[]
+*   当机械臂像电线杆一样完全伸直（Z轴到达绝对顶峰 ~421mm）时，所有关节被拉伸到极限。
+--- Record 111 ---
+[]
+*   此时如果强制要求改变末端姿态（例如让 Rx 横滚 50 度），底层会因为没有关节弯曲余量而报错拒绝执行。
+--- Record 112 ---
+[]
+*   **破解方案：** “先蹲后转”。先将 Z 轴降低 100mm 左右，让肘部（J3）弯曲腾出物理空间，然后再执行极端的姿态翻滚指令 (`escape_singularity_and_roll.py`)。
+--- Record 113 ---
+[]
+*   如果不想碰坐标系，开发了 `teach_and_play.py`。
+--- Record 114 ---
+[]
+*   原理：发送放松指令断电变软 -> 人工摆姿势 -> 记录各关节角度帧 -> 一键通电按顺序安全回放。
+--- Record 115 ---
+[]
+*   放弃了盲目的开环坐标叠加。
+--- Record 116 ---
+[]
+*   测试了基于比例尺的降维打击方案：通过全自动平移拍三张照片（`auto_calibrate.py`）得出桌面像素比（1mm=1.5px），然后拍一张照片算出偏移像素，直接转换成毫米发送绝对坐标。
+--- Record 117 ---
+[]
+*   在新的会话中，结合视觉大模型 + 今天的单轴高精度控制，挑战真正的“看准了就垂直扎下去”实物抓取。
+--- Record 118 ---
+[]
+*   将控制脚本封装成更高级的 Skill，供全局调用。
+--- Record 119 ---
+[]
+- **背景**：为解决多任务下文件串台、相互覆盖的问题。
+--- Record 120 ---
+[]
+- **方案**：在 `workspace/agents/` 下建立完全独立的按角色分类目录（content, media, robotics, publishing, shared）。跨 Agent 文件交接只能在 `shared` 目录通过绝对路径进行。
+--- Record 121 ---
+[]
+- **调度**：通过 `sessions_spawn` 唤起子代理时，强制绑定 `cwd` 确保工作区隔离。
+--- Record 122 ---
+[]
+- **参考与位置**：学习 `TommyZihao/vlm_arm` 经验，在 `workspace/robot_vlm/` 新建了完全隔离的控制堆栈（附带 `.venv`）。
+--- Record 123 ---
+[]
+- **核心机制**：
+--- Record 124 ---
+[]
+1. LLM 充当 Planner，解析自然语言输出带 `back_zero`、`vlm_move` 等可用函数的 JSON 序列。
+--- Record 125 ---
+[]
+2. 视觉大模型（VLM）零样本找物体坐标，返回像素级目标边界框。
+--- Record 126 ---
+[]
+3. 极简两点线性插值标定（手眼映射），将像素直接转为机械臂平面物理坐标。
+--- Record 127 ---
+[]
+- **关键硬件细节与偏置处理**：
+--- Record 128 ---
+[]
+- 真实环境为眼在手上（Eye-in-hand），摄像头与末端执行器存在 5cm 横向物理偏置。
+--- Record 129 ---
+[]
+- **策略**：每次拍摄前强制回到旧版的固定 `HOME_ANGLES` `[1.14, 0.43, -4.83, -76.02, 7.55, 133.24]`。通过固定拍摄高度和位姿，把 5cm 的物理距离变成一个“像素常量”，在后续双点标定时直接被 `numpy.interp()` 线性插值吸收掉，完美绕开复杂的数学坐标系换算。
+--- Record 130 ---
+[]
+- **踩坑**：测试发现机械臂坐标指反。原因为 `numpy.interp` 要求基准点数组必须是严格递增的，当遇到机械臂/相机坐标系存在镜像或反向映射时，插值会出错导致方向跑偏。
+--- Record 131 ---
+[]
+- **修复**：在 `robot_vlm/executor.py` 的 `eye2hand` 方法中废弃了 `numpy.interp`，改写为底层的“基础线性比例映射公式”：计算 `ratio` 后利用 `p1 + ratio * (p2 - p1)` 直接求解。此方法自动免疫轴系反向问题。
+--- Record 132 ---
+[]
+- **下一步**：当前 config 中的参考坐标仍是硬编码的 mock 数据，已通知用户利用桌面实物（鼠标、烟盒）跑 `calibrate_helper.py` 获取真实的两点物理与像素坐标，准备完成最终校准。
+--- Record 133 ---
+[]
+- **二维标定升级为三点仿射变换**: 简单的两点线性插值（甚至比例映射）无法解决摄像机倾斜安装带来的 XY 轴耦合偏差（即物理上一条直线，照片里是斜线）。引入了 OpenCV 的 `cv2.getAffineTransform`，通过 3 个非共线点彻底解决旋转、镜像和缩放畸变。
+--- Record 134 ---
+[]
+- **VLM 零样本视觉（Vision Grounding）调优**: VLM 经常因为缺乏绝对尺度概念而返回归一化坐标或“张冠李戴”（把黑色鼠标当成黑色烟盒）。
+--- Record 135 ---
+[]
+- **解决方案**: 在系统 Prompt 中明确告知输入的图片分辨率（例如 1920x1080），并强制约束 X、Y 的取值范围，严禁使用归一化坐标。这能极大提升 VLM 目标检测的空间准确率。
+--- Record 136 ---
+[]
+- **机械臂软件保护机制**: 加入了工作台空间限制 (`x_min, x_max, y_min, y_max`)，遇到目标像素换算出界的情况，底层 `safety.py` 会静默拦截并强制机械臂回 Home，防止冲撞损坏。
+--- Record 137 ---
+[]
+- **关键结论**: 只要 `Home` 姿态一变，原有 `calibration_3pt.json` 基本立即失效。因为摄像头高度、旋转、视场都变了，必须重新拍标定图并重做三点映射。
+--- Record 138 ---
+[]
+- **关键教训**: 不能依赖 VLM 去“猜”标定图里的物体中心像素来做高精度手眼标定。VLM 适合做零样本目标定位，但不适合承担毫米级标定点采样；其像素误差会直接把仿射矩阵带偏，导致机械臂方向整体错误。
+--- Record 139 ---
+[]
+- **正确流程**: 新 Home -> `calibrate_helper_v2.py` 记录 3 个物理点 -> `click_calib.py` 人工点击同一接触点的像素坐标 -> 固化 `calibration_3pt.json` -> 再做 VLM 指向测试。
+--- Record 140 ---
+[]
+- **已落地工具**: 新增 `/Users/mac/.openclaw/workspace/robot_vlm/click_calib.py`，用于在标定图上手工点选烟盒/鼠标/打火机的精确像素坐标，避免 AI 估点误差。
+--- Record 141 ---
+[]
+- **配置收敛**: `executor.py` 与 `calibrate_helper_v2.py` 已改为自动读取 `/Users/mac/.openclaw/workspace/home_pos.json` 中的 `home_angles`，不再依赖硬编码 Home 角度。
+--- Record 142 ---
+[]
+- **配置读取**: `/Users/mac/.openclaw/workspace/robot_vlm/utils.py` 已支持默认从 `/Users/mac/.openclaw/workspace/.env.local` 自动读取 `OPENAI_API_KEY` / `GOOGLE_API_KEY`，以后无需重复手动配置。
+--- Record 143 ---
+[]
+- **Word/DOCX Formatting**: Used macOS native `textutil` to convert styled HTML (with CSS and emojis) directly into `.docx` format to satisfy the user's request for high-quality document structuring while strictly maintaining the original file extension.
+--- Record 144 ---
+[]
+- **Excel Data Cleaning**: Parsed a messy, single-column data dump from an Excel file, structured it into logical columns (Category, Item, Value, Unit, Notes) using a custom Node.js script with the `xlsx` library, and outputted a clean, styled `.xlsx` file.
+--- Record 145 ---
+[]
+- **Purpose**: A fully automated, two-step workflow to generate AI videos and publish them to Douyin.
+--- Record 146 ---
+[]
+- **Video Generation (`generate-video.js`)**: Implemented Google's Veo 3.1 API (`generativelanguage.googleapis.com`) using the `predictLongRunning` endpoint. Set up automatic polling and `.mp4` downloading.
+--- Record 147 ---
+[]
+- **CRITICAL AUTOMATION FIXES (Douyin Playwright UI Issues)**:
+--- Record 148 ---
+[]
+1.  **The "Enter" Key Trap**: Simulating the `Enter` key inside Douyin's `.zone-container` editor causes the page to abruptly save/exit. **Solution**: Strictly use `locator.fill()` for text input to bypass keyboard event listeners.
+--- Record 149 ---
+[]
+2.  **The Double-Popup Cover Trap**: Setting a 3:4 vertical cover triggers two modals in sequence.
+--- Record 150 ---
+[]
+- First, the main cropping popup (requires clicking "完成" or "确定").
+--- Record 151 ---
+[]
+- Second, a malicious promotional popup pushing horizontal covers. **The script MUST locate and click "暂不设置" (Skip)**, otherwise the entire screen is blocked and publishing fails.
+--- Record 152 ---
+[]
+3.  **Unclickable Elements**: When standard locators fail on Douyin's nested `div` structures, using `.boundingBox()` and clicking relative coordinates (e.g., `box.y - 60` above the text) is a highly effective fallback.
+--- Record 153 ---
+[]
+4.  **Process Safety**: Never use global `pkill -f "Google Chrome"` to clean up Playwright zombies, as it forcibly closes the user's personal browser. Always target the specific Node script process instead.

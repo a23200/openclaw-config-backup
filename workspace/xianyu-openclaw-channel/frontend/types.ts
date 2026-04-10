@@ -118,6 +118,8 @@ export interface Item {
   item_price?: string;
   item_image?: string; // Inferred from common usage, though not explicitly in list model sometimes
   item_category?: string;
+  ai_knowledge?: string;
+  is_multi_qty_ship?: boolean;
   is_multi_spec?: number | boolean;
   created_at?: string;
 }
@@ -194,4 +196,69 @@ export interface DefaultReply {
   reply_content: string;
   reply_once: boolean;
   reply_image_url?: string;
+}
+
+export interface MarketResearchItem {
+  item_id: string;
+  title: string;
+  price_text: string;
+  price_value: number | null;
+  price_display: string;
+  condition: string;
+  defects: string[];
+  defects_text: string;
+  storage: string;
+  battery_health: number | null;
+  color: string;
+  want_count: number;
+  area: string;
+  seller_name: string;
+  publish_time: string;
+  item_url: string;
+  tags_text: string;
+}
+
+export interface MarketResearchSummary {
+  count: number;
+  priced_count: number;
+  min_price: number | null;
+  p25_price: number | null;
+  median_price: number | null;
+  avg_price: number | null;
+  p75_price: number | null;
+  max_price: number | null;
+  condition_breakdown: Array<[string, number]>;
+  area_breakdown: Array<[string, number]>;
+  storage_breakdown: Array<{
+    storage: string;
+    count: number;
+    median_price: number;
+    avg_price: number;
+  }>;
+}
+
+export interface MarketResearchResponse {
+  ok: boolean;
+  keyword: string;
+  cookie_id: string;
+  items: MarketResearchItem[];
+  summary: MarketResearchSummary;
+  raw_count: number;
+  deduped_count: number;
+  filtered_count: number;
+  source?: string;
+  is_real_data?: boolean;
+  sort?: string;
+  captcha_required?: boolean;
+  error?: string;
+  captcha_info?: {
+    session_id?: string;
+    mode?: string;
+    control_url?: string;
+    base_control_url?: string;
+    status_url?: string;
+    resume_url?: string;
+    browser_name?: string;
+    browser_hint?: string;
+  };
 }

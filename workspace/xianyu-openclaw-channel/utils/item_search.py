@@ -9,6 +9,9 @@ import json
 import time
 import sys
 import os
+import urllib.request
+from pathlib import Path
+from urllib.parse import urlparse
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from loguru import logger
@@ -51,6 +54,16 @@ class XianyuSearcher:
         self.user_id = "default"  # 默认用户ID
         self.preferred_cookie_id = None
         self.last_captcha_info = None
+        self.captcha_mode = "remote_control"
+        self.launched_browser_label = "Chromium"
+        self.current_search_request: Dict[str, Any] = {}
+        self.external_browser = False
+        self.close_external_page_on_close = True
+        self.local_browser_cdp_url = (
+            os.getenv("LOCAL_BROWSER_CDP_URL")
+            or os.getenv("EXISTING_BROWSER_CDP_URL")
+            or "http://127.0.0.1:9222"
+        )
 
     async def _handle_scratch_captcha_manual(self, page, max_retries=3, wait_for_completion=True):
         """人工处理刮刮乐滑块（远程控制 + 截图备份）
@@ -69,9 +82,94 @@ class XianyuSearcher:
         # 获取会话ID
         session_id = str(getattr(self, 'user_id', None) or getattr(self, 'preferred_cookie_id', None) or 'default')
         
-        # 【新方案】启用远程控制
+        # 【新方案】启用远程控制 / 本机浏览器接管
+        captcha_mode = getattr(self, 'captcha_mode', 'remote_control')
         use_remote_control = getattr(self, 'use_remote_control', True)
-        
+        if captcha_mode == 'local_browser':
+            use_remote_control = False
+
+        try:
+            import os
+            local_ip = os.getenv('SERVER_HOST') or os.getenv('PUBLIC_IP') or "127.0.0.1"
+            server_port = os.getenv('API_PORT') or os.getenv('SERVER_PORT', '18444')
+        except Exception:
+            local_ip = "127.0.0.1"
+            server_port = "18444"
+
+        if captcha_mode == 'local_browser':
+            try:
+                from utils.captcha_remote_control import captcha_controller
+
+                logger.warning(f"🖥️ 启动本机浏览器接管会话: {session_id}")
+                await captcha_controller.create_session(session_id, page)
+
+                local_browser_status_url = f"http://{local_ip}:{server_port}/api/captcha/status/{session_id}"
+                local_resume_url = f"http://{local_ip}:{server_port}/api/bridge/market-research/resume"
+
+                browser_session = captcha_controller.active_sessions.get(session_id)
+                if browser_session is not None:
+                    browser_session['owns_browser'] = True
+                    browser_session['playwright'] = getattr(self, 'playwright', None)
+                    browser_session['browser'] = getattr(self, 'browser', None)
+                    browser_session['context'] = getattr(self, 'context', None)
+                    browser_session['page'] = page
+                    browser_session['external_browser'] = getattr(self, 'external_browser', False)
+                    browser_session['close_owned_page'] = getattr(self, 'close_external_page_on_close', True)
+                    browser_session['handoff_mode'] = 'local_browser'
+                    browser_session['resume_request'] = {
+                        **(self.current_search_request or {}),
+                        'cookie_id': str(getattr(self, 'preferred_cookie_id', None) or session_id),
+                    }
+
+                try:
+                    await page.bring_to_front()
+                except Exception:
+                    pass
+
+                self.last_captcha_info = {
+                    'mode': 'local_browser',
+                    'session_id': session_id,
+                    'status_url': local_browser_status_url,
+                    'resume_url': local_resume_url,
+                    'browser_name': getattr(self, 'launched_browser_label', '浏览器'),
+                    'browser_hint': f"已在你当前运行的 {getattr(self, 'launched_browser_label', '浏览器')} 新开标签页，请直接手动完成验证",
+                }
+
+                if browser_session is not None:
+                    browser_session['handoff_info'] = self.last_captcha_info
+
+                logger.warning("=" * 60)
+                logger.warning("🖥️ 已切换到本机浏览器人工接管模式")
+                logger.warning(f"👉 请直接在 {getattr(self, 'launched_browser_label', '浏览器')} 窗口完成验证码")
+                logger.warning(f"📡 状态检查: {local_browser_status_url}")
+                logger.warning("=" * 60)
+
+                if not wait_for_completion:
+                    self.page = None
+                    self.context = None
+                    self.browser = None
+                    self.playwright = None
+                    logger.warning("⚠️ 已转交本机浏览器处理，立即返回给前端继续等待")
+                    return 'need_captcha'
+
+                logger.warning("⏳ 等待用户在本机浏览器完成验证...")
+                max_wait_time = 180
+                check_interval = 1
+                elapsed_time = 0
+                while elapsed_time < max_wait_time:
+                    await asyncio.sleep(check_interval)
+                    elapsed_time += check_interval
+                    if captcha_controller.is_completed(session_id):
+                        logger.success("✅ 本机浏览器验证成功！")
+                        return True
+                logger.error(f"❌ 本机浏览器验证超时（{max_wait_time}秒）")
+                return False
+
+            except Exception as e:
+                logger.error(f"本机浏览器接管失败: {e}")
+                logger.warning("⚠️ 回退到远程控制模式")
+                use_remote_control = True
+
         if use_remote_control:
             try:
                 from utils.captcha_remote_control import captcha_controller
@@ -81,13 +179,6 @@ class XianyuSearcher:
                 session_info = await captcha_controller.create_session(session_id, page)
                 
                 # 获取控制页面URL
-                import socket
-                import os
-                
-                # 本地协作场景下优先使用 127.0.0.1，避免错误探测出不可访问的内网地址。
-                local_ip = os.getenv('SERVER_HOST') or os.getenv('PUBLIC_IP') or "127.0.0.1"
-                
-                server_port = os.getenv('SERVER_PORT', '8080')
                 control_url = f"http://{local_ip}:{server_port}/api/captcha/control/{session_id}"
                 
                 logger.warning("=" * 60)
@@ -100,6 +191,7 @@ class XianyuSearcher:
                 logger.warning("=" * 60)
 
                 self.last_captcha_info = {
+                    'mode': 'remote_control',
                     'session_id': session_id,
                     'control_url': control_url,
                     'base_control_url': f"http://{local_ip}:{server_port}/api/captcha/control",
@@ -107,6 +199,19 @@ class XianyuSearcher:
 
                 # 如果不等待完成，立即返回特殊值给调用者
                 if not wait_for_completion:
+                    remote_session = captcha_controller.active_sessions.get(session_id)
+                    if remote_session is not None:
+                        remote_session['owns_browser'] = True
+                        remote_session['playwright'] = getattr(self, 'playwright', None)
+                        remote_session['browser'] = getattr(self, 'browser', None)
+                        remote_session['context'] = getattr(self, 'context', None)
+                        remote_session['page'] = page
+
+                    self.page = None
+                    self.context = None
+                    self.browser = None
+                    self.playwright = None
+
                     logger.warning("⚠️ 不等待验证完成，立即返回给前端处理")
                     return 'need_captcha'  # 返回特殊值，表示需要前端处理
                 
@@ -711,31 +816,170 @@ class XianyuSearcher:
                     '--disable-gpu',
                 ])
 
-            logger.info("启动 Chromium（普通上下文模式）...")
-            self.browser = await self.playwright.chromium.launch(
-                headless=True,
-                args=browser_args,
-            )
+            use_local_browser = getattr(self, 'captcha_mode', 'remote_control') == 'local_browser'
+            if use_local_browser:
+                resolved_cdp_url = await self._resolve_local_browser_cdp_url()
+                logger.info(f"尝试接管本机正在运行的浏览器: {resolved_cdp_url}")
+                try:
+                    self.browser = await self.playwright.chromium.connect_over_cdp(resolved_cdp_url)
+                    if not self.browser.contexts:
+                        raise RuntimeError("未获取到本机浏览器默认上下文")
 
-            logger.info("创建浏览器上下文...")
-            self.context = await self.browser.new_context(
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                viewport={'width': 1280, 'height': 720},
-                locale='zh-CN',
-            )
+                    self.context = self.browser.contexts[0]
+                    self.context.set_default_timeout(30000)
+                    self.page = await self.context.new_page()
+                    self.external_browser = True
+                    self.close_external_page_on_close = True
+                    self.launched_browser_label = "Google Chrome"
+                    logger.info("✅ 已连接到本机正在运行的 Google Chrome，并新开标签页")
+                except Exception as connect_error:
+                    try:
+                        if self.playwright:
+                            await self.playwright.stop()
+                    except Exception:
+                        pass
+                    self.playwright = None
+                    self.browser = None
+                    self.context = None
+                    self.page = None
+                    self.external_browser = False
+                    raise Exception(
+                        f"无法接管本机运行中的浏览器（{resolved_cdp_url}）：{connect_error}。"
+                        f"请确认本机 Chrome 已开启远程调试端口。"
+                    )
+            else:
+                logger.info("启动 Chromium（普通上下文模式）...")
+                self.browser = await self.playwright.chromium.launch(
+                    headless=True,
+                    args=browser_args,
+                )
+                self.launched_browser_label = "Chromium"
+                self.external_browser = False
+                logger.info("创建浏览器上下文...")
+                self.context = await self.browser.new_context(
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                    viewport={'width': 1280, 'height': 720},
+                    locale='zh-CN',
+                )
 
-            self.context.set_default_timeout(30000)
+                self.context.set_default_timeout(30000)
 
-            logger.info("浏览器启动成功")
+                logger.info("浏览器启动成功")
 
-            logger.info("创建页面...")
-            self.page = await self.context.new_page()
+                logger.info("创建页面...")
+                self.page = await self.context.new_page()
 
             logger.info("浏览器初始化完成")
+
+    async def _resolve_local_browser_cdp_url(self) -> str:
+        """解析本机浏览器可用的 CDP 地址，优先转换成 ws://...。"""
+        base_url = str(self.local_browser_cdp_url or "").strip()
+        if not base_url:
+            return "http://127.0.0.1:9222"
+
+        if base_url.startswith(("ws://", "wss://")):
+            return base_url
+
+        parsed_base = urlparse(base_url if "://" in base_url else f"http://{base_url}")
+        base_host = parsed_base.hostname or "127.0.0.1"
+        base_port = parsed_base.port
+
+        active_port_candidates = []
+        explicit_profile_dir = os.getenv("LOCAL_BROWSER_USER_DATA_DIR") or os.getenv("CHROME_USER_DATA_DIR")
+        if explicit_profile_dir:
+            active_port_candidates.append(Path(explicit_profile_dir) / "DevToolsActivePort")
+
+        home_dir = Path.home()
+        active_port_candidates.extend([
+            home_dir / "Library/Application Support/Google/Chrome/DevToolsActivePort",
+            home_dir / "Library/Application Support/Google/Chrome Beta/DevToolsActivePort",
+            home_dir / "Library/Application Support/Chromium/DevToolsActivePort",
+        ])
+
+        for active_port_file in active_port_candidates:
+            try:
+                if not active_port_file.exists():
+                    continue
+
+                lines = [
+                    line.strip()
+                    for line in active_port_file.read_text(encoding="utf-8").splitlines()
+                    if line.strip()
+                ]
+                if len(lines) < 2:
+                    continue
+
+                discovered_port = int(lines[0])
+                discovered_path = lines[1]
+                if not discovered_path.startswith("/"):
+                    discovered_path = f"/{discovered_path}"
+
+                if base_port and discovered_port != base_port:
+                    logger.debug(
+                        f"DevToolsActivePort 端口不匹配，忽略 {active_port_file}: {discovered_port} != {base_port}"
+                    )
+                    continue
+
+                websocket_url = f"ws://{base_host}:{discovered_port}{discovered_path}"
+                logger.info(f"已通过 DevToolsActivePort 解析本机浏览器 CDP 地址: {websocket_url}")
+                return websocket_url
+            except Exception as active_port_error:
+                logger.debug(f"读取 DevToolsActivePort 失败 {active_port_file}: {active_port_error}")
+
+        normalized = base_url.rstrip("/")
+        candidate_endpoints = [
+            f"{normalized}/json/version",
+            f"{normalized}/json",
+            f"{normalized}/json/list",
+        ]
+
+        async def fetch_json(endpoint: str):
+            def _load():
+                with urllib.request.urlopen(endpoint, timeout=3) as response:
+                    return json.loads(response.read().decode("utf-8"))
+
+            return await asyncio.to_thread(_load)
+
+        for endpoint in candidate_endpoints:
+            try:
+                payload = await fetch_json(endpoint)
+                if isinstance(payload, dict):
+                    websocket_url = payload.get("webSocketDebuggerUrl")
+                    if websocket_url:
+                        logger.info(f"已解析本机浏览器 CDP 地址: {websocket_url}")
+                        return websocket_url
+                elif isinstance(payload, list):
+                    for item in payload:
+                        websocket_url = (item or {}).get("webSocketDebuggerUrl")
+                        if websocket_url:
+                            logger.info(f"已从标签页列表解析本机浏览器 CDP 地址: {websocket_url}")
+                            return websocket_url
+            except Exception as resolve_error:
+                logger.debug(f"解析本机浏览器 CDP 地址失败 {endpoint}: {resolve_error}")
+
+        logger.warning(f"未能提前解析 CDP ws 地址，回退使用原始地址: {base_url}")
+        return base_url
 
     async def close_browser(self):
         """关闭浏览器。"""
         try:
+            if self.external_browser:
+                if self.page and self.close_external_page_on_close:
+                    try:
+                        if not self.page.is_closed():
+                            await self.page.close()
+                    except Exception as page_error:
+                        logger.warning(f"关闭本机浏览器标签页时出错: {page_error}")
+                self.page = None
+                self.context = None
+                self.browser = None
+                if self.playwright:
+                    await self.playwright.stop()
+                    self.playwright = None
+                self.external_browser = False
+                logger.debug("已断开本机运行浏览器连接")
+                return
+
             if self.page:
                 await self.page.close()
                 self.page = None
@@ -748,9 +992,271 @@ class XianyuSearcher:
             if self.playwright:
                 await self.playwright.stop()
                 self.playwright = None
+            self.external_browser = False
             logger.debug("商品搜索器浏览器已关闭")
         except Exception as e:
             logger.warning(f"关闭商品搜索器浏览器时出错: {e}")
+
+    def _get_active_session_id(self) -> str:
+        """获取当前验证码/浏览器接管会话 ID。"""
+        return str(getattr(self, 'user_id', None) or getattr(self, 'preferred_cookie_id', None) or 'default')
+
+    @staticmethod
+    def _capture_item_key(item: Dict[str, Any]) -> str:
+        """生成商品去重 key。"""
+        return str(item.get('item_url') or item.get('item_id') or item.get('title') or '').strip()
+
+    def _append_unique_item(
+        self,
+        target_list: List[Dict[str, Any]],
+        item: Dict[str, Any],
+        seen_keys: Optional[set[str]] = None,
+    ) -> bool:
+        """向列表中追加唯一商品。"""
+        key = self._capture_item_key(item)
+        if seen_keys is None:
+            seen_keys = {
+                existing_key
+                for existing_key in (self._capture_item_key(existing) for existing in target_list)
+                if existing_key
+            }
+
+        if key and key in seen_keys:
+            return False
+
+        if key:
+            seen_keys.add(key)
+
+        target_list.append(item)
+        return True
+
+    def _get_session_captured_items(self) -> List[Dict[str, Any]]:
+        """读取验证码会话中已捕获的搜索结果。"""
+        try:
+            from utils.captcha_remote_control import captcha_controller
+
+            session = captcha_controller.active_sessions.get(self._get_active_session_id())
+            if not session:
+                return []
+
+            captured_items = list(session.get('captured_items') or [])
+            if '_captured_item_keys' not in session:
+                session['_captured_item_keys'] = {
+                    key for key in (self._capture_item_key(item) for item in captured_items) if key
+                }
+            session['captured_count'] = len(captured_items)
+            return captured_items
+        except Exception as e:
+            logger.debug(f"读取验证码会话结果失败: {e}")
+            return []
+
+    async def _sync_item_to_active_session(self, item: Dict[str, Any]) -> None:
+        """将实时抓到的商品同步到人工验证会话。"""
+        try:
+            from utils.captcha_remote_control import captcha_controller
+
+            session = captcha_controller.active_sessions.get(self._get_active_session_id())
+            if not session:
+                return
+
+            captured_items = session.setdefault('captured_items', [])
+            captured_keys = session.setdefault('_captured_item_keys', set())
+            if not isinstance(captured_keys, set):
+                captured_keys = set(captured_keys)
+                session['_captured_item_keys'] = captured_keys
+
+            item_copy = dict(item)
+            if self._append_unique_item(captured_items, item_copy, captured_keys):
+                session['captured_count'] = len(captured_items)
+                session['last_capture_at'] = time.time()
+        except Exception as e:
+            logger.debug(f"同步验证码会话结果失败: {e}")
+
+    def _build_search_response_handler(self, target_items: List[Dict[str, Any]]):
+        """构建统一的搜索 API 响应处理器。"""
+        target_seen_keys = {
+            key for key in (self._capture_item_key(item) for item in target_items) if key
+        }
+
+        async def on_response(response):
+            if "h5api.m.goofish.com/h5/mtop.taobao.idlemtopsearch.pc.search" not in response.url:
+                return
+
+            try:
+                if response.status != 200:
+                    logger.warning(f"API响应状态异常: {response.status}")
+                    return
+
+                try:
+                    result_json = await response.json()
+                except Exception as json_error:
+                    logger.warning(f"无法解析响应JSON: {str(json_error)}")
+                    return
+
+                self.api_responses.append(result_json)
+                logger.info(f"捕获到API响应，URL: {response.url}")
+
+                items = result_json.get("data", {}).get("resultList", [])
+                logger.info(f"从API获取到 {len(items)} 条原始数据")
+
+                for item in items:
+                    try:
+                        parsed_item = await self._parse_real_item(item)
+                        if parsed_item and self._append_unique_item(target_items, parsed_item, target_seen_keys):
+                            await self._sync_item_to_active_session(parsed_item)
+                    except Exception as parse_error:
+                        logger.warning(f"解析单个商品失败: {str(parse_error)}")
+                        continue
+
+            except Exception as e:
+                logger.warning(f"响应处理异常: {str(e)}")
+
+        return on_response
+
+    async def resume_search_from_current_page(self, keyword: str, total_pages: int = 1) -> Dict[str, Any]:
+        """在人工验证完成后的当前搜索页继续采集结果，避免重新触发风险。"""
+        if not self.page or self.page.is_closed():
+            return {
+                'items': [],
+                'total': 0,
+                'error': '人工验证页已关闭，请重新发起调研',
+            }
+
+        self.current_search_request = {
+            'keyword': keyword,
+            'page': 1,
+            'page_size': 20,
+            'max_pages': total_pages,
+            'search_mode': 'resume_after_captcha',
+        }
+
+        self.api_responses = []
+        collected_items = self._get_session_captured_items()
+        response_handler = self._build_search_response_handler(collected_items)
+        self.page.on("response", response_handler)
+
+        try:
+            try:
+                await self.page.bring_to_front()
+            except Exception:
+                pass
+
+            try:
+                await self.page.wait_for_load_state("networkidle", timeout=15000)
+            except Exception:
+                pass
+
+            # 先确认当前页已经脱离验证码态，再等待结果回流。
+            slider_result = await self.handle_slider_verification(
+                page=self.page,
+                context=self.context,
+                browser=self.browser,
+                playwright=getattr(self, 'playwright', None),
+                max_retries=5,
+            )
+
+            if slider_result == 'need_captcha':
+                logger.warning("恢复抓取时再次进入人工验证码流程")
+                return 'need_captcha'
+
+            if not slider_result:
+                return {
+                    'items': [],
+                    'total': 0,
+                    'error': '验证码状态异常，请重新完成验证后再试',
+                }
+
+            await asyncio.sleep(3)
+            logger.info(f"人工验证后的第一页已累计抓取 {len(collected_items)} 条结果")
+
+            if total_pages > 1:
+                for page_num in range(2, total_pages + 1):
+                    logger.info(f"继续从人工验证页面抓取第 {page_num} 页...")
+                    before_click_count = len(collected_items)
+                    await asyncio.sleep(2)
+
+                    next_button_found = False
+                    next_button_selectors = [
+                        '.search-page-tiny-arrow-right--oXVFaRao',
+                        '[class*="search-page-tiny-arrow-right"]',
+                        'button[aria-label="下一页"]',
+                        'button:has-text("下一页")',
+                        'a:has-text("下一页")',
+                        '.ant-pagination-next',
+                        'li.ant-pagination-next a',
+                        'a[aria-label="下一页"]'
+                    ]
+
+                    for selector in next_button_selectors:
+                        try:
+                            next_button = self.page.locator(selector).first
+                            if not await next_button.is_visible(timeout=3000):
+                                continue
+
+                            is_disabled = await next_button.get_attribute("disabled")
+                            has_disabled_class = await next_button.evaluate(
+                                "el => el.classList.contains('ant-pagination-disabled') || el.classList.contains('disabled')"
+                            )
+                            if is_disabled or has_disabled_class:
+                                continue
+
+                            await next_button.scroll_into_view_if_needed()
+                            await asyncio.sleep(1)
+                            await next_button.click()
+                            next_button_found = True
+                            break
+                        except Exception:
+                            continue
+
+                    if not next_button_found:
+                        logger.warning(f"未找到第 {page_num} 页的下一页按钮，提前结束翻页")
+                        break
+
+                    try:
+                        await self.page.wait_for_load_state("networkidle", timeout=15000)
+                    except Exception:
+                        pass
+
+                    slider_result = await self.handle_slider_verification(
+                        page=self.page,
+                        context=self.context,
+                        browser=self.browser,
+                        playwright=getattr(self, 'playwright', None),
+                        max_retries=5,
+                    )
+
+                    if slider_result == 'need_captcha':
+                        logger.warning(f"抓取第 {page_num} 页时再次触发验证码")
+                        return 'need_captcha'
+
+                    if not slider_result:
+                        return {
+                            'items': collected_items,
+                            'total': len(collected_items),
+                            'error': f'抓取第 {page_num} 页时验证码状态异常',
+                        }
+
+                    await asyncio.sleep(4)
+                    new_items = len(collected_items) - before_click_count
+                    if new_items > 0:
+                        logger.info(f"第 {page_num} 页新增 {new_items} 条结果")
+                    else:
+                        logger.warning(f"第 {page_num} 页没有抓到新结果，停止继续翻页")
+                        break
+
+            collected_items.sort(key=lambda x: x.get('want_count', 0), reverse=True)
+            return {
+                'items': collected_items,
+                'total': len(collected_items),
+                'is_real_data': True,
+                'source': 'playwright_local_browser_resume',
+            }
+        finally:
+            try:
+                if hasattr(self.page, 'remove_listener'):
+                    self.page.remove_listener("response", response_handler)
+            except Exception:
+                pass
     
     async def search_items(self, keyword: str, page: int = 1, page_size: int = 20) -> Dict[str, Any]:
         """
@@ -765,6 +1271,13 @@ class XianyuSearcher:
             搜索结果字典，包含items列表和总数
         """
         try:
+            self.current_search_request = {
+                'keyword': keyword,
+                'page': page,
+                'page_size': page_size,
+                'max_pages': max(1, page),
+                'search_mode': 'single',
+            }
             if not PLAYWRIGHT_AVAILABLE:
                 logger.error("Playwright 不可用，无法获取真实数据")
                 return {
@@ -781,40 +1294,7 @@ class XianyuSearcher:
             self.api_responses = []
             data_list = []
 
-            # 设置API响应监听器
-            async def on_response(response):
-                """处理API响应，解析数据"""
-                if "h5api.m.goofish.com/h5/mtop.taobao.idlemtopsearch.pc.search" in response.url:
-                    try:
-                        # 检查响应状态
-                        if response.status != 200:
-                            logger.warning(f"API响应状态异常: {response.status}")
-                            return
-
-                        # 安全地获取响应内容
-                        try:
-                            result_json = await response.json()
-                        except Exception as json_error:
-                            logger.warning(f"无法解析响应JSON: {str(json_error)}")
-                            return
-
-                        self.api_responses.append(result_json)
-                        logger.info(f"捕获到API响应，URL: {response.url}")
-
-                        items = result_json.get("data", {}).get("resultList", [])
-                        logger.info(f"从API获取到 {len(items)} 条原始数据")
-
-                        for item in items:
-                            try:
-                                parsed_item = await self._parse_real_item(item)
-                                if parsed_item:
-                                    data_list.append(parsed_item)
-                            except Exception as parse_error:
-                                logger.warning(f"解析单个商品失败: {str(parse_error)}")
-                                continue
-
-                    except Exception as e:
-                        logger.warning(f"响应处理异常: {str(e)}")
+            on_response = self._build_search_response_handler(data_list)
 
             try:
                 # 获取并设置cookies进行登录
@@ -1172,6 +1652,13 @@ class XianyuSearcher:
         """
         browser_initialized = False
         try:
+            self.current_search_request = {
+                'keyword': keyword,
+                'page': 1,
+                'page_size': 20,
+                'max_pages': total_pages,
+                'search_mode': 'multi',
+            }
             if not PLAYWRIGHT_AVAILABLE:
                 logger.error("Playwright 不可用，无法获取真实数据")
                 return {
@@ -1196,40 +1683,7 @@ class XianyuSearcher:
             self.api_responses = []
             all_data_list = []
 
-            # 设置API响应监听器
-            async def on_response(response):
-                """处理API响应，解析数据"""
-                if "h5api.m.goofish.com/h5/mtop.taobao.idlemtopsearch.pc.search" in response.url:
-                    try:
-                        # 检查响应状态
-                        if response.status != 200:
-                            logger.warning(f"API响应状态异常: {response.status}")
-                            return
-
-                        # 安全地获取响应内容
-                        try:
-                            result_json = await response.json()
-                        except Exception as json_error:
-                            logger.warning(f"无法解析响应JSON: {str(json_error)}")
-                            return
-
-                        self.api_responses.append(result_json)
-                        logger.info(f"捕获到API响应，URL: {response.url}")
-
-                        items = result_json.get("data", {}).get("resultList", [])
-                        logger.info(f"从API获取到 {len(items)} 条原始数据")
-
-                        for item in items:
-                            try:
-                                parsed_item = await self._parse_real_item(item)
-                                if parsed_item:
-                                    all_data_list.append(parsed_item)
-                            except Exception as parse_error:
-                                logger.warning(f"解析单个商品失败: {str(parse_error)}")
-                                continue
-
-                    except Exception as e:
-                        logger.warning(f"响应处理异常: {str(e)}")
+            on_response = self._build_search_response_handler(all_data_list)
 
             try:
                 # 检查浏览器状态
@@ -1578,7 +2032,13 @@ async def search_xianyu_items(keyword: str, page: int = 1, page_size: int = 20) 
     }
 
 
-async def search_xianyu_items_with_cookie(cookie_id: str, keyword: str, page: int = 1, page_size: int = 20) -> Dict[str, Any]:
+async def search_xianyu_items_with_cookie(
+    cookie_id: str,
+    keyword: str,
+    page: int = 1,
+    page_size: int = 20,
+    captcha_mode: str = "remote_control",
+) -> Dict[str, Any]:
     """使用指定 cookie 搜索闲鱼商品。"""
     max_retries = 2
     retry_delay = 5
@@ -1589,6 +2049,7 @@ async def search_xianyu_items_with_cookie(cookie_id: str, keyword: str, page: in
             searcher = XianyuSearcher()
             searcher.preferred_cookie_id = str(cookie_id)
             searcher.user_id = str(cookie_id)
+            searcher.captcha_mode = captcha_mode
 
             logger.info(f"开始单页搜索（指定cookie={cookie_id}），尝试次数: {attempt + 1}/{max_retries + 1}")
             result = await searcher.search_items(keyword, page, page_size)
@@ -1646,6 +2107,7 @@ async def search_multiple_pages_xianyu_with_cookie(cookie_id: str, keyword: str,
             searcher = XianyuSearcher()
             searcher.preferred_cookie_id = str(cookie_id)
             searcher.user_id = str(cookie_id)
+            searcher.captcha_mode = "remote_control"
 
             logger.info(f"开始多页搜索（指定cookie={cookie_id}），尝试次数: {attempt + 1}/{max_retries + 1}")
             result = await searcher.search_multiple_pages(keyword, total_pages)
@@ -1690,6 +2152,136 @@ async def search_multiple_pages_xianyu_with_cookie(cookie_id: str, keyword: str,
         'total': 0,
         'error': "未知错误"
     }
+
+
+async def search_multiple_pages_xianyu_with_cookie_mode(
+    cookie_id: str,
+    keyword: str,
+    total_pages: int = 1,
+    captcha_mode: str = "remote_control",
+) -> Dict[str, Any]:
+    """使用指定 cookie 搜索多页闲鱼商品，可指定验证码处理模式。"""
+    max_retries = 0
+    retry_delay = 5
+
+    for attempt in range(max_retries + 1):
+        searcher = None
+        try:
+            searcher = XianyuSearcher()
+            searcher.preferred_cookie_id = str(cookie_id)
+            searcher.user_id = str(cookie_id)
+            searcher.captcha_mode = captcha_mode
+
+            logger.info(f"开始多页搜索（指定cookie={cookie_id}），尝试次数: {attempt + 1}/{max_retries + 1}")
+            result = await searcher.search_multiple_pages(keyword, total_pages)
+
+            if result == 'need_captcha':
+                captcha_info = searcher.last_captcha_info or {}
+                return {
+                    'items': [],
+                    'total': 0,
+                    'error': '需要人工完成刮刮乐验证码',
+                    'captcha_required': True,
+                    'captcha_info': captcha_info,
+                }
+
+            if result.get('items') or not result.get('error'):
+                logger.info(f"多页搜索成功，获取到 {len(result.get('items', []))} 条数据")
+                return result
+
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"多页搜索商品失败 (尝试 {attempt + 1}/{max_retries + 1}): {error_msg}")
+
+            if attempt == max_retries:
+                return {
+                    'items': [],
+                    'total': 0,
+                    'error': f"搜索失败，已重试 {max_retries} 次: {error_msg}"
+                }
+
+            logger.info(f"等待 {retry_delay} 秒后重试...")
+            await asyncio.sleep(retry_delay)
+
+        finally:
+            if searcher:
+                try:
+                    await searcher.close_browser()
+                except Exception as close_error:
+                    logger.warning(f"关闭搜索器时出错: {str(close_error)}")
+
+    return {
+        'items': [],
+        'total': 0,
+        'error': "未知错误"
+    }
+
+
+async def resume_market_research_session(
+    session_id: str,
+    cookie_id: str,
+    keyword: str,
+    max_pages: int = 1,
+) -> Dict[str, Any]:
+    """使用已通过人工验证的本机浏览器会话继续抓取市场调研数据。"""
+    from utils.captcha_remote_control import captcha_controller
+
+    session = captcha_controller.active_sessions.get(session_id)
+    if not session:
+        return {
+            'items': [],
+            'total': 0,
+            'error': '验证码会话不存在，请重新发起调研',
+        }
+
+    handoff_info = session.get('handoff_info') or {'session_id': session_id, 'mode': 'local_browser'}
+
+    completed = await captcha_controller.check_completion(session_id)
+    if not completed:
+        return {
+            'items': [],
+            'total': 0,
+            'error': '请先在本机浏览器完成验证码验证',
+            'captcha_required': True,
+            'captcha_info': handoff_info,
+        }
+
+    page = session.get('page')
+    context = session.get('context')
+    browser = session.get('browser')
+    playwright = session.get('playwright')
+
+    searcher = XianyuSearcher()
+    searcher.user_id = str(cookie_id)
+    searcher.preferred_cookie_id = str(cookie_id)
+    searcher.captcha_mode = 'local_browser'
+    searcher.page = page
+    searcher.context = context
+    searcher.browser = browser
+    searcher.playwright = playwright
+
+    try:
+        result = await searcher.resume_search_from_current_page(keyword, max_pages)
+
+        if result == 'need_captcha':
+            captcha_info = searcher.last_captcha_info or handoff_info
+            return {
+                'items': [],
+                'total': 0,
+                'error': '仍需人工完成验证码',
+                'captcha_required': True,
+                'captcha_info': captcha_info,
+            }
+
+        await captcha_controller.close_session(session_id)
+        return result
+    except Exception as e:
+        logger.error(f"恢复市场调研会话失败: {e}")
+        return {
+            'items': [],
+            'total': 0,
+            'error': f'恢复抓取失败: {e}',
+        }
 
 
 async def search_multiple_pages_xianyu(keyword: str, total_pages: int = 1) -> Dict[str, Any]:

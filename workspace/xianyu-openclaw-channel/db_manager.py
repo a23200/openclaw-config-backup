@@ -70,6 +70,43 @@ class DBManager:
             self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
             cursor = self.conn.cursor()
             
+            # 创建引流任务表
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS outreach_tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                account_id TEXT NOT NULL,
+                target_url TEXT NOT NULL,
+                intent_keywords TEXT DEFAULT '[]',
+                message_template TEXT NOT NULL,
+                dry_run INTEGER DEFAULT 1,
+                status TEXT DEFAULT 'pending',
+                leads_found INTEGER DEFAULT 0,
+                messages_sent INTEGER DEFAULT 0,
+                result_json TEXT DEFAULT '{}',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            ''')
+
+            # 创建引流线索表
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS outreach_leads (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                task_id INTEGER NOT NULL,
+                account_id TEXT NOT NULL,
+                user_id TEXT NOT NULL,
+                nickname TEXT DEFAULT '',
+                source_url TEXT NOT NULL,
+                comment_text TEXT DEFAULT '',
+                intent_score REAL DEFAULT 0,
+                status TEXT DEFAULT 'collected',
+                dm_text TEXT DEFAULT '',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(account_id, user_id, source_url)
+            )
+            ''')
+
             # 创建用户表
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
@@ -4023,6 +4060,38 @@ class DBManager:
         except Exception as e:
             logger.error(f"获取商品信息失败: {e}")
             return None
+
+    
+    def update_item_ai_knowledge(self, cookie_id: str, item_id: str, ai_knowledge: str) -> bool:
+        """更新商品的AI专属知识库"""
+        try:
+            with self.lock:
+                cursor = self.conn.cursor()
+                cursor.execute('''
+                    UPDATE item_info
+                    SET ai_knowledge = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE cookie_id = ? AND item_id = ?
+                ''', (ai_knowledge, cookie_id, item_id))
+                self.conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Failed to update item ai_knowledge: {e}")
+            return False
+
+    def get_item_ai_knowledge(self, cookie_id: str, item_id: str) -> str:
+        """获取商品的AI专属知识库"""
+        try:
+            with self.lock:
+                cursor = self.conn.cursor()
+                cursor.execute('''
+                    SELECT ai_knowledge FROM item_info
+                    WHERE cookie_id = ? AND item_id = ?
+                ''', (cookie_id, item_id))
+                row = cursor.fetchone()
+                return row[0] if row and row[0] else ""
+        except Exception as e:
+            logger.error(f"Failed to get item ai_knowledge: {e}")
+            return ""
 
     def update_item_multi_spec_status(self, cookie_id: str, item_id: str, is_multi_spec: bool) -> bool:
         """更新商品的多规格状态"""

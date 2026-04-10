@@ -356,10 +356,17 @@ class AIReplyEngine:
                 custom_prompts = json.loads(settings['custom_prompts']) if settings['custom_prompts'] else {}
                 system_prompt = custom_prompts.get(intent, self.default_prompts[intent])
 
+                
                 # 7. 构建商品信息
                 item_desc = f"商品标题: {item_info.get('title', '未知')}\n"
                 item_desc += f"商品价格: {item_info.get('price', '未知')}元\n"
-                item_desc += f"商品描述: {item_info.get('desc', '无')}"
+                item_desc += f"商品描述: {item_info.get('desc', '无')}\n"
+                
+                # 获取商品专属知识库
+                ai_knowledge = db_manager.get_item_ai_knowledge(cookie_id, item_id)
+                if ai_knowledge:
+                    item_desc += f"\n【商品专属知识库/话术/底线规则】:\n{ai_knowledge}\n(注：回复客户时请优先遵守以上专属知识库中的规定和预设话术)"
+
 
                 # 8. 构建对话历史
                 context_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in context[-10:]])  # 最近10条

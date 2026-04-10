@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Item, AccountDetail } from '../types';
-import { getItems, getAccountDetails, syncItemsFromAccount } from '../services/api';
-import { Box, RefreshCw, ShoppingBag, Edit, Trash2, Plus, Save, X, Eye, EyeOff } from 'lucide-react';
+import { getItems, getAccountDetails, syncItemsFromAccount, updateItemAiKnowledge } from '../services/api';
+import { Box, RefreshCw, ShoppingBag, Edit, Trash2, Plus, Save, X, Eye, EyeOff, Brain } from 'lucide-react';
 
 const ItemList: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -12,6 +12,10 @@ const ItemList: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [editForm, setEditForm] = useState<Partial<Item>>({});
+
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [aiKnowledgeText, setAiKnowledgeText] = useState('');
+
   const [addForm, setAddForm] = useState({
     cookie_id: '',
     item_id: '',
@@ -94,6 +98,31 @@ const ItemList: React.FC = () => {
     }
   };
 
+  
+  const handleOpenAiModal = (item: Item) => {
+    setSelectedItem(item);
+    setAiKnowledgeText(item.ai_knowledge || '');
+    setShowAiModal(true);
+  };
+
+  const handleSaveAiKnowledge = async () => {
+    if (!selectedItem) return;
+    try {
+      await updateItemAiKnowledge(selectedItem.cookie_id, selectedItem.item_id, aiKnowledgeText);
+      const updatedItems = items.map(item =>
+        item.cookie_id === selectedItem.cookie_id && item.item_id === selectedItem.item_id
+          ? { ...item, ai_knowledge: aiKnowledgeText }
+          : item
+      );
+      setItems(updatedItems);
+      setShowAiModal(false);
+      alert('AI专属知识库保存成功！');
+    } catch (error) {
+      console.error('保存AI知识库失败:', error);
+      alert('保存失败，请重试');
+    }
+  };
+
   const toggleMultiSpec = async (item: Item) => {
     try {
       const updatedItems = items.map(i =>
@@ -160,8 +189,17 @@ const ItemList: React.FC = () => {
           {items.map(item => (
               <div key={`${item.cookie_id}-${item.item_id}`} className="ios-card p-4 rounded-3xl hover:shadow-lg transition-all group relative">
                   <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      
+                      <button
+                        onClick={() => handleOpenAiModal(item)}
+                        className="p-2 bg-white/90 backdrop-blur rounded-lg shadow-md hover:bg-purple-100 text-purple-600 transition-colors"
+                        title="AI专属知识库"
+                      >
+                        <Brain className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => handleEdit(item)}
+
                         className="p-2 bg-white/90 backdrop-blur rounded-lg shadow-md hover:bg-[#FFE815] transition-colors"
                         title="编辑"
                       >
@@ -222,6 +260,60 @@ const ItemList: React.FC = () => {
              </div>
           )}
       </div>
+
+      {showAiModal && selectedItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-purple-600" />
+                  AI专属知识库喂养
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">预设用户可能会问的问题及标准回答方向</p>
+              </div>
+              <button onClick={() => setShowAiModal(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4 bg-purple-50 p-3 rounded-xl border border-purple-100 text-sm text-purple-800">
+                <strong>💡 提示：</strong> 您可以在这里输入该商品的常见FAQ、底线规则、售后政策。AI在回复客户关于该商品的问题时，会严格参考这里的内容。
+              </div>
+              <textarea
+                className="ios-input w-full h-64 p-4 rounded-2xl resize-none font-mono text-sm leading-relaxed"
+                placeholder="例如：
+Q：能便宜吗？
+A：底价500，不能再低了，不包邮。
+
+Q：几成新？
+A：95新，屏幕无划痕，边框有一点小磕碰，已拍图。
+
+规则：售出不退换，看好再拍。"
+                value={aiKnowledgeText}
+                onChange={(e) => setAiKnowledgeText(e.target.value)}
+              ></textarea>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+              <button 
+                onClick={() => setShowAiModal(false)}
+                className="px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition-colors"
+              >
+                取消
+              </button>
+              <button 
+                onClick={handleSaveAiKnowledge}
+                className="px-5 py-2.5 rounded-xl font-bold bg-purple-600 text-white hover:bg-purple-700 transition-colors shadow-lg shadow-purple-200 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                保存知识库
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
