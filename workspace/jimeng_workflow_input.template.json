@@ -1,0 +1,67 @@
+{
+  "project_name": "jimeng-seedance-15s-workflow",
+  "confirm_before_generate": true,
+  "aspect_ratio": "9:16",
+  "duration_seconds": 15,
+  "image_model": "即梦图片 5.0 lite",
+  "video_model": "Seedance 2.0 Fast",
+  "topic": "在废墟城市中寻找希望的小女孩",
+  "style": "电影感，写实，情绪张力强，光影层次丰富",
+  "subject": {
+    "identity": "一个穿着旧军帽和磨损外套的小女孩",
+    "appearance": "脸上有灰尘与细小划痕，眼神坚韧但温柔",
+    "outfit": "破旧军帽，磨损夹克，旧靴子，衣角沾有尘土",
+    "consistency_rules": [
+      "首尾帧必须是同一人物",
+      "首尾帧必须保持同一套服装与造型",
+      "不能改变人物年龄感、脸部特征、发型和主色调"
+    ]
+  },
+  "scene": {
+    "location": "被战争摧毁的城市废墟",
+    "environment": "断壁残垣，弥漫烟尘，残破路灯，远处有坍塌高楼",
+    "time": "黄昏偏冷色调",
+    "atmosphere": "压抑中带希望，空气里有细微尘埃和逆光"
+  },
+  "story": {
+    "opening_state": "女孩独自站在废墟街道中央，环顾四周",
+    "ending_state": "女孩在瓦砾边俯身捡起一朵残存的小花，轻轻注视",
+    "emotion_arc": "迷茫 -> 坚定 -> 温柔希望"
+  },
+  "camera_language": {
+    "opening_shot": "中远景，低机位缓慢推进",
+    "mid_shot": "跟随镜头，轻微手持感，环境压迫感增强",
+    "ending_shot": "慢慢推近到中近景，聚焦手中的花与眼神变化",
+    "movement_rules": [
+      "运镜平滑，不要突然跳切",
+      "强调从大环境压迫感到人物情绪特写的过渡",
+      "保持电影镜头语言，不做夸张短视频特效"
+    ]
+  },
+  "generation_requirements": {
+    "first_frame_must_include": [
+      "人物完整外观",
+      "服装细节",
+      "场景全貌",
+      "主光源方向",
+      "景别与构图"
+    ],
+    "last_frame_must_include": [
+      "与首帧同一人物同一场景",
+      "动作推进后的姿态变化",
+      "手中或地面小花细节",
+      "更集中的情绪表达"
+    ],
+    "video_prompt_must_include": [
+      "首帧到尾帧的动作连续性",
+      "环境动态，如烟尘、风、碎片、光线变化",
+      "人物表情变化",
+      "明确的 15 秒镜头节奏"
+    ]
+  },
+  "output_files": {
+    "first_frame": "outputs/first_frame.png",
+    "last_frame": "outputs/last_frame.png",
+    "video": "outputs/final_video.mp4"
+  }
+}

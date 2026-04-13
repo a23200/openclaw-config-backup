@@ -1,0 +1,9 @@
+1
+00:00:00,800 --> 00:00:03,400
+我以为这里什么都没有了，
+I thought there was nothing left here.
+
+2
+00:00:03,900 --> 00:00:06,400
+原来，希望还在。
+Turns out, hope is still here.

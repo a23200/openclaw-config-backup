@@ -1,0 +1,14 @@
+{
+  "submit_id": "78daf4ae395949b4",
+  "prompt": "a slow cinematic push through a ruined mountain valley as winter gives way to early spring, mist drifting, dry grass moving gently, morning light opening over distant ridges, tiny flowers appearing from cracks, the same young woman slowly lifting her gaze toward the awakening mountains, realistic cinematic motion",
+  "logid": "20260412041436192168001203609A135",
+  "gen_status": "querying",
+  "credit_count": 75,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Generating",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":false,\"dreamina_matrix_queue_name\":\"dreamina_fusion_video40\",\"dreamina_matrix_req_key\":\"DreaminaFusion:Video40_end_frame_720p\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":true,\"queue_name\":\"\",\"matrix_req_key\":\"\",\"matrix_second_req_key\":\"\"}"
+  }
+}
