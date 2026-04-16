@@ -3,8 +3,17 @@ import {
   LoginResponse, AccountDetail, Order, PaginatedResponse,
   AdminStats, Card, SystemSettings, ApiResponse, OrderAnalytics,
   Item, AIReplySettings, ShippingRule, ReplyRule, DefaultReply,
-  MarketResearchResponse
+  ConversationRecord, ConversationSession,
+  MarketResearchResponse,
+  MarketSellerContactResponse
 } from '../types';
+import {
+  buildAvatarDataUrl,
+  extractItemPrice,
+  extractItemTitle,
+  normalizeImageUrl,
+  resolveItemImage,
+} from '../utils/image';
 
 // Auth
 export const login = async (data: { username?: string; password?: string; email?: string; verification_code?: string }): Promise<LoginResponse> => {
@@ -39,9 +48,34 @@ export const getAccountDetails = async (): Promise<AccountDetail[]> => {
     username: item.username,
     login_password: item.login_password,
     show_browser: item.show_browser,
-    nickname: item.remark || `Account ${item.id.substring(0,6)}`, // Fallback for UI
-    avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.id}`, // Placeholder avatar
+    nickname: item.remark || item.username || `账号 ${item.id.substring(0, 6)}`,
+    avatar_url: buildAvatarDataUrl(item.remark || item.username || item.id, item.id),
     ai_enabled: false, // 需要从AI设置API获取
+  }));
+};
+
+export const getConversationAccounts = async (): Promise<AccountDetail[]> => {
+  const data = await get<any[]>('/api/conversation-accounts');
+  return data.map(item => ({
+    id: item.id,
+    value: item.value,
+    cookie: item.value,
+    enabled: item.enabled,
+    auto_confirm: item.auto_confirm,
+    remark: item.remark,
+    note: item.remark,
+    pause_duration: item.pause_duration,
+    username: item.username,
+    login_password: item.login_password,
+    show_browser: item.show_browser,
+    nickname: item.nickname || item.remark || item.username || item.id,
+    avatar_url: buildAvatarDataUrl(item.nickname || item.remark || item.username || item.id, item.id),
+    conversation_only: item.conversation_only,
+    derived_from: item.derived_from,
+    message_count: item.message_count,
+    session_count: item.session_count,
+    last_message_at: item.last_message_at,
+    ai_enabled: false,
   }));
 };
 
@@ -103,11 +137,24 @@ export const getOrders = async (
   const res = await get<any>('/api/orders', params);
 
   // Handle backend response variations
-  const orders = res.orders || res.data || [];
+  const orders = (res.orders || res.data || []).map((order: any) => ({
+    ...order,
+    item_image: normalizeImageUrl(order.item_image),
+    item_title: order.item_title || '',
+    item_price: order.item_price || '',
+  }));
+  const dedupedOrders = Array.from(
+    new Map(
+      orders.map((order: Order) => [
+        order.order_id || order.id || `${order.cookie_id}:${order.item_id}:${order.buyer_id}:${order.created_at}`,
+        order,
+      ])
+    ).values()
+  );
   return {
     success: true,
-    data: orders,
-    total: res.total || orders.length,
+    data: dedupedOrders,
+    total: res.total || dedupedOrders.length,
     page: res.page || page,
     page_size: res.page_size || pageSize,
     total_pages: res.total_pages || 1
@@ -116,9 +163,13 @@ export const getOrders = async (
 
 export const getOrderDetail = async (orderId: string): Promise<{ success: boolean; data?: Order }> => {
   const result = await get<{ order?: Order; data?: Order }>(`/api/orders/${orderId}`);
+  const order = result.order || result.data;
   return {
     success: true,
-    data: result.order || result.data
+    data: order ? {
+      ...order,
+      item_image: normalizeImageUrl(order.item_image),
+    } : undefined
   };
 };
 
@@ -149,6 +200,19 @@ export const syncOrders = async (cookieId?: string, status?: string): Promise<an
 
 export const syncSingleOrder = async (orderId: string): Promise<any> => {
   return post(`/api/orders/${orderId}/refresh`);
+};
+
+export const repairOrderItemMedia = async (data: {
+  cookie_id?: string;
+  order_ids?: string[];
+  limit?: number;
+  force?: boolean;
+}): Promise<any> => {
+  try {
+    return await post('/api/orders/media/repair', data);
+  } catch (error) {
+    return post('/api/orders/repair-item-media', data);
+  }
 };
 
 export const manualShipOrder = async (orderIds: string[], shipMode: 'status_only' | 'full_delivery', content?: string): Promise<any> => {
@@ -203,6 +267,40 @@ export const getValidOrders = async (dateRange: {start_date: string; end_date: s
     return res.orders || [];
 }
 
+export const getConversations = async (params?: {
+  cookie_id?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<PaginatedResponse<ConversationRecord>> => {
+  return get('/api/conversations', params);
+};
+
+export const getConversationSessions = async (params?: {
+  cookie_id?: string;
+  page?: number;
+  page_size?: number;
+  sync_mode?: 'auto' | 'none' | 'background' | 'force';
+}): Promise<PaginatedResponse<ConversationSession> & {
+  sync_mode?: 'auto' | 'none' | 'background' | 'force';
+  sync_triggered?: boolean;
+}> => {
+  return get('/api/conversation-sessions', params);
+};
+
+export const getConversationThread = async (params: {
+  cookie_id: string;
+  chat_id: string;
+  sync_mode?: 'auto' | 'none' | 'background' | 'force';
+}): Promise<{
+  success: boolean;
+  data: ConversationRecord[];
+  total: number;
+  sync_mode?: 'auto' | 'none' | 'background' | 'force';
+  sync_triggered?: boolean;
+}> => {
+  return get('/api/conversation-thread', params);
+};
+
 export const getMarketResearch = async (data: {
   cookie_id: string;
   keyword: string;
@@ -211,10 +309,17 @@ export const getMarketResearch = async (data: {
   exclude_terms?: string[];
   min_price?: number;
   max_price?: number;
-  sort?: 'price_asc' | 'price_desc' | 'want_desc' | 'latest';
+  sort?: 'price_asc' | 'price_desc' | 'want_desc' | 'latest' | 'quality_desc';
   captcha_mode?: 'local_browser' | 'remote_control';
 }): Promise<MarketResearchResponse> => {
-  return post('/api/bridge/market-research', data);
+  const response = await post<MarketResearchResponse>('/api/bridge/market-research', data);
+  return {
+    ...response,
+    items: (response.items || []).map((item) => ({
+      ...item,
+      main_image: normalizeImageUrl(item.main_image),
+    })),
+  };
 };
 
 export const resumeMarketResearch = async (data: {
@@ -226,9 +331,47 @@ export const resumeMarketResearch = async (data: {
   exclude_terms?: string[];
   min_price?: number;
   max_price?: number;
-  sort?: 'price_asc' | 'price_desc' | 'want_desc' | 'latest';
+  sort?: 'price_asc' | 'price_desc' | 'want_desc' | 'latest' | 'quality_desc';
 }): Promise<MarketResearchResponse> => {
-  return post('/api/bridge/market-research/resume', data);
+  const response = await post<MarketResearchResponse>('/api/bridge/market-research/resume', data);
+  return {
+    ...response,
+    items: (response.items || []).map((item) => ({
+      ...item,
+      main_image: normalizeImageUrl(item.main_image),
+    })),
+  };
+};
+
+export const contactMarketSellers = async (data: {
+  cookie_id: string;
+  items: Array<{
+    item_id: string;
+    title: string;
+    seller_name: string;
+    seller_user_id: string;
+    price_text?: string;
+    price_display?: string;
+    condition?: string;
+    storage?: string;
+    battery_health?: number | null;
+    area?: string;
+    quality_score?: number;
+    quality_level?: string;
+    item_url?: string;
+  }>;
+  message_template: string;
+  min_quality_score?: number;
+  max_count?: number;
+  delay_seconds?: number;
+  dry_run?: boolean;
+  async_mode?: boolean;
+}): Promise<MarketSellerContactResponse> => {
+  return post('/api/bridge/market-research/contact-sellers', data);
+};
+
+export const getMarketSellerContactJob = async (jobId: string): Promise<MarketSellerContactResponse> => {
+  return get(`/api/bridge/market-research/contact-sellers/${encodeURIComponent(jobId)}`);
 };
 
 // Cards
@@ -256,7 +399,17 @@ export const getCardDetails = async (cardId: string): Promise<any> => {
 // Items
 export const getItems = async (): Promise<Item[]> => {
     const res = await get<any>('/items');
-    return Array.isArray(res) ? res : (res.items || []);
+    const items = Array.isArray(res) ? res : (res.items || []);
+    return items.map((item: any) => {
+      const itemTitle = item.item_title || extractItemTitle(item) || item.item_id || '未知商品';
+      const itemPrice = item.item_price || extractItemPrice(item);
+      return {
+        ...item,
+        item_title: itemTitle,
+        item_price: itemPrice,
+        item_image: resolveItemImage(item, itemTitle, itemPrice),
+      };
+    });
 }
 
 export const syncItemsFromAccount = async (cookieId: string): Promise<any> => {

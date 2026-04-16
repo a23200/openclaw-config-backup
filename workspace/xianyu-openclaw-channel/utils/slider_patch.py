@@ -85,10 +85,10 @@ def send_notification(user_id: str, title: str, message: str, notification_type:
                             msg = MIMEMultipart()
                             msg['From'] = smtp_from
                             msg['To'] = recipient_email
-                            msg['Subject'] = f"闲鱼自动回复通知 - {title}"
+                            msg['Subject'] = f"鱼鱼自动回复通知 - {title}"
                             
                             # 邮件正文
-                            email_body = f"""【闲鱼自动回复系统通知】
+                            email_body = f"""【鱼鱼自动回复系统通知】
 
 标题：{title}
 
@@ -101,7 +101,7 @@ def send_notification(user_id: str, title: str, message: str, notification_type:
 时间：{time.strftime('%Y-%m-%d %H:%M:%S')}
 
 此邮件由系统自动发送，请勿直接回复
-© 2025 闲鱼自动回复系统"""
+© 2025 鱼鱼自动回复系统"""
                             
                             msg.attach(MIMEText(email_body, 'plain', 'utf-8'))
                             
@@ -1618,14 +1618,14 @@ def _send_qr_verification_notification(cookie_id: str, qr_url: str):
         logger.info(f"【{cookie_id}】准备发送二维码/人脸验证通知...")
         
         # 构造通知消息
-        notification_title = "闲鱼账号需要验证"
+        notification_title = "鱼鱼账号需要验证"
         notification_message = (
             f"⚠️ Token失效 - 需要人脸验证\n\n"
             f"账号ID: {cookie_id}\n"
             f"时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
             f"密码登录需要人脸验证，请执行以下步骤：\n"
             f"1. 打开下方二维码链接\n"
-            f"2. 使用闲鱼APP扫码\n"
+            f"2. 使用鱼鱼APP扫码\n"
             f"3. 完成人脸验证\n\n"
             f"验证链接:\n{qr_url}\n\n"
             f"请尽快完成验证以恢复账号正常使用。"
@@ -1974,7 +1974,7 @@ def patch_login_with_password_headful():
                                     
                                     # 发送通知
                                     try:
-                                        notification_title = "闲鱼登录失败"
+                                        notification_title = "鱼鱼登录失败"
                                         notification_message = (
                                             f"❌ 登录失败 - 账号密码错误\n\n"
                                             f"账号ID: {user_id}\n"

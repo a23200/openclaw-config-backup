@@ -74,6 +74,7 @@ CSV_FIELDNAMES: Sequence[str] = (
     "title",
     "price_text",
     "price_value",
+    "main_image",
     "condition",
     "defects",
     "storage",
@@ -82,11 +83,27 @@ CSV_FIELDNAMES: Sequence[str] = (
     "want_count",
     "area",
     "seller_name",
+    "seller_user_id",
     "publish_time",
     "item_url",
     "tags_text",
     "item_id",
+    "quality_score",
+    "quality_level",
+    "quality_reasons",
+    "contact_ready",
 )
+
+CONDITION_SCORE_MAP: dict[str, int] = {
+    "全新未拆": 24,
+    "全新": 22,
+    "99新": 20,
+    "98新": 18,
+    "95新": 14,
+    "9成新": 9,
+    "85新": 5,
+    "8成新": 2,
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -97,7 +114,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top", type=int, default=15, help="控制台展示前 N 条结果，默认 15")
     parser.add_argument(
         "--sort",
-        choices=("price_asc", "price_desc", "want_desc", "latest"),
+        choices=("price_asc", "price_desc", "want_desc", "latest", "quality_desc"),
         default="price_asc",
         help="控制台排序方式，默认按价格升序",
     )
@@ -229,16 +246,59 @@ def build_search_text(item: dict[str, Any]) -> str:
     return " ".join(part for part in parts if part).strip()
 
 
+def normalize_main_image(value: Any) -> str:
+    if not value:
+        return ""
+
+    if isinstance(value, (list, tuple)):
+        for item in value:
+            image_url = normalize_main_image(item)
+            if image_url:
+                return image_url
+        return ""
+
+    if isinstance(value, dict):
+        for key in ("main_image", "mainImage", "image_url", "imageUrl", "picUrl", "pic_url", "url"):
+            image_url = normalize_main_image(value.get(key))
+            if image_url:
+                return image_url
+        return ""
+
+    image_url = str(value).strip()
+    if not image_url:
+        return ""
+    if image_url.startswith("//"):
+        image_url = f"https:{image_url}"
+    if "via.placeholder.com" in image_url or "dummyimage.com" in image_url:
+        return ""
+    return image_url
+
+
 def normalize_item(item: dict[str, Any]) -> dict[str, Any]:
     text = build_search_text(item)
     price_value = parse_price(item.get("price"))
     defects = extract_defects(text)
+    seller_user_id = str(
+        item.get("seller_user_id")
+        or item.get("sellerUserId")
+        or item.get("seller_id")
+        or item.get("sellerId")
+        or item.get("user_id")
+        or item.get("userId")
+        or ""
+    ).split("@", 1)[0].strip()
     return {
         "item_id": str(item.get("item_id") or ""),
         "title": str(item.get("title") or "").strip(),
         "price_text": str(item.get("price") or "").strip(),
         "price_value": price_value,
         "price_display": normalize_price_text(price_value, str(item.get("price") or "").strip()),
+        "main_image": normalize_main_image(
+            item.get("main_image")
+            or item.get("image_url")
+            or item.get("picUrl")
+            or item.get("pic_url")
+        ),
         "condition": extract_condition(text),
         "defects": defects,
         "defects_text": "、".join(defects) if defects else "",
@@ -248,11 +308,12 @@ def normalize_item(item: dict[str, Any]) -> dict[str, Any]:
         "want_count": int(item.get("want_count") or 0),
         "area": str(item.get("area") or "地区未知"),
         "seller_name": str(item.get("seller_name") or "匿名卖家"),
+        "seller_user_id": seller_user_id,
         "publish_time": str(item.get("publish_time") or ""),
         "item_url": str(item.get("item_url") or "").strip(),
         "tags_text": stringify_tags(item.get("tags")),
         "search_text": text,
-        "unique_key": str(item.get("item_url") or item.get("item_id") or item.get("title") or "").strip(),
+        "unique_key": str(item.get("item_id") or item.get("item_url") or item.get("title") or "").strip(),
         "raw_item": item,
     }
 
@@ -300,6 +361,16 @@ def filter_items(
 
 def sort_items(items: Iterable[dict[str, Any]], sort_by: str) -> list[dict[str, Any]]:
     items = list(items)
+    if sort_by == "quality_desc":
+        return sorted(
+            items,
+            key=lambda item: (
+                -int(item.get("quality_score") or 0),
+                item.get("price_value") is None,
+                item.get("price_value") or float("inf"),
+                -item.get("want_count", 0),
+            ),
+        )
     if sort_by == "price_desc":
         return sorted(items, key=lambda item: (item.get("price_value") is None, -(item.get("price_value") or 0), -item.get("want_count", 0)))
     if sort_by == "want_desc":
@@ -345,6 +416,113 @@ def summarize_items(items: Sequence[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _quality_level(score: int) -> str:
+    if score >= 80:
+        return "S"
+    if score >= 70:
+        return "A"
+    if score >= 60:
+        return "B"
+    if score >= 45:
+        return "C"
+    return "D"
+
+
+def score_quality_item(item: dict[str, Any], summary: dict[str, Any]) -> dict[str, Any]:
+    """按价格、成色、瑕疵、资料完整度给市场调研结果打分。"""
+    score = 0
+    reasons: list[str] = []
+
+    condition = str(item.get("condition") or "")
+    condition_score = CONDITION_SCORE_MAP.get(condition, 4)
+    score += condition_score
+    if condition_score >= 18:
+        reasons.append(f"成色{condition}")
+    elif condition and condition != "未识别":
+        reasons.append(f"成色{condition}")
+
+    defects = item.get("defects") or []
+    if not defects:
+        score += 18
+        reasons.append("未识别明显瑕疵")
+    else:
+        penalty = min(len(defects) * 7, 24)
+        score -= penalty
+        reasons.append(f"存在瑕疵：{'、'.join(str(defect) for defect in defects[:3])}")
+
+    price_value = item.get("price_value")
+    p25_price = summary.get("p25_price")
+    median_price = summary.get("median_price")
+    p75_price = summary.get("p75_price")
+    if price_value is not None:
+        if p25_price is not None and price_value <= p25_price:
+            score += 24
+            reasons.append("价格低于P25")
+        elif median_price is not None and price_value <= median_price:
+            score += 18
+            reasons.append("价格低于中位价")
+        elif p75_price is not None and price_value <= p75_price:
+            score += 10
+            reasons.append("价格处于合理区间")
+        else:
+            score += 4
+            reasons.append("价格偏高")
+    else:
+        reasons.append("价格缺失")
+
+    battery_health = item.get("battery_health")
+    if isinstance(battery_health, int):
+        if battery_health >= 90:
+            score += 10
+            reasons.append(f"电池{battery_health}%")
+        elif battery_health >= 85:
+            score += 6
+            reasons.append(f"电池{battery_health}%")
+        elif battery_health < 80:
+            score -= 5
+            reasons.append(f"电池偏低{battery_health}%")
+    else:
+        score += 2
+
+    if item.get("storage") and item.get("storage") != "未知":
+        score += 4
+    if item.get("main_image"):
+        score += 4
+    if item.get("seller_name") and item.get("seller_name") != "匿名卖家":
+        score += 4
+    if item.get("seller_user_id") and item.get("item_id") and not str(item.get("item_id")).startswith("mock_"):
+        score += 12
+        reasons.append("可直接沟通")
+
+    want_count = int(item.get("want_count") or 0)
+    if want_count >= 30:
+        score += 5
+        reasons.append("热度较高")
+    elif want_count >= 10:
+        score += 3
+
+    normalized_score = max(0, min(100, int(round(score))))
+    contact_ready = bool(item.get("seller_user_id") and item.get("item_id") and not str(item.get("item_id")).startswith("mock_"))
+    block_reason = ""
+    if not item.get("seller_user_id"):
+        block_reason = "缺少卖家ID"
+    elif not item.get("item_id") or str(item.get("item_id")).startswith("mock_"):
+        block_reason = "缺少真实商品ID"
+
+    return {
+        **item,
+        "quality_score": normalized_score,
+        "quality_level": _quality_level(normalized_score),
+        "quality_reasons": reasons[:5],
+        "contact_ready": contact_ready,
+        "contact_block_reason": block_reason,
+    }
+
+
+def enrich_quality_scores(items: Sequence[dict[str, Any]], summary: dict[str, Any]) -> list[dict[str, Any]]:
+    return [score_quality_item(item, summary) for item in items]
+
+
 def serialize_market_item(item: dict[str, Any]) -> dict[str, Any]:
     return {
         key: value
@@ -370,8 +548,11 @@ def build_market_analysis(
         min_price=min_price,
         max_price=max_price,
     )
-    sorted_items = sort_items(filtered_items, sort_by)
-    summary = summarize_items(sorted_items)
+    summary = summarize_items(filtered_items)
+    scored_items = enrich_quality_scores(filtered_items, summary)
+    sorted_items = sort_items(scored_items, sort_by)
+    summary["quality_count"] = sum(1 for item in scored_items if int(item.get("quality_score") or 0) >= 60)
+    summary["contactable_count"] = sum(1 for item in scored_items if item.get("contact_ready"))
     return {
         "items": sorted_items,
         "summary": summary,
@@ -409,6 +590,7 @@ def export_csv(path: str, items: Sequence[dict[str, Any]]) -> None:
                     "title": item.get("title", ""),
                     "price_text": item.get("price_text", ""),
                     "price_value": item.get("price_value", ""),
+                    "main_image": item.get("main_image", ""),
                     "condition": item.get("condition", ""),
                     "defects": item.get("defects_text", ""),
                     "storage": item.get("storage", ""),
@@ -417,10 +599,15 @@ def export_csv(path: str, items: Sequence[dict[str, Any]]) -> None:
                     "want_count": item.get("want_count", 0),
                     "area": item.get("area", ""),
                     "seller_name": item.get("seller_name", ""),
+                    "seller_user_id": item.get("seller_user_id", ""),
                     "publish_time": item.get("publish_time", ""),
                     "item_url": item.get("item_url", ""),
                     "tags_text": item.get("tags_text", ""),
                     "item_id": item.get("item_id", ""),
+                    "quality_score": item.get("quality_score", 0),
+                    "quality_level": item.get("quality_level", ""),
+                    "quality_reasons": "、".join(item.get("quality_reasons") or []),
+                    "contact_ready": item.get("contact_ready", False),
                 }
             )
 

@@ -1,0 +1,63 @@
+Metadata-Version: 2.4
+Name: lead-ops-backend
+Version: 0.1.0
+Summary: Lead ingestion, scoring, and outreach task tracking backend.
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi<1.0,>=0.115
+Requires-Dist: pydantic-settings<3.0,>=2.4
+Requires-Dist: sqlmodel<0.1,>=0.0.22
+Requires-Dist: uvicorn<1.0,>=0.30
+Provides-Extra: dev
+Requires-Dist: pytest<9.0,>=8.0; extra == "dev"
+
+# Lead Ops Backend
+
+一个可运行的线索管理后端骨架，覆盖：
+
+- 目标视频登记
+- 评论导入入库
+- 评论意向打分
+- 线索池聚合
+- 外呼任务台账
+- 汇总报表
+
+## 快速开始
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+uvicorn app.main:app --reload
+```
+
+服务启动后可访问：
+
+- `http://127.0.0.1:8000/docs`
+- `http://127.0.0.1:8000/api/health`
+
+## 主要接口
+
+- `POST /api/videos`
+- `GET /api/videos`
+- `POST /api/comments/import`
+- `GET /api/leads`
+- `POST /api/leads/{lead_id}/status`
+- `POST /api/outreach/tasks`
+- `POST /api/outreach/tasks/{task_id}/status`
+- `GET /api/reports/summary`
+
+## 数据流
+
+1. 创建目标视频
+2. 批量导入评论
+3. 系统按规则自动打分并聚合线索
+4. 查询高意向线索池
+5. 创建外呼任务并追踪状态
+
+## 当前实现说明
+
+- 数据库默认使用本地 `SQLite`
+- 评论导入接口支持幂等更新
+- 打分规则内置在 `app/services/lead_scoring.py`
+- 外呼任务仅做任务台账与状态流转，不接入任何平台发送器

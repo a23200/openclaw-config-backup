@@ -6,6 +6,7 @@ import time
 import json
 import random
 import string
+from datetime import datetime, timedelta
 import aiohttp
 import io
 import base64
@@ -70,43 +71,6 @@ class DBManager:
             self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
             cursor = self.conn.cursor()
             
-            # 创建引流任务表
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS outreach_tasks (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                account_id TEXT NOT NULL,
-                target_url TEXT NOT NULL,
-                intent_keywords TEXT DEFAULT '[]',
-                message_template TEXT NOT NULL,
-                dry_run INTEGER DEFAULT 1,
-                status TEXT DEFAULT 'pending',
-                leads_found INTEGER DEFAULT 0,
-                messages_sent INTEGER DEFAULT 0,
-                result_json TEXT DEFAULT '{}',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-            ''')
-
-            # 创建引流线索表
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS outreach_leads (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                task_id INTEGER NOT NULL,
-                account_id TEXT NOT NULL,
-                user_id TEXT NOT NULL,
-                nickname TEXT DEFAULT '',
-                source_url TEXT NOT NULL,
-                comment_text TEXT DEFAULT '',
-                intent_score REAL DEFAULT 0,
-                status TEXT DEFAULT 'collected',
-                dm_text TEXT DEFAULT '',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(account_id, user_id, source_url)
-            )
-            ''')
-
             # 创建用户表
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
@@ -209,6 +173,7 @@ class DBManager:
                 cookie_id TEXT NOT NULL,
                 chat_id TEXT NOT NULL,
                 user_id TEXT NOT NULL,
+                user_name TEXT DEFAULT '',
                 item_id TEXT NOT NULL,
                 role TEXT NOT NULL,
                 content TEXT NOT NULL,
@@ -217,6 +182,39 @@ class DBManager:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (cookie_id) REFERENCES cookies (id) ON DELETE CASCADE
             )
+            ''')
+
+            cursor.execute("PRAGMA table_info(ai_conversations)")
+            ai_conversation_columns = [row[1] for row in cursor.fetchall()]
+            if 'user_name' not in ai_conversation_columns:
+                cursor.execute("ALTER TABLE ai_conversations ADD COLUMN user_name TEXT DEFAULT ''")
+                logger.info("数据库迁移完成：为ai_conversations表添加user_name列")
+
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS conversation_profiles (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                cookie_id TEXT NOT NULL,
+                chat_id TEXT DEFAULT '',
+                counterpart_user_id TEXT NOT NULL,
+                counterpart_name TEXT DEFAULT '',
+                item_id TEXT NOT NULL,
+                item_title TEXT DEFAULT '',
+                item_price TEXT DEFAULT '',
+                scene_type TEXT NOT NULL DEFAULT 'seller_customer',
+                our_role TEXT NOT NULL DEFAULT 'seller',
+                counterpart_role TEXT NOT NULL DEFAULT 'buyer',
+                source TEXT DEFAULT 'auto',
+                status TEXT DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(cookie_id, counterpart_user_id, item_id),
+                FOREIGN KEY (cookie_id) REFERENCES cookies (id) ON DELETE CASCADE
+            )
+            ''')
+            cursor.execute('''
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_conversation_profiles_chat
+                ON conversation_profiles(cookie_id, chat_id)
+                WHERE chat_id IS NOT NULL AND TRIM(chat_id) != ''
             ''')
 
             # 创建AI商品信息缓存表
@@ -2022,15 +2020,15 @@ class DBManager:
                 system_model = self.get_system_setting('ai_model') or DEFAULT_MODEL
                 
                 if result:
-                    # 账号有设置，但如果api_key/base_url/model_name为空或等于默认值，使用系统设置
+                    # 账号有设置时优先使用账号值；只有字段为空才使用系统设置
                     account_model = result[1]
                     account_api_key = result[2]
                     account_base_url = result[3]
                     
-                    # 如果账号值为空或等于硬编码默认值，则使用系统设置
-                    use_model = account_model if (account_model and account_model != DEFAULT_MODEL) else system_model
+                    # 账号级配置优先，只在为空时才回退到系统设置
+                    use_model = account_model if account_model else system_model
                     use_api_key = account_api_key if account_api_key else system_api_key
-                    use_base_url = account_base_url if (account_base_url and account_base_url != DEFAULT_BASE_URL) else system_base_url
+                    use_base_url = account_base_url if account_base_url else system_base_url
                     
                     return {
                         'ai_enabled': bool(result[0]),
@@ -2968,13 +2966,13 @@ class DBManager:
     async def send_verification_email(self, email: str, code: str) -> bool:
         """发送验证码邮件（支持SMTP和API两种方式）"""
         try:
-            subject = "闲鱼自动回复系统 - 邮箱验证码"
+            subject = "鱼鱼自动回复系统 - 邮箱验证码"
             # 使用简单的纯文本邮件内容
-            text_content = f"""【闲鱼自动回复系统】邮箱验证码
+            text_content = f"""【鱼鱼自动回复系统】邮箱验证码
 
 您好！
 
-感谢您使用闲鱼自动回复系统。为了确保账户安全，请使用以下验证码完成邮箱验证：
+感谢您使用鱼鱼自动回复系统。为了确保账户安全，请使用以下验证码完成邮箱验证：
 
 验证码：{code}
 
@@ -2985,11 +2983,11 @@ class DBManager:
 • 系统不会主动索要您的验证码
 
 如果您在使用过程中遇到任何问题，请联系我们的技术支持团队。
-感谢您选择闲鱼自动回复系统！
+感谢您选择鱼鱼自动回复系统！
 
 ---
 此邮件由系统自动发送，请勿直接回复
-© 2025 闲鱼自动回复系统"""
+© 2025 鱼鱼自动回复系统"""
 
             # 从系统设置读取SMTP配置
             try:
@@ -4382,7 +4380,18 @@ class DBManager:
                                 item_description = CASE WHEN (item_description IS NULL OR item_description = '') AND ? != '' THEN ? ELSE item_description END,
                                 item_category = CASE WHEN (item_category IS NULL OR item_category = '') AND ? != '' THEN ? ELSE item_category END,
                                 item_price = CASE WHEN (item_price IS NULL OR item_price = '') AND ? != '' THEN ? ELSE item_price END,
-                                item_detail = CASE WHEN (item_detail IS NULL OR item_detail = '' OR TRIM(item_detail) = '') AND ? != '' THEN ? ELSE item_detail END,
+                                item_detail = CASE
+                                    WHEN ? != '' AND (
+                                        item_detail IS NULL
+                                        OR item_detail = ''
+                                        OR TRIM(item_detail) = ''
+                                        OR (
+                                            SUBSTR(LTRIM(item_detail), 1, 1) NOT IN ('{', '[')
+                                            AND SUBSTR(LTRIM(?), 1, 1) IN ('{', '[')
+                                        )
+                                    ) THEN ?
+                                    ELSE item_detail
+                                END,
                                 updated_at = CURRENT_TIMESTAMP
                             WHERE cookie_id = ? AND item_id = ?
                             '''
@@ -4391,7 +4400,7 @@ class DBManager:
                                 item_description, item_description,
                                 item_category, item_category,
                                 item_price, item_price,
-                                item_detail, item_detail,
+                                item_detail, item_detail, item_detail,
                                 cookie_id, item_id
                             ))
 
@@ -6432,13 +6441,288 @@ class DBManager:
             return 0
 
     # ==================== 聊天记录相关方法 ====================
+
+    def save_conversation(self, cookie_id: str, chat_id: str, user_id: str, item_id: str,
+                          role: str, content: str, intent: str = None,
+                          bargain_count: int = 0, created_at: str = None,
+                          user_name: str = None) -> Optional[str]:
+        """保存聊天记录，按账号 + 会话隔离，并尽量避免重复写入。"""
+        cookie_id = str(cookie_id or '').strip()
+        chat_id = str(chat_id or '').strip()
+        user_id = str(user_id or '').strip()
+        user_name = str(user_name or '').strip()
+        item_id = str(item_id or '').strip()
+        role = str(role or '').strip()
+        content = str(content or '').strip()
+        if not cookie_id or not chat_id or not role or not content:
+            return None
+
+        explicit_created_at = bool(created_at)
+        if explicit_created_at:
+            created_at = str(created_at).strip()
+        else:
+            created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            recent_cutoff = (datetime.now() - timedelta(seconds=120)).strftime('%Y-%m-%d %H:%M:%S')
+
+        with self.lock:
+            try:
+                cursor = self.conn.cursor()
+
+                if explicit_created_at:
+                    self._execute_sql(cursor, '''
+                        SELECT created_at FROM ai_conversations
+                        WHERE cookie_id = ? AND chat_id = ? AND user_id = ? AND item_id = ?
+                          AND role = ? AND content = ? AND created_at = ?
+                        ORDER BY id DESC
+                        LIMIT 1
+                    ''', (cookie_id, chat_id, user_id, item_id, role, content, created_at))
+                else:
+                    self._execute_sql(cursor, '''
+                        SELECT created_at FROM ai_conversations
+                        WHERE cookie_id = ? AND chat_id = ? AND user_id = ? AND item_id = ?
+                          AND role = ? AND content = ?
+                          AND created_at >= ? AND created_at <= ?
+                        ORDER BY id DESC
+                        LIMIT 1
+                    ''', (cookie_id, chat_id, user_id, item_id, role, content, recent_cutoff, created_at))
+
+                existing = cursor.fetchone()
+                if existing:
+                    if user_name:
+                        self._execute_sql(cursor, '''
+                            UPDATE ai_conversations
+                            SET user_name = ?
+                            WHERE cookie_id = ? AND chat_id = ? AND user_id = ? AND item_id = ?
+                              AND role = ? AND content = ?
+                              AND COALESCE(TRIM(user_name), '') = ''
+                        ''', (user_name, cookie_id, chat_id, user_id, item_id, role, content))
+                        self.conn.commit()
+                    return existing[0]
+
+                self._execute_sql(cursor, '''
+                    INSERT INTO ai_conversations
+                    (cookie_id, chat_id, user_id, user_name, item_id, role, content, intent, bargain_count, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (cookie_id, chat_id, user_id, user_name, item_id, role, content, intent, bargain_count or 0, created_at))
+
+                self.conn.commit()
+                self._execute_sql(cursor, 'SELECT created_at FROM ai_conversations WHERE rowid = last_insert_rowid()')
+                result = cursor.fetchone()
+                return result[0] if result else created_at
+            except Exception as e:
+                logger.error(f"保存聊天记录失败: cookie_id={cookie_id}, chat_id={chat_id}, role={role}, error={e}")
+                self.conn.rollback()
+                return None
+
+    def find_conversation_user_id(self, cookie_id: str, chat_id: str, exclude_user_id: str = None) -> str:
+        """查找指定账号会话最近的买家 user_id，用于记录卖家手动消息。"""
+        with self.lock:
+            try:
+                cursor = self.conn.cursor()
+                params = [cookie_id, chat_id]
+                exclude_clause = ''
+                if exclude_user_id:
+                    exclude_clause = 'AND user_id != ?'
+                    params.append(str(exclude_user_id))
+                self._execute_sql(cursor, f'''
+                    SELECT user_id FROM ai_conversations
+                    WHERE cookie_id = ? AND chat_id = ? AND role = 'user'
+                      AND user_id IS NOT NULL AND TRIM(user_id) != ''
+                      AND LOWER(TRIM(user_id)) NOT IN ('0', 'unknown', 'unknown_user', 'none', 'null')
+                      AND LENGTH(TRIM(user_id)) >= 6
+                      {exclude_clause}
+                    ORDER BY id DESC
+                    LIMIT 1
+                ''', params)
+                row = cursor.fetchone()
+                return str(row[0]) if row and row[0] else ''
+            except Exception as e:
+                logger.error(f"查找聊天买家ID失败: {e}")
+                return ''
+
+    def upsert_conversation_profile(
+        self,
+        cookie_id: str,
+        counterpart_user_id: str,
+        item_id: str,
+        *,
+        chat_id: str = '',
+        counterpart_name: str = '',
+        item_title: str = '',
+        item_price: str = '',
+        scene_type: str = 'seller_customer',
+        our_role: str = 'seller',
+        counterpart_role: str = 'buyer',
+        source: str = 'auto',
+        status: str = 'active',
+    ) -> bool:
+        cookie_id = str(cookie_id or '').strip()
+        counterpart_user_id = str(counterpart_user_id or '').strip()
+        item_id = str(item_id or '').strip()
+        chat_id = str(chat_id or '').strip()
+        counterpart_name = str(counterpart_name or '').strip()
+        item_title = str(item_title or '').strip()
+        item_price = str(item_price or '').strip()
+        scene_type = str(scene_type or 'seller_customer').strip() or 'seller_customer'
+        our_role = str(our_role or 'seller').strip() or 'seller'
+        counterpart_role = str(counterpart_role or 'buyer').strip() or 'buyer'
+        source = str(source or 'auto').strip() or 'auto'
+        status = str(status or 'active').strip() or 'active'
+
+        if not cookie_id or not counterpart_user_id or not item_id:
+            return False
+
+        with self.lock:
+            try:
+                cursor = self.conn.cursor()
+                self._execute_sql(cursor, '''
+                    INSERT INTO conversation_profiles (
+                        cookie_id, chat_id, counterpart_user_id, counterpart_name,
+                        item_id, item_title, item_price, scene_type,
+                        our_role, counterpart_role, source, status,
+                        created_at, updated_at
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    ON CONFLICT(cookie_id, counterpart_user_id, item_id) DO UPDATE SET
+                        chat_id = CASE
+                            WHEN excluded.chat_id IS NOT NULL AND TRIM(excluded.chat_id) != ''
+                            THEN excluded.chat_id ELSE conversation_profiles.chat_id
+                        END,
+                        counterpart_name = CASE
+                            WHEN excluded.counterpart_name IS NOT NULL AND TRIM(excluded.counterpart_name) != ''
+                            THEN excluded.counterpart_name ELSE conversation_profiles.counterpart_name
+                        END,
+                        item_title = CASE
+                            WHEN excluded.item_title IS NOT NULL AND TRIM(excluded.item_title) != ''
+                            THEN excluded.item_title ELSE conversation_profiles.item_title
+                        END,
+                        item_price = CASE
+                            WHEN excluded.item_price IS NOT NULL AND TRIM(excluded.item_price) != ''
+                            THEN excluded.item_price ELSE conversation_profiles.item_price
+                        END,
+                        scene_type = CASE
+                            WHEN excluded.scene_type IS NOT NULL AND TRIM(excluded.scene_type) != ''
+                            THEN excluded.scene_type ELSE conversation_profiles.scene_type
+                        END,
+                        our_role = CASE
+                            WHEN excluded.our_role IS NOT NULL AND TRIM(excluded.our_role) != ''
+                            THEN excluded.our_role ELSE conversation_profiles.our_role
+                        END,
+                        counterpart_role = CASE
+                            WHEN excluded.counterpart_role IS NOT NULL AND TRIM(excluded.counterpart_role) != ''
+                            THEN excluded.counterpart_role ELSE conversation_profiles.counterpart_role
+                        END,
+                        source = CASE
+                            WHEN excluded.source IS NOT NULL AND TRIM(excluded.source) != ''
+                            THEN excluded.source ELSE conversation_profiles.source
+                        END,
+                        status = CASE
+                            WHEN excluded.status IS NOT NULL AND TRIM(excluded.status) != ''
+                            THEN excluded.status ELSE conversation_profiles.status
+                        END,
+                        updated_at = CURRENT_TIMESTAMP
+                ''', (
+                    cookie_id, chat_id, counterpart_user_id, counterpart_name,
+                    item_id, item_title, item_price, scene_type,
+                    our_role, counterpart_role, source, status,
+                ))
+                self.conn.commit()
+                return True
+            except Exception as e:
+                logger.error(f"保存会话画像失败: cookie_id={cookie_id}, counterpart={counterpart_user_id}, item_id={item_id}, error={e}")
+                self.conn.rollback()
+                return False
+
+    def get_conversation_profile(
+        self,
+        cookie_id: str,
+        *,
+        chat_id: str = '',
+        counterpart_user_id: str = '',
+        item_id: str = '',
+    ) -> Optional[Dict[str, Any]]:
+        cookie_id = str(cookie_id or '').strip()
+        chat_id = str(chat_id or '').strip()
+        counterpart_user_id = str(counterpart_user_id or '').strip()
+        item_id = str(item_id or '').strip()
+        if not cookie_id:
+            return None
+
+        with self.lock:
+            try:
+                cursor = self.conn.cursor()
+                if chat_id:
+                    self._execute_sql(cursor, '''
+                        SELECT
+                            id, cookie_id, chat_id, counterpart_user_id, counterpart_name,
+                            item_id, item_title, item_price, scene_type, our_role,
+                            counterpart_role, source, status, created_at, updated_at
+                        FROM conversation_profiles
+                        WHERE cookie_id = ? AND chat_id = ?
+                        ORDER BY updated_at DESC, id DESC
+                        LIMIT 1
+                    ''', (cookie_id, chat_id))
+                    row = cursor.fetchone()
+                    if row:
+                        return {
+                            'id': row[0],
+                            'cookie_id': row[1],
+                            'chat_id': row[2] or '',
+                            'counterpart_user_id': row[3] or '',
+                            'counterpart_name': row[4] or '',
+                            'item_id': row[5] or '',
+                            'item_title': row[6] or '',
+                            'item_price': row[7] or '',
+                            'scene_type': row[8] or 'seller_customer',
+                            'our_role': row[9] or 'seller',
+                            'counterpart_role': row[10] or 'buyer',
+                            'source': row[11] or 'auto',
+                            'status': row[12] or 'active',
+                            'created_at': row[13],
+                            'updated_at': row[14],
+                        }
+
+                if counterpart_user_id and item_id:
+                    self._execute_sql(cursor, '''
+                        SELECT
+                            id, cookie_id, chat_id, counterpart_user_id, counterpart_name,
+                            item_id, item_title, item_price, scene_type, our_role,
+                            counterpart_role, source, status, created_at, updated_at
+                        FROM conversation_profiles
+                        WHERE cookie_id = ? AND counterpart_user_id = ? AND item_id = ?
+                        ORDER BY updated_at DESC, id DESC
+                        LIMIT 1
+                    ''', (cookie_id, counterpart_user_id, item_id))
+                    row = cursor.fetchone()
+                    if row:
+                        return {
+                            'id': row[0],
+                            'cookie_id': row[1],
+                            'chat_id': row[2] or '',
+                            'counterpart_user_id': row[3] or '',
+                            'counterpart_name': row[4] or '',
+                            'item_id': row[5] or '',
+                            'item_title': row[6] or '',
+                            'item_price': row[7] or '',
+                            'scene_type': row[8] or 'seller_customer',
+                            'our_role': row[9] or 'seller',
+                            'counterpart_role': row[10] or 'buyer',
+                            'source': row[11] or 'auto',
+                            'status': row[12] or 'active',
+                            'created_at': row[13],
+                            'updated_at': row[14],
+                        }
+                return None
+            except Exception as e:
+                logger.error(f"获取会话画像失败: cookie_id={cookie_id}, chat_id={chat_id}, counterpart={counterpart_user_id}, item_id={item_id}, error={e}")
+                return None
     
     def get_conversations_by_cookie(self, cookie_id: str, limit: int = 20, offset: int = 0):
         """获取指定账号的聊天记录"""
         with self.lock:
             cursor = self.conn.cursor()
             self._execute_sql(cursor, '''
-                SELECT id, cookie_id, chat_id, user_id, item_id, role, content, intent, bargain_count, created_at
+                SELECT id, cookie_id, chat_id, user_id, user_name, item_id, role, content, intent, bargain_count, created_at
                 FROM ai_conversations
                 WHERE cookie_id = ?
                 ORDER BY created_at DESC
@@ -6450,12 +6734,13 @@ class DBManager:
                 'cookie_id': r[1],
                 'chat_id': r[2],
                 'user_id': r[3],
-                'item_id': r[4],
-                'role': r[5],
-                'content': r[6],
-                'intent': r[7],
-                'bargain_count': r[8],
-                'created_at': r[9]
+                'user_name': r[4] or '',
+                'item_id': r[5],
+                'role': r[6],
+                'content': r[7],
+                'intent': r[8],
+                'bargain_count': r[9],
+                'created_at': r[10]
             } for r in rows]
     
     def count_conversations_by_cookie(self, cookie_id: str) -> int:
@@ -6474,7 +6759,7 @@ class DBManager:
             cursor = self.conn.cursor()
             placeholders = ','.join('?' * len(cookie_ids))
             self._execute_sql(cursor, f'''
-                SELECT id, cookie_id, chat_id, user_id, item_id, role, content, intent, bargain_count, created_at
+                SELECT id, cookie_id, chat_id, user_id, user_name, item_id, role, content, intent, bargain_count, created_at
                 FROM ai_conversations
                 WHERE cookie_id IN ({placeholders})
                 ORDER BY created_at DESC
@@ -6486,12 +6771,13 @@ class DBManager:
                 'cookie_id': r[1],
                 'chat_id': r[2],
                 'user_id': r[3],
-                'item_id': r[4],
-                'role': r[5],
-                'content': r[6],
-                'intent': r[7],
-                'bargain_count': r[8],
-                'created_at': r[9]
+                'user_name': r[4] or '',
+                'item_id': r[5],
+                'role': r[6],
+                'content': r[7],
+                'intent': r[8],
+                'bargain_count': r[9],
+                'created_at': r[10]
             } for r in rows]
     
     def count_conversations_by_cookies(self, cookie_ids: list) -> int:
@@ -6504,13 +6790,328 @@ class DBManager:
             placeholders = ','.join('?' * len(cookie_ids))
             self._execute_sql(cursor, f'SELECT COUNT(*) FROM ai_conversations WHERE cookie_id IN ({placeholders})', cookie_ids)
             return cursor.fetchone()[0]
+
+    def get_conversation_cookie_summaries(self):
+        """获取存在聊天记录的账号汇总信息。"""
+        with self.lock:
+            cursor = self.conn.cursor()
+            self._execute_sql(cursor, '''
+                SELECT
+                    cookie_id,
+                    COUNT(*) AS message_count,
+                    COUNT(DISTINCT chat_id) AS session_count,
+                    MIN(created_at) AS first_message_at,
+                    MAX(created_at) AS last_message_at
+                FROM ai_conversations
+                GROUP BY cookie_id
+                ORDER BY last_message_at DESC, cookie_id ASC
+            ''')
+            rows = cursor.fetchall()
+            return [{
+                'cookie_id': row[0],
+                'message_count': row[1],
+                'session_count': row[2],
+                'first_message_at': row[3],
+                'last_message_at': row[4],
+            } for row in rows]
+
+    def get_conversation_sessions_by_cookie(self, cookie_id: str, limit: int = 20, offset: int = 0):
+        """按会话维度获取指定账号的聊天列表。"""
+        with self.lock:
+            cursor = self.conn.cursor()
+            self._execute_sql(cursor, '''
+                SELECT
+                    summary.cookie_id,
+                    summary.chat_id,
+                    summary.user_id,
+                    summary.user_name,
+                    summary.item_id,
+                    latest.id,
+                    latest.role,
+                    latest.content,
+                    latest.intent,
+                    latest.bargain_count,
+                    summary.message_count,
+                    summary.user_message_count,
+                    summary.assistant_message_count,
+                    summary.first_message_at,
+                    summary.last_message_at,
+                    COALESCE(NULLIF(profile.scene_type, ''), 'seller_customer') AS scene_type,
+                    COALESCE(NULLIF(profile.our_role, ''), 'seller') AS our_role,
+                    COALESCE(NULLIF(profile.counterpart_role, ''), 'buyer') AS counterpart_role,
+                    COALESCE(NULLIF(profile.counterpart_name, ''), summary.user_name, '') AS counterpart_name,
+                    COALESCE(NULLIF(profile.source, ''), 'auto') AS conversation_source,
+                    COALESCE(NULLIF(profile.item_title, ''), '') AS item_title,
+                    COALESCE(NULLIF(profile.item_price, ''), '') AS item_price
+                FROM (
+                    SELECT
+                        cookie_id,
+                        chat_id,
+                        COALESCE(
+                            NULLIF(SUBSTR(MAX(CASE
+                                WHEN role = 'user'
+                                  AND user_id IS NOT NULL
+                                  AND TRIM(user_id) != ''
+                                  AND LOWER(TRIM(user_id)) NOT IN ('0', 'unknown', 'unknown_user', 'none', 'null')
+                                  AND LENGTH(TRIM(user_id)) >= 6
+                                THEN printf('%020d', id) || user_id
+                            END), 21), ''),
+                            NULLIF(SUBSTR(MAX(CASE
+                                WHEN user_id IS NOT NULL
+                                  AND TRIM(user_id) != ''
+                                  AND LOWER(TRIM(user_id)) NOT IN ('0', 'unknown', 'unknown_user', 'none', 'null')
+                                  AND LENGTH(TRIM(user_id)) >= 6
+                                THEN printf('%020d', id) || user_id
+                            END), 21), ''),
+                            ''
+                        ) AS user_id,
+                        COALESCE(
+                            NULLIF(SUBSTR(MAX(CASE
+                                WHEN role = 'user' AND user_name IS NOT NULL AND TRIM(user_name) != ''
+                                THEN printf('%020d', id) || user_name
+                            END), 21), ''),
+                            NULLIF(SUBSTR(MAX(CASE
+                                WHEN user_name IS NOT NULL AND TRIM(user_name) != ''
+                                THEN printf('%020d', id) || user_name
+                            END), 21), ''),
+                            ''
+                        ) AS user_name,
+                        MAX(item_id) AS item_id,
+                        CAST(SUBSTR(MAX(COALESCE(created_at, '') || '|' || printf('%020d', id)), 21) AS INTEGER) AS latest_message_id,
+                        COUNT(*) AS message_count,
+                        SUM(CASE WHEN role = 'user' THEN 1 ELSE 0 END) AS user_message_count,
+                        SUM(CASE WHEN role = 'assistant' THEN 1 ELSE 0 END) AS assistant_message_count,
+                        MIN(created_at) AS first_message_at,
+                        MAX(created_at) AS last_message_at
+                    FROM ai_conversations
+                    WHERE cookie_id = ?
+                    GROUP BY cookie_id, chat_id
+                ) AS summary
+                INNER JOIN ai_conversations AS latest
+                    ON latest.id = summary.latest_message_id
+                LEFT JOIN conversation_profiles AS profile
+                    ON profile.cookie_id = summary.cookie_id AND profile.chat_id = summary.chat_id
+                ORDER BY summary.last_message_at DESC, latest.id DESC
+                LIMIT ? OFFSET ?
+            ''', (cookie_id, limit, offset))
+            rows = cursor.fetchall()
+            return [{
+                'cookie_id': row[0],
+                'chat_id': row[1],
+                'user_id': row[2],
+                'user_name': row[3] or '',
+                'buyer_name': row[3] or '',
+                'item_id': row[4],
+                'latest_message_id': row[5],
+                'latest_role': row[6],
+                'latest_content': row[7],
+                'latest_intent': row[8],
+                'latest_bargain_count': row[9],
+                'message_count': row[10],
+                'user_message_count': row[11],
+                'assistant_message_count': row[12],
+                'first_message_at': row[13],
+                'last_message_at': row[14],
+                'scene_type': row[15],
+                'our_role': row[16],
+                'counterpart_role': row[17],
+                'counterpart_name': row[18] or row[3] or '',
+                'conversation_source': row[19],
+                'item_title': row[20] or '',
+                'item_price': row[21] or '',
+            } for row in rows]
+
+    def count_conversation_sessions_by_cookie(self, cookie_id: str) -> int:
+        """统计指定账号的聊天会话数量。"""
+        with self.lock:
+            cursor = self.conn.cursor()
+            self._execute_sql(cursor, '''
+                SELECT COUNT(*) FROM (
+                    SELECT 1
+                    FROM ai_conversations
+                    WHERE cookie_id = ?
+                    GROUP BY cookie_id, chat_id
+                )
+            ''', (cookie_id,))
+            return cursor.fetchone()[0]
+
+    def get_conversation_sessions_by_cookies(self, cookie_ids: list, limit: int = 20, offset: int = 0):
+        """按会话维度获取多个账号的聊天列表。"""
+        if not cookie_ids:
+            return []
+
+        with self.lock:
+            cursor = self.conn.cursor()
+            placeholders = ','.join('?' * len(cookie_ids))
+            self._execute_sql(cursor, f'''
+                SELECT
+                    summary.cookie_id,
+                    summary.chat_id,
+                    summary.user_id,
+                    summary.user_name,
+                    summary.item_id,
+                    latest.id,
+                    latest.role,
+                    latest.content,
+                    latest.intent,
+                    latest.bargain_count,
+                    summary.message_count,
+                    summary.user_message_count,
+                    summary.assistant_message_count,
+                    summary.first_message_at,
+                    summary.last_message_at,
+                    COALESCE(NULLIF(profile.scene_type, ''), 'seller_customer') AS scene_type,
+                    COALESCE(NULLIF(profile.our_role, ''), 'seller') AS our_role,
+                    COALESCE(NULLIF(profile.counterpart_role, ''), 'buyer') AS counterpart_role,
+                    COALESCE(NULLIF(profile.counterpart_name, ''), summary.user_name, '') AS counterpart_name,
+                    COALESCE(NULLIF(profile.source, ''), 'auto') AS conversation_source,
+                    COALESCE(NULLIF(profile.item_title, ''), '') AS item_title,
+                    COALESCE(NULLIF(profile.item_price, ''), '') AS item_price
+                FROM (
+                    SELECT
+                        cookie_id,
+                        chat_id,
+                        COALESCE(
+                            NULLIF(SUBSTR(MAX(CASE
+                                WHEN role = 'user'
+                                  AND user_id IS NOT NULL
+                                  AND TRIM(user_id) != ''
+                                  AND LOWER(TRIM(user_id)) NOT IN ('0', 'unknown', 'unknown_user', 'none', 'null')
+                                  AND LENGTH(TRIM(user_id)) >= 6
+                                THEN printf('%020d', id) || user_id
+                            END), 21), ''),
+                            NULLIF(SUBSTR(MAX(CASE
+                                WHEN user_id IS NOT NULL
+                                  AND TRIM(user_id) != ''
+                                  AND LOWER(TRIM(user_id)) NOT IN ('0', 'unknown', 'unknown_user', 'none', 'null')
+                                  AND LENGTH(TRIM(user_id)) >= 6
+                                THEN printf('%020d', id) || user_id
+                            END), 21), ''),
+                            ''
+                        ) AS user_id,
+                        COALESCE(
+                            NULLIF(SUBSTR(MAX(CASE
+                                WHEN role = 'user' AND user_name IS NOT NULL AND TRIM(user_name) != ''
+                                THEN printf('%020d', id) || user_name
+                            END), 21), ''),
+                            NULLIF(SUBSTR(MAX(CASE
+                                WHEN user_name IS NOT NULL AND TRIM(user_name) != ''
+                                THEN printf('%020d', id) || user_name
+                            END), 21), ''),
+                            ''
+                        ) AS user_name,
+                        MAX(item_id) AS item_id,
+                        CAST(SUBSTR(MAX(COALESCE(created_at, '') || '|' || printf('%020d', id)), 21) AS INTEGER) AS latest_message_id,
+                        COUNT(*) AS message_count,
+                        SUM(CASE WHEN role = 'user' THEN 1 ELSE 0 END) AS user_message_count,
+                        SUM(CASE WHEN role = 'assistant' THEN 1 ELSE 0 END) AS assistant_message_count,
+                        MIN(created_at) AS first_message_at,
+                        MAX(created_at) AS last_message_at
+                    FROM ai_conversations
+                    WHERE cookie_id IN ({placeholders})
+                    GROUP BY cookie_id, chat_id
+                ) AS summary
+                INNER JOIN ai_conversations AS latest
+                    ON latest.id = summary.latest_message_id
+                LEFT JOIN conversation_profiles AS profile
+                    ON profile.cookie_id = summary.cookie_id AND profile.chat_id = summary.chat_id
+                ORDER BY summary.last_message_at DESC, latest.id DESC
+                LIMIT ? OFFSET ?
+            ''', (*cookie_ids, limit, offset))
+            rows = cursor.fetchall()
+            return [{
+                'cookie_id': row[0],
+                'chat_id': row[1],
+                'user_id': row[2],
+                'user_name': row[3] or '',
+                'buyer_name': row[3] or '',
+                'item_id': row[4],
+                'latest_message_id': row[5],
+                'latest_role': row[6],
+                'latest_content': row[7],
+                'latest_intent': row[8],
+                'latest_bargain_count': row[9],
+                'message_count': row[10],
+                'user_message_count': row[11],
+                'assistant_message_count': row[12],
+                'first_message_at': row[13],
+                'last_message_at': row[14],
+                'scene_type': row[15],
+                'our_role': row[16],
+                'counterpart_role': row[17],
+                'counterpart_name': row[18] or row[3] or '',
+                'conversation_source': row[19],
+                'item_title': row[20] or '',
+                'item_price': row[21] or '',
+            } for row in rows]
+
+    def count_conversation_sessions_by_cookies(self, cookie_ids: list) -> int:
+        """统计多个账号的聊天会话数量。"""
+        if not cookie_ids:
+            return 0
+
+        with self.lock:
+            cursor = self.conn.cursor()
+            placeholders = ','.join('?' * len(cookie_ids))
+            self._execute_sql(cursor, f'''
+                SELECT COUNT(*) FROM (
+                    SELECT 1
+                    FROM ai_conversations
+                    WHERE cookie_id IN ({placeholders})
+                    GROUP BY cookie_id, chat_id
+                )
+            ''', cookie_ids)
+            return cursor.fetchone()[0]
+
+    def get_conversation_thread(self, cookie_id: str, chat_id: str):
+        """获取单个会话下的完整聊天消息。"""
+        with self.lock:
+            cursor = self.conn.cursor()
+            self._execute_sql(cursor, '''
+                SELECT
+                    convo.id, convo.cookie_id, convo.chat_id, convo.user_id, convo.user_name,
+                    convo.item_id, convo.role, convo.content, convo.intent, convo.bargain_count, convo.created_at,
+                    COALESCE(NULLIF(profile.scene_type, ''), 'seller_customer') AS scene_type,
+                    COALESCE(NULLIF(profile.our_role, ''), 'seller') AS our_role,
+                    COALESCE(NULLIF(profile.counterpart_role, ''), 'buyer') AS counterpart_role,
+                    COALESCE(NULLIF(profile.counterpart_name, ''), convo.user_name, '') AS counterpart_name,
+                    COALESCE(NULLIF(profile.source, ''), 'auto') AS conversation_source,
+                    COALESCE(NULLIF(profile.item_title, ''), '') AS item_title,
+                    COALESCE(NULLIF(profile.item_price, ''), '') AS item_price
+                FROM ai_conversations AS convo
+                LEFT JOIN conversation_profiles AS profile
+                    ON profile.cookie_id = convo.cookie_id AND profile.chat_id = convo.chat_id
+                WHERE convo.cookie_id = ? AND convo.chat_id = ?
+                ORDER BY convo.created_at ASC, convo.id ASC
+            ''', (cookie_id, chat_id))
+            rows = cursor.fetchall()
+            return [{
+                'id': row[0],
+                'cookie_id': row[1],
+                'chat_id': row[2],
+                'user_id': row[3],
+                'user_name': row[4] or '',
+                'item_id': row[5],
+                'role': row[6],
+                'content': row[7],
+                'intent': row[8],
+                'bargain_count': row[9],
+                'created_at': row[10],
+                'scene_type': row[11],
+                'our_role': row[12],
+                'counterpart_role': row[13],
+                'counterpart_name': row[14] or row[4] or '',
+                'conversation_source': row[15],
+                'item_title': row[16] or '',
+                'item_price': row[17] or '',
+            } for row in rows]
     
     def get_conversation_by_id(self, conversation_id: int):
         """获取聊天记录详情"""
         with self.lock:
             cursor = self.conn.cursor()
             self._execute_sql(cursor, '''
-                SELECT id, cookie_id, chat_id, user_id, item_id, role, content, intent, bargain_count, created_at
+                SELECT id, cookie_id, chat_id, user_id, user_name, item_id, role, content, intent, bargain_count, created_at
                 FROM ai_conversations
                 WHERE id = ?
             ''', (conversation_id,))
@@ -6521,12 +7122,13 @@ class DBManager:
                     'cookie_id': row[1],
                     'chat_id': row[2],
                     'user_id': row[3],
-                    'item_id': row[4],
-                    'role': row[5],
-                    'content': row[6],
-                    'intent': row[7],
-                    'bargain_count': row[8],
-                    'created_at': row[9]
+                    'user_name': row[4] or '',
+                    'item_id': row[5],
+                    'role': row[6],
+                    'content': row[7],
+                    'intent': row[8],
+                    'bargain_count': row[9],
+                    'created_at': row[10]
                 }
             return None
 

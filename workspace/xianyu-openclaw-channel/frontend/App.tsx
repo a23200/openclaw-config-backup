@@ -90,10 +90,10 @@ const App: React.FC = () => {
           {/* Header with Logo */}
           <div className="text-center mb-10">
              <div className="w-24 h-24 bg-[#FFE815] rounded-[2rem] flex items-center justify-center shadow-xl shadow-yellow-200 mx-auto mb-6 transform rotate-[-6deg] hover:rotate-0 transition-all duration-500 cursor-pointer group">
-                <span className="text-black font-extrabold text-5xl group-hover:scale-110 transition-transform">闲</span>
+                <span className="text-black font-extrabold text-5xl group-hover:scale-110 transition-transform">鱼</span>
              </div>
              <h2 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">欢迎回来</h2>
-             <p className="text-gray-500 font-medium">闲鱼智能自动发货与管家系统</p>
+             <p className="text-gray-500 font-medium">鱼鱼智能自动发货与管家系统</p>
           </div>
           
           <form onSubmit={handleLogin} className="space-y-5">
@@ -147,7 +147,7 @@ const App: React.FC = () => {
              </button>
              <div className="mt-6 text-center">
                  <span className="text-xs text-gray-400 font-medium tracking-widest uppercase">
-                    Xianyu Auto-Dispatch Pro v2.5
+                    YUYU Auto-Dispatch Pro v2.5
                  </span>
              </div>
           </div>

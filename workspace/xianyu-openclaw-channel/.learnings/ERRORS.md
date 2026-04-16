@@ -28,3 +28,31 @@ AttributeError: 'CaptchaRemoteController' object has no attribute 'check_failure
 - Related Files: utils/captcha_remote_control.py, api_captcha_remote.py, captcha_control.html
 
 ---
+
+## [ERR-20260411-001] voice_transcription_test_cookie_fetch
+
+**Logged**: 2026-04-11T17:14:20+08:00
+**Priority**: low
+**Status**: pending
+**Area**: tests
+
+### Summary
+Ad-hoc voice transcription test assumed `db_manager.get_all_cookies()` returned row dicts, but it returned strings/another structure.
+
+### Error
+```text
+TypeError: string indices must be integers, not 'str'
+```
+
+### Context
+- Command: local Python snippet to test `_resolve_voice_message_text` with a real Xianyu voice URL.
+- Cause: cookie lookup used `row['id']` on non-dict rows.
+
+### Suggested Fix
+Use direct SQLite query or inspect helper return shape before indexing rows in ad-hoc diagnostics.
+
+### Metadata
+- Reproducible: yes
+- Related Files: XianyuAutoAsync.py
+
+---

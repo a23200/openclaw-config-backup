@@ -42,6 +42,11 @@ export interface AccountDetail {
   // Frontend helpers
   nickname?: string;
   avatar_url?: string;
+  conversation_only?: boolean;
+  derived_from?: string;
+  message_count?: number;
+  session_count?: number;
+  last_message_at?: string;
   // AI设置
   ai_enabled?: boolean;
   max_discount_percent?: number;
@@ -204,6 +209,7 @@ export interface MarketResearchItem {
   price_text: string;
   price_value: number | null;
   price_display: string;
+  main_image?: string;
   condition: string;
   defects: string[];
   defects_text: string;
@@ -213,9 +219,15 @@ export interface MarketResearchItem {
   want_count: number;
   area: string;
   seller_name: string;
+  seller_user_id?: string;
   publish_time: string;
   item_url: string;
   tags_text: string;
+  quality_score?: number;
+  quality_level?: string;
+  quality_reasons?: string[];
+  contact_ready?: boolean;
+  contact_block_reason?: string;
 }
 
 export interface MarketResearchSummary {
@@ -235,6 +247,8 @@ export interface MarketResearchSummary {
     median_price: number;
     avg_price: number;
   }>;
+  quality_count?: number;
+  contactable_count?: number;
 }
 
 export interface MarketResearchResponse {
@@ -261,4 +275,86 @@ export interface MarketResearchResponse {
     browser_name?: string;
     browser_hint?: string;
   };
+}
+
+export interface MarketSellerContactResult {
+  item_id: string;
+  title: string;
+  seller_name: string;
+  seller_user_id: string;
+  quality_score: number;
+  message: string;
+  status?: 'queued' | 'sending' | 'sent' | 'failed';
+  chat_id?: string;
+  scene_type?: string;
+  our_role?: string;
+  counterpart_role?: string;
+  ok?: boolean;
+  error?: string;
+}
+
+export interface MarketSellerContactResponse {
+  ok: boolean;
+  job_id?: string;
+  dry_run?: boolean;
+  status?: 'queued' | 'running' | 'completed' | 'failed';
+  count?: number;
+  total_count?: number;
+  processed_count?: number;
+  success_count?: number;
+  failed_count?: number;
+  current_index?: number;
+  current_seller_name?: string;
+  current_title?: string;
+  started_at?: string;
+  finished_at?: string;
+  results: MarketSellerContactResult[];
+  error?: string;
+}
+
+export interface ConversationRecord {
+  id: number;
+  cookie_id: string;
+  chat_id: string;
+  user_id: string;
+  user_name?: string;
+  item_id: string;
+  role: string;
+  content: string;
+  intent: string;
+  bargain_count: number;
+  created_at: string;
+  scene_type?: string;
+  our_role?: string;
+  counterpart_role?: string;
+  counterpart_name?: string;
+  conversation_source?: string;
+  item_title?: string;
+  item_price?: string;
+}
+
+export interface ConversationSession {
+  cookie_id: string;
+  chat_id: string;
+  user_id: string;
+  user_name?: string;
+  buyer_name?: string;
+  item_id: string;
+  latest_message_id: number;
+  latest_role: string;
+  latest_content: string;
+  latest_intent: string;
+  latest_bargain_count: number;
+  message_count: number;
+  user_message_count: number;
+  assistant_message_count: number;
+  first_message_at: string;
+  last_message_at: string;
+  scene_type?: string;
+  our_role?: string;
+  counterpart_role?: string;
+  counterpart_name?: string;
+  conversation_source?: string;
+  item_title?: string;
+  item_price?: string;
 }

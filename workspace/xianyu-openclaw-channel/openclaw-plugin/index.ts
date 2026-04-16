@@ -1,5 +1,5 @@
-﻿/**
- * Xianyu (闲鱼) Channel Plugin entry point for OpenClaw.
+/**
+ * YUYU（鱼鱼） Channel Plugin entry point for OpenClaw.
  */
 
 import type { OpenClawPluginApi } from "openclaw/plugin-sdk";
@@ -13,8 +13,8 @@ const bridgeManager = new BridgeProcessManager();
 
 const plugin: XianyuPluginModule = {
   id: "xianyu",
-  name: "Xianyu Channel",
-  description: "Xianyu (闲鱼) messaging channel via Bridge mode",
+  name: "YUYU Channel",
+  description: "YUYU（鱼鱼） messaging channel via Bridge mode",
   configSchema: emptyPluginConfigSchema(),
   register(api: OpenClawPluginApi): void {
     setXianyuRuntime(api.runtime);
@@ -24,7 +24,7 @@ const plugin: XianyuPluginModule = {
     api.registerTool({
       name: "xianyu_confirm_delivery",
       label: "确认发货",
-      description: "确认闲鱼订单发货",
+      description: "确认鱼鱼订单发货",
       parameters: {
         type: "object",
         properties: {
@@ -53,7 +53,7 @@ const plugin: XianyuPluginModule = {
     api.registerTool({
       name: "xianyu_get_orders",
       label: "获取订单",
-      description: "获取闲鱼订单列表",
+      description: "获取鱼鱼订单列表",
       parameters: {
         type: "object",
         properties: {
@@ -82,7 +82,7 @@ const plugin: XianyuPluginModule = {
     api.registerTool({
       name: "xianyu_create_product",
       label: "创建商品",
-      description: "在闲鱼创建并发布商品",
+      description: "在鱼鱼创建并发布商品",
       parameters: {
         type: "object",
         properties: {
@@ -113,7 +113,7 @@ const plugin: XianyuPluginModule = {
     api.registerTool({
       name: "xianyu_create_card",
       label: "创建发货卡片",
-      description: "创建闲鱼发货内容卡片",
+      description: "创建鱼鱼发货内容卡片",
       parameters: {
         type: "object",
         properties: {
@@ -144,7 +144,7 @@ const plugin: XianyuPluginModule = {
     api.registerTool({
       name: "xianyu_create_delivery_rule",
       label: "创建发货规则",
-      description: "创建闲鱼自动发货规则",
+      description: "创建鱼鱼自动发货规则",
       parameters: {
         type: "object",
         properties: {
@@ -175,7 +175,7 @@ const plugin: XianyuPluginModule = {
     api.registerTool({
       name: "xianyu_publish_product",
       label: "发布商品",
-      description: `发布单个商品到闲鱼平台。支持自动填写商品信息、上传图片、选择分类和位置。
+      description: `发布单个商品到鱼鱼平台。支持自动填写商品信息、上传图片、选择分类和位置。
 
 ⚠️ 使用前提:
 - 必须有有效的账号 Cookie（包含 unb 和 _m_h5_tk 字段）
@@ -304,7 +304,7 @@ const plugin: XianyuPluginModule = {
     api.registerTool({
       name: "xianyu_batch_publish_products",
       label: "批量发布商品",
-      description: `批量发布多个商品到闲鱼平台。适用于需要一次性发布多个商品的场景。
+      description: `批量发布多个商品到鱼鱼平台。适用于需要一次性发布多个商品的场景。
 
 ⚠️ 使用前提:
 - 必须有有效的账号 Cookie
@@ -426,7 +426,7 @@ const plugin: XianyuPluginModule = {
     api.registerTool({
       name: "xianyu_search_products",
       label: "搜索商品",
-      description: "在闲鱼平台搜索商品，返回商品列表。可用于市场调研、竞品分析、价格监控等场景。",
+      description: "在鱼鱼平台搜索商品，返回商品列表。可用于市场调研、竞品分析、价格监控等场景。",
       parameters: {
         type: "object",
         properties: {
@@ -466,7 +466,7 @@ const plugin: XianyuPluginModule = {
               return {
                 content: [{
                   type: "text",
-                  text: `⚠️ 当前账号触发了闲鱼风控验证码，商品搜索暂未完成。\n\n关键词: ${result.keyword}\n会话ID: ${sessionId}\n处理地址: ${controlUrl}\n\n请先在浏览器中手动完成验证码，再重新发起搜索。`
+                  text: `⚠️ 当前账号触发了鱼鱼风控验证码，商品搜索暂未完成。\n\n关键词: ${result.keyword}\n会话ID: ${sessionId}\n处理地址: ${controlUrl}\n\n请先在浏览器中手动完成验证码，再重新发起搜索。`
                 }],
                 details: {
                   captcha_required: true,
@@ -521,7 +521,7 @@ const plugin: XianyuPluginModule = {
     api.registerTool({
       name: "xianyu_get_spider_products",
       label: "获取爬虫商品",
-      description: "获取已爬取的闲鱼商品列表，支持分页查询。",
+      description: "获取已爬取的鱼鱼商品列表，支持分页查询。",
       parameters: {
         type: "object",
         properties: {

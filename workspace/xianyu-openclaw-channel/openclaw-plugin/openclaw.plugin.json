@@ -5,7 +5,7 @@
   "tools": [
     {
       "name": "search_xianyu_products",
-      "description": "搜索闲鱼商品，支持关键词搜索和多页爬取。返回商品标题、价格、地区、卖家、链接、图片、发布时间等信息。",
+      "description": "搜索鱼鱼商品，支持关键词搜索和多页爬取。返回商品标题、价格、地区、卖家、链接、图片、发布时间等信息。",
       "parameters": {
         "type": "object",
         "properties": {

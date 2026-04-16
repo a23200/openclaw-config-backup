@@ -144,7 +144,7 @@ const ProductPublish: React.FC = () => {
     <div className="space-y-8 animate-fade-in">
       <div>
         <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">发布商品</h2>
-        <p className="text-gray-500 mt-2 font-medium">填写商品信息并发布到闲鱼平台</p>
+        <p className="text-gray-500 mt-2 font-medium">填写商品信息并发布到鱼鱼平台</p>
       </div>
 
       <form onSubmit={handleSubmit} className="ios-card p-8 rounded-[2rem] space-y-6">

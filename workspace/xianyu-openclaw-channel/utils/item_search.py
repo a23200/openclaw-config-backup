@@ -11,7 +11,7 @@ import sys
 import os
 import urllib.request
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from loguru import logger
@@ -1006,6 +1006,52 @@ class XianyuSearcher:
         """生成商品去重 key。"""
         return str(item.get('item_url') or item.get('item_id') or item.get('title') or '').strip()
 
+    @staticmethod
+    def _find_first_by_keys(payload: Any, keys: tuple[str, ...], max_depth: int = 7) -> str:
+        """在搜索结果原始结构中尽量提取卖家相关字段。"""
+        seen_ids: set[int] = set()
+
+        def walk(value: Any, depth: int = 0) -> str:
+            if value is None or depth > max_depth:
+                return ""
+            if isinstance(value, (str, int, float)):
+                return ""
+            object_id = id(value)
+            if object_id in seen_ids:
+                return ""
+            seen_ids.add(object_id)
+
+            if isinstance(value, dict):
+                for key in keys:
+                    candidate = value.get(key)
+                    if candidate not in (None, ""):
+                        return str(candidate).split("@", 1)[0].strip()
+                for nested in value.values():
+                    found = walk(nested, depth + 1)
+                    if found:
+                        return found
+            elif isinstance(value, list):
+                for nested in value:
+                    found = walk(nested, depth + 1)
+                    if found:
+                        return found
+            return ""
+
+        return walk(payload)
+
+    @staticmethod
+    def _extract_query_value(url: str, keys: tuple[str, ...]) -> str:
+        """从商品链接里尝试提取指定 query 参数。"""
+        if not url:
+            return ""
+        parsed = urlparse(url.replace("fleamarket://", "https://www.goofish.com/"))
+        query = parse_qs(parsed.query)
+        for key in keys:
+            values = query.get(key)
+            if values:
+                return str(values[0]).split("@", 1)[0].strip()
+        return ""
+
     def _append_unique_item(
         self,
         target_list: List[Dict[str, Any]],
@@ -1514,6 +1560,17 @@ class XianyuSearcher:
 
             # 获取商品ID
             item_id = await self.safe_get(click_params, "item_id", default="未知ID")
+            seller_user_id = (
+                str(await self.safe_get(main_data, "userId", default="") or "").strip()
+                or str(await self.safe_get(main_data, "sellerUserId", default="") or "").strip()
+                or str(await self.safe_get(click_params, "seller_id", default="") or "").strip()
+                or str(await self.safe_get(click_params, "sellerId", default="") or "").strip()
+                or self._extract_query_value(raw_link, ("sellerId", "seller_id", "sellerUserId", "userId", "user_id"))
+                or self._find_first_by_keys(
+                    item_data,
+                    ("sellerUserId", "seller_user_id", "sellerId", "seller_id", "sellerUid", "seller_uid", "userId", "user_id"),
+                )
+            )
 
             # 处理发布时间
             publish_time = "未知时间"
@@ -1534,6 +1591,7 @@ class XianyuSearcher:
                 "title": title,
                 "price": price,
                 "seller_name": seller,
+                "seller_user_id": seller_user_id,
                 "item_url": raw_link.replace("fleamarket://", "https://www.goofish.com/"),
                 "main_image": f"https:{image_url}" if image_url and not image_url.startswith("http") else image_url,
                 "publish_time": publish_time,

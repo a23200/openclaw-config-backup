@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Card } from '../types';
 import { getCards, createCard, updateCard, deleteCard } from '../services/api';
 import { Plus, CreditCard, Clock, FileText, Image as ImageIcon, Code, Edit, Trash2, Save, X, Eye, EyeOff, Package } from 'lucide-react';
+import { buildCardPreviewFallback } from '../utils/image';
 
 const CardList: React.FC = () => {
   const [cards, setCards] = useState<Card[]>([]);
@@ -437,7 +438,7 @@ const CardList: React.FC = () => {
                           src={editForm.image_url}
                           alt="预览"
                           className="max-w-full max-h-48 rounded-xl border border-gray-200"
-                          onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/400x200?text=图片加载失败'; }}
+                          onError={(event) => { event.currentTarget.src = buildCardPreviewFallback(); }}
                         />
                       </div>
                     )}

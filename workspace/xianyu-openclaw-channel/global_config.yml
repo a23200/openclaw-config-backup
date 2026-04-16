@@ -62,8 +62,12 @@ MANUAL_MODE:
   timeout: 3600
   toggle_keywords: []
 MESSAGE_EXPIRE_TIME: 300000
-TOKEN_REFRESH_INTERVAL: 3600  # 从3600秒(1小时)增加到72000秒(20小时)
-TOKEN_RETRY_INTERVAL: 600    # 从300秒(5分钟)增加到7200秒(2小时)
+TOKEN_REFRESH_INTERVAL: 72000  # 20小时，减少频繁鉴权触发
+TOKEN_RETRY_INTERVAL: 7200    # 2小时，失败后不要高频重试
+COOKIE_REFRESH_INTERVAL: 3600  # 1小时
+LOCAL_BROWSER_COOKIE_SYNC:
+  enabled: false  # 非验证码场景不再自动接管本机浏览器
+  page_open_cooldown: 300
 SLIDER_VERIFICATION:
   max_concurrent: 3  # 滑块验证最大并发数
   wait_timeout: 60   # 等待排队超时时间（秒）

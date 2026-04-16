@@ -13,6 +13,7 @@ import time
 import json
 import os
 import re
+import threading
 import uvicorn
 import pandas as pd
 import io
@@ -315,9 +316,9 @@ class ResponseModel(BaseModel):
 
 
 app = FastAPI(
-    title="Xianyu Auto Reply API",
+    title="YUYU Auto Reply API",
     version="1.0.0",
-    description="闲鱼自动回复系统API",
+    description="鱼鱼自动回复系统API",
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -1348,9 +1349,6 @@ class SystemSettingCreateIn(BaseModel):
 
 @app.get("/cookies")
 def list_cookies(current_user: Dict[str, Any] = Depends(get_current_user)):
-    if cookie_manager.manager is None:
-        return []
-
     # 获取当前用户的cookies
     user_id = current_user['user_id']
     from db_manager import db_manager
@@ -1361,9 +1359,6 @@ def list_cookies(current_user: Dict[str, Any] = Depends(get_current_user)):
 @app.get("/cookies/details")
 def get_cookies_details(current_user: Dict[str, Any] = Depends(get_current_user)):
     """获取所有Cookie的详细信息（包括值和状态）"""
-    if cookie_manager.manager is None:
-        return []
-
     # 获取当前用户的cookies
     user_id = current_user['user_id']
     from db_manager import db_manager
@@ -1371,10 +1366,13 @@ def get_cookies_details(current_user: Dict[str, Any] = Depends(get_current_user)
 
     result = []
     for cookie_id, cookie_value in user_cookies.items():
-        cookie_enabled = cookie_manager.manager.get_cookie_status(cookie_id)
-        auto_confirm = db_manager.get_auto_confirm(cookie_id)
-        # 获取备注信息
+        cookie_enabled = (
+            cookie_manager.manager.get_cookie_status(cookie_id)
+            if cookie_manager.manager is not None
+            else db_manager.get_cookie_status(cookie_id)
+        )
         cookie_details = db_manager.get_cookie_details(cookie_id)
+        auto_confirm = cookie_details.get('auto_confirm') if cookie_details else db_manager.get_auto_confirm(cookie_id)
         remark = cookie_details.get('remark', '') if cookie_details else ''
 
         result.append({
@@ -1383,7 +1381,10 @@ def get_cookies_details(current_user: Dict[str, Any] = Depends(get_current_user)
             'enabled': cookie_enabled,
             'auto_confirm': auto_confirm,
             'remark': remark,
-            'pause_duration': cookie_details.get('pause_duration', 10) if cookie_details else 10
+            'pause_duration': cookie_details.get('pause_duration', 10) if cookie_details else 10,
+            'username': cookie_details.get('username', '') if cookie_details else '',
+            'login_password': cookie_details.get('password', '') if cookie_details else '',
+            'show_browser': cookie_details.get('show_browser', False) if cookie_details else False,
         })
     return result
 
@@ -1464,8 +1465,6 @@ def update_cookie_login_info(cid: str, update_data: AccountLoginInfoUpdate, curr
 
 @app.put('/cookies/{cid}')
 def update_cookie(cid: str, item: CookieIn, current_user: Dict[str, Any] = Depends(get_current_user)):
-    if cookie_manager.manager is None:
-        raise HTTPException(status_code=500, detail='CookieManager 未就绪')
     try:
         # 检查cookie是否属于当前用户
         user_id = current_user['user_id']
@@ -1488,7 +1487,8 @@ def update_cookie(cid: str, item: CookieIn, current_user: Dict[str, Any] = Depen
         # 只有当 cookie 值真的发生变化时才重启任务
         if item.value != old_cookie_value:
             logger.info(f"Cookie值已变化，重启任务: {cid}")
-            cookie_manager.manager.update_cookie(cid, item.value, save_to_db=False)
+            if cookie_manager.manager is not None:
+                cookie_manager.manager.update_cookie(cid, item.value, save_to_db=False)
         else:
             logger.info(f"Cookie值未变化，无需重启任务: {cid}")
         
@@ -2596,8 +2596,6 @@ async def get_qr_cookie_refresh_cooldown_status(
 @app.put('/cookies/{cid}/status')
 def update_cookie_status(cid: str, status_data: CookieStatusIn, current_user: Dict[str, Any] = Depends(get_current_user)):
     """更新账号的启用/禁用状态"""
-    if cookie_manager.manager is None:
-        raise HTTPException(status_code=500, detail='CookieManager 未就绪')
     try:
         # 检查cookie是否属于当前用户
         user_id = current_user['user_id']
@@ -2607,7 +2605,10 @@ def update_cookie_status(cid: str, status_data: CookieStatusIn, current_user: Di
         if cid not in user_cookies:
             raise HTTPException(status_code=403, detail="无权限操作该Cookie")
 
-        cookie_manager.manager.update_cookie_status(cid, status_data.enabled)
+        if cookie_manager.manager is not None:
+            cookie_manager.manager.update_cookie_status(cid, status_data.enabled)
+        else:
+            db_manager.save_cookie_status(cid, status_data.enabled)
         return {'msg': 'status updated', 'enabled': status_data.enabled}
     except HTTPException:
         raise
@@ -3097,8 +3098,6 @@ def update_login_info_settings(setting_data: LoginInfoSettingUpdate, admin_user:
 
 @app.delete("/cookies/{cid}")
 def remove_cookie(cid: str, current_user: Dict[str, Any] = Depends(get_current_user)):
-    if cookie_manager.manager is None:
-        raise HTTPException(status_code=500, detail="CookieManager 未就绪")
     try:
         # 检查cookie是否属于当前用户
         user_id = current_user['user_id']
@@ -3108,7 +3107,10 @@ def remove_cookie(cid: str, current_user: Dict[str, Any] = Depends(get_current_u
         if cid not in user_cookies:
             raise HTTPException(status_code=403, detail="无权限操作该Cookie")
 
-        cookie_manager.manager.remove_cookie(cid)
+        if cookie_manager.manager is not None:
+            cookie_manager.manager.remove_cookie(cid)
+        else:
+            db_manager.delete_cookie(cid)
         
         # 🔄 通知 Bridge 注销实例
         from bridge_api import xianyu_instances, unregister_xianyu_instance
@@ -3155,8 +3157,6 @@ class PauseDurationUpdate(BaseModel):
 @app.put("/cookies/{cid}/auto-confirm")
 def update_auto_confirm(cid: str, update_data: AutoConfirmUpdate, current_user: Dict[str, Any] = Depends(get_current_user)):
     """更新账号的自动确认发货设置"""
-    if cookie_manager.manager is None:
-        raise HTTPException(status_code=500, detail="CookieManager 未就绪")
     try:
         # 检查cookie是否属于当前用户
         user_id = current_user['user_id']
@@ -3172,7 +3172,7 @@ def update_auto_confirm(cid: str, update_data: AutoConfirmUpdate, current_user: 
             raise HTTPException(status_code=500, detail="更新自动确认发货设置失败")
 
         # 通知CookieManager更新设置（如果账号正在运行）
-        if hasattr(cookie_manager.manager, 'update_auto_confirm_setting'):
+        if cookie_manager.manager is not None and hasattr(cookie_manager.manager, 'update_auto_confirm_setting'):
             cookie_manager.manager.update_auto_confirm_setting(cid, update_data.auto_confirm)
 
         return {
@@ -3189,8 +3189,6 @@ def update_auto_confirm(cid: str, update_data: AutoConfirmUpdate, current_user: 
 @app.get("/cookies/{cid}/auto-confirm")
 def get_auto_confirm(cid: str, current_user: Dict[str, Any] = Depends(get_current_user)):
     """获取账号的自动确认发货设置"""
-    if cookie_manager.manager is None:
-        raise HTTPException(status_code=500, detail="CookieManager 未就绪")
     try:
         # 检查cookie是否属于当前用户
         user_id = current_user['user_id']
@@ -3215,8 +3213,6 @@ def get_auto_confirm(cid: str, current_user: Dict[str, Any] = Depends(get_curren
 @app.put("/cookies/{cid}/remark")
 def update_cookie_remark(cid: str, update_data: RemarkUpdate, current_user: Dict[str, Any] = Depends(get_current_user)):
     """更新账号备注"""
-    if cookie_manager.manager is None:
-        raise HTTPException(status_code=500, detail="CookieManager 未就绪")
     try:
         # 检查cookie是否属于当前用户
         user_id = current_user['user_id']
@@ -3245,8 +3241,6 @@ def update_cookie_remark(cid: str, update_data: RemarkUpdate, current_user: Dict
 @app.get("/cookies/{cid}/remark")
 def get_cookie_remark(cid: str, current_user: Dict[str, Any] = Depends(get_current_user)):
     """获取账号备注"""
-    if cookie_manager.manager is None:
-        raise HTTPException(status_code=500, detail="CookieManager 未就绪")
     try:
         # 检查cookie是否属于当前用户
         user_id = current_user['user_id']
@@ -3274,8 +3268,6 @@ def get_cookie_remark(cid: str, current_user: Dict[str, Any] = Depends(get_curre
 @app.put("/cookies/{cid}/pause-duration")
 def update_cookie_pause_duration(cid: str, update_data: PauseDurationUpdate, current_user: Dict[str, Any] = Depends(get_current_user)):
     """更新账号自动回复暂停时间"""
-    if cookie_manager.manager is None:
-        raise HTTPException(status_code=500, detail="CookieManager 未就绪")
     try:
         # 检查cookie是否属于当前用户
         user_id = current_user['user_id']
@@ -4326,7 +4318,7 @@ async def search_items(
     search_request: ItemSearchRequest,
     current_user: Optional[Dict[str, Any]] = Depends(get_current_user_optional)
 ):
-    """搜索闲鱼商品"""
+    """搜索鱼鱼商品"""
     user_info = f"【{current_user.get('username', 'unknown')}#{current_user.get('user_id', 'unknown')}】" if current_user else "【未登录】"
 
     try:
@@ -4425,7 +4417,7 @@ async def search_multiple_pages(
     search_request: ItemSearchMultipleRequest,
     current_user: Optional[Dict[str, Any]] = Depends(get_current_user_optional)
 ):
-    """搜索多页闲鱼商品"""
+    """搜索多页鱼鱼商品"""
     user_info = f"【{current_user.get('username', 'unknown')}#{current_user.get('user_id', 'unknown')}】" if current_user else "【未登录】"
 
     try:
@@ -6005,6 +5997,229 @@ def update_item_multi_quantity_delivery(cookie_id: str, item_id: str, delivery_d
 
 
 
+def _safe_json_loads(value: Any) -> Optional[Any]:
+    if isinstance(value, (dict, list)):
+        return value
+    if not isinstance(value, str):
+        return None
+
+    text = value.strip()
+    if not text or text[:1] not in {'{', '['}:
+        return None
+
+    try:
+        return json.loads(text)
+    except Exception:
+        return None
+
+
+def _normalize_image_url(value: Any) -> str:
+    text = str(value or '').strip()
+    if not text:
+        return ''
+    if text.startswith('//'):
+        return f'https:{text}'
+    return text
+
+
+def _extract_first_image_url(value: Any) -> str:
+    if not value:
+        return ''
+
+    parsed = _safe_json_loads(value)
+    if parsed is not None and parsed is not value:
+        return _extract_first_image_url(parsed)
+
+    if isinstance(value, list):
+        for item in value:
+            image_url = _extract_first_image_url(item)
+            if image_url:
+                return image_url
+        return ''
+
+    if isinstance(value, dict):
+        for key in ('picUrl', 'pic_url', 'imageUrl', 'image_url', 'url', 'mainImage', 'main_image'):
+            image_url = _normalize_image_url(value.get(key))
+            if image_url:
+                return image_url
+        return ''
+
+    return _normalize_image_url(value)
+
+
+def _format_price_text(value: Any) -> str:
+    text = str(value or '').strip()
+    if not text:
+        return ''
+    if text.startswith('¥') or text.startswith('￥'):
+        return text
+    if any(char.isdigit() for char in text):
+        return f'¥{text}'
+    return text
+
+
+def _extract_item_metadata(item_title: Any, item_price: Any, item_detail: Any) -> Dict[str, str]:
+    detail = _safe_json_loads(item_detail) or {}
+    detail_params = detail.get('detail_params') or detail.get('detailParams') or {}
+    pic_info = detail.get('pic_info') or detail.get('picInfo') or {}
+
+    title = str(
+        item_title
+        or detail.get('title')
+        or detail.get('item_title')
+        or detail_params.get('title')
+        or ''
+    ).strip()
+    price = _format_price_text(
+        item_price
+        or detail.get('price_text')
+        or detail.get('price')
+        or detail.get('priceText')
+        or detail_params.get('soldPrice')
+        or ''
+    )
+    image_url = (
+        _extract_first_image_url(pic_info)
+        or _extract_first_image_url(detail_params)
+        or _extract_first_image_url(detail.get('main_image'))
+        or _extract_first_image_url(detail.get('image_url'))
+        or _extract_first_image_url(detail.get('imageInfos'))
+        or _extract_first_image_url(detail_params.get('imageInfos'))
+    )
+
+    return {
+        'item_title': title,
+        'item_price': price,
+        'item_image': image_url,
+    }
+
+
+def _item_detail_needs_media_repair(item_detail: Any) -> bool:
+    detail = _safe_json_loads(item_detail)
+    if not detail:
+        return True
+    metadata = _extract_item_metadata('', '', detail)
+    return not bool(metadata.get('item_image'))
+
+
+def _build_item_metadata_map(cookie_ids: List[str], item_ids: Optional[List[str]] = None) -> Dict[Tuple[str, str], Dict[str, str]]:
+    if not cookie_ids:
+        return {}
+
+    with db_manager.lock:
+        cursor = db_manager.conn.cursor()
+        cookie_placeholders = ','.join('?' * len(cookie_ids))
+        params: List[Any] = list(cookie_ids)
+        sql = f'''
+            SELECT cookie_id, item_id, item_title, item_price, item_detail
+            FROM item_info
+            WHERE cookie_id IN ({cookie_placeholders})
+        '''
+
+        if item_ids:
+            item_placeholders = ','.join('?' * len(item_ids))
+            sql += f' AND item_id IN ({item_placeholders})'
+            params.extend(item_ids)
+
+        db_manager._execute_sql(cursor, sql, params)
+        rows = cursor.fetchall()
+
+    metadata_map: Dict[Tuple[str, str], Dict[str, str]] = {}
+    for row in rows:
+        metadata_map[(row[0], row[1])] = _extract_item_metadata(row[2], row[3], row[4])
+    return metadata_map
+
+
+def _enrich_order_with_item_metadata(order: Dict[str, Any], metadata_map: Dict[Tuple[str, str], Dict[str, str]]) -> Dict[str, Any]:
+    enriched = dict(order)
+    key = (str(order.get('cookie_id') or ''), str(order.get('item_id') or ''))
+    metadata = metadata_map.get(key) or {}
+
+    enriched['item_title'] = metadata.get('item_title') or enriched.get('item_title') or f"商品 {enriched.get('item_id', '')}"
+    enriched['item_price'] = metadata.get('item_price') or enriched.get('item_price') or ''
+    enriched['item_image'] = metadata.get('item_image') or enriched.get('item_image') or ''
+    return enriched
+
+
+def _parse_item_info_api_response(response: Dict[str, Any], item_id: str) -> Optional[Dict[str, Any]]:
+    if not isinstance(response, dict):
+        return None
+
+    ret_values = response.get('ret') or []
+    if ret_values and not any('SUCCESS::调用成功' in ret for ret in ret_values):
+        return None
+
+    candidates: List[Dict[str, Any]] = []
+    data = response.get('data') or {}
+    if isinstance(data, dict):
+        if isinstance(data.get('itemDO'), dict):
+            candidates.append(data.get('itemDO'))
+
+        api_stack = data.get('apiStack') or []
+        for stack in api_stack:
+            if not isinstance(stack, dict):
+                continue
+            value = stack.get('value')
+            parsed_value = _safe_json_loads(value) if isinstance(value, str) else value
+            if isinstance(parsed_value, dict):
+                for candidate in (
+                    parsed_value.get('data', {}).get('itemDO') if isinstance(parsed_value.get('data'), dict) else None,
+                    parsed_value.get('itemDO'),
+                    parsed_value.get('data'),
+                    parsed_value,
+                ):
+                    if isinstance(candidate, dict):
+                        candidates.append(candidate)
+
+    for candidate in candidates:
+        detail_params = candidate.get('detailParams') or candidate.get('detail_params') or {}
+        pic_info = candidate.get('picInfo') or candidate.get('pic_info') or {}
+
+        title = (
+            candidate.get('title')
+            or candidate.get('itemTitle')
+            or detail_params.get('title')
+            or ''
+        )
+        price_text = _format_price_text(
+            candidate.get('priceText')
+            or candidate.get('price_text')
+            or candidate.get('soldPrice')
+            or candidate.get('price')
+            or detail_params.get('soldPrice')
+            or ''
+        )
+
+        item_data = {
+            'title': title,
+            'price': str(candidate.get('price') or detail_params.get('soldPrice') or '').strip(),
+            'price_text': price_text,
+            'category_id': candidate.get('categoryId') or candidate.get('category_id') or detail_params.get('categoryId') or '',
+            'auction_type': candidate.get('auctionType') or candidate.get('auction_type') or '',
+            'item_status': candidate.get('itemStatus') or candidate.get('item_status') or 0,
+            'detail_url': candidate.get('detailUrl') or candidate.get('detail_url') or '',
+            'web_url': candidate.get('webUrl') or candidate.get('web_url') or f'https://www.goofish.com/item?id={item_id}',
+            'pic_info': pic_info,
+            'detail_params': detail_params,
+            'track_params': candidate.get('trackParams') or candidate.get('track_params') or {},
+            'item_label_data': candidate.get('itemLabelData') or candidate.get('item_label_data') or {},
+            'card_type': candidate.get('cardType') or candidate.get('card_type') or 0,
+        }
+
+        metadata = _extract_item_metadata(item_data['title'], item_data['price_text'], item_data)
+        if metadata.get('item_title') or metadata.get('item_image'):
+            return item_data
+
+    return None
+
+
+class OrderItemMediaRepairRequest(BaseModel):
+    cookie_id: Optional[str] = None
+    order_ids: Optional[List[str]] = None
+    limit: int = 20
+    force: bool = False
+
+
 # ==================== 订单管理接口 ====================
 
 @app.get('/api/orders')
@@ -6029,22 +6244,15 @@ def get_user_orders(
         if cookie_id and cookie_id in user_cookies:
             user_cookies = {cookie_id: user_cookies[cookie_id]}
 
+        metadata_map = _build_item_metadata_map(list(user_cookies.keys()))
+
         # 获取所有订单数据
         all_orders = []
-        # 先获取所有商品的 item_id 到 item_title 的映射
-        item_titles = {}
-        with db_manager.lock:
-            cursor = db_manager.conn.cursor()
-            cursor.execute('SELECT item_id, item_title FROM item_info')
-            for row in cursor.fetchall():
-                item_titles[row[0]] = row[1]
-
         for cid in user_cookies.keys():
             orders = db_manager.get_orders_by_cookie(cid, limit=1000)
             for order in orders:
                 order['cookie_id'] = cid
-                # 添加 item_title 字段
-                order['item_title'] = item_titles.get(order.get('item_id'), '')
+                order = _enrich_order_with_item_metadata(order, metadata_map)
                 # 状态筛选
                 if status and order.get('status') != status:
                     continue
@@ -6052,6 +6260,19 @@ def get_user_orders(
 
         # 按创建时间倒序排列
         all_orders.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        deduped_orders = []
+        seen_order_keys = set()
+        for order in all_orders:
+            order_key = str(
+                order.get('order_id')
+                or order.get('id')
+                or f"{order.get('cookie_id', '')}:{order.get('item_id', '')}:{order.get('buyer_id', '')}:{order.get('created_at', '')}"
+            )
+            if order_key in seen_order_keys:
+                continue
+            seen_order_keys.add(order_key)
+            deduped_orders.append(order)
+        all_orders = deduped_orders
 
         # 分页处理
         total = len(all_orders)
@@ -6091,6 +6312,8 @@ def get_order_detail(order_id: str, current_user: Dict[str, Any] = Depends(get_c
         for cookie_id in user_cookies.keys():
             order = db_manager.get_order_by_id(order_id)
             if order and order.get('cookie_id') == cookie_id:
+                metadata_map = _build_item_metadata_map([cookie_id], [str(order.get('item_id') or '')])
+                order = _enrich_order_with_item_metadata(order, metadata_map)
                 log_with_user('info', f"订单详情查询成功: {order_id}", current_user)
                 return {"success": True, "data": order}
 
@@ -6102,6 +6325,173 @@ def get_order_detail(order_id: str, current_user: Dict[str, Any] = Depends(get_c
     except Exception as e:
         log_with_user('error', f"查询订单详情失败: {str(e)}", current_user)
         raise HTTPException(status_code=500, detail=f"查询订单详情失败: {str(e)}")
+
+
+async def _repair_order_item_media_impl(
+    request: OrderItemMediaRepairRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """按历史订单中的 item_id 定向补全商品标题/价格/主图。"""
+    try:
+        user_id = current_user['user_id']
+        user_cookies = db_manager.get_all_cookies(user_id)
+        if not user_cookies:
+            return {"success": True, "message": "当前用户没有可用账号", "updated_count": 0, "failed_count": 0, "skipped_count": 0, "results": []}
+
+        if request.cookie_id:
+            if request.cookie_id not in user_cookies:
+                raise HTTPException(status_code=403, detail="无权访问该账号")
+            target_cookie_ids = [request.cookie_id]
+        else:
+            target_cookie_ids = list(user_cookies.keys())
+
+        with db_manager.lock:
+            cursor = db_manager.conn.cursor()
+            cookie_placeholders = ','.join('?' * len(target_cookie_ids))
+            sql = f'''
+                SELECT DISTINCT
+                    o.cookie_id,
+                    o.item_id,
+                    o.order_id,
+                    i.item_detail
+                FROM orders o
+                LEFT JOIN item_info i
+                    ON i.cookie_id = o.cookie_id AND i.item_id = o.item_id
+                WHERE o.cookie_id IN ({cookie_placeholders})
+                  AND o.item_id IS NOT NULL
+                  AND TRIM(o.item_id) != ''
+            '''
+            params: List[Any] = list(target_cookie_ids)
+
+            if request.order_ids:
+                order_placeholders = ','.join('?' * len(request.order_ids))
+                sql += f' AND o.order_id IN ({order_placeholders})'
+                params.extend(request.order_ids)
+
+            sql += ' ORDER BY o.created_at DESC'
+            db_manager._execute_sql(cursor, sql, params)
+            raw_candidates = cursor.fetchall()
+
+        candidates: List[Dict[str, str]] = []
+        for cookie_id, item_id, order_id, item_detail in raw_candidates:
+            if not request.force and not _item_detail_needs_media_repair(item_detail):
+                continue
+            candidates.append({
+                'cookie_id': str(cookie_id),
+                'item_id': str(item_id),
+                'order_id': str(order_id),
+            })
+
+        if request.limit > 0:
+            candidates = candidates[:request.limit]
+
+        if not candidates:
+            return {
+                "success": True,
+                "message": "没有需要补全的历史订单商品",
+                "updated_count": 0,
+                "failed_count": 0,
+                "skipped_count": 0,
+                "results": [],
+            }
+
+        from XianyuAutoAsync import XianyuLive
+
+        results: List[Dict[str, Any]] = []
+        grouped_candidates: Dict[str, List[Dict[str, str]]] = {}
+        for candidate in candidates:
+            grouped_candidates.setdefault(candidate['cookie_id'], []).append(candidate)
+
+        updated_count = 0
+        failed_count = 0
+
+        for cookie_id, items in grouped_candidates.items():
+            cookie_info = db_manager.get_cookie_by_id(cookie_id)
+            cookies_str = str((cookie_info or {}).get('cookies_str') or '').strip()
+            if len(cookies_str) < 50:
+                for item in items:
+                    results.append({
+                        **item,
+                        'success': False,
+                        'message': '账号 Cookie 不可用',
+                    })
+                    failed_count += 1
+                continue
+
+            xianyu_instance = XianyuLive(cookies_str, cookie_id)
+            try:
+                for item in items:
+                    try:
+                        response = await xianyu_instance.get_item_info(item['item_id'])
+                        item_data = _parse_item_info_api_response(response, item['item_id'])
+                        if not item_data:
+                            results.append({
+                                **item,
+                                'success': False,
+                                'message': '未获取到可解析的商品详情（可能需要验证码或商品已下架）',
+                            })
+                            failed_count += 1
+                            continue
+
+                        success = db_manager.save_item_info(cookie_id, item['item_id'], item_data)
+                        metadata = _extract_item_metadata(item_data.get('title'), item_data.get('price_text'), item_data)
+                        results.append({
+                            **item,
+                            'success': bool(success),
+                            'message': '补全成功' if success else '写入数据库失败',
+                            'item_title': metadata.get('item_title', ''),
+                            'item_image': metadata.get('item_image', ''),
+                        })
+                        if success:
+                            updated_count += 1
+                        else:
+                            failed_count += 1
+                    except Exception as item_error:
+                        logger.warning(f"补全历史订单商品失败: cookie_id={cookie_id}, item_id={item['item_id']}, error={item_error}")
+                        results.append({
+                            **item,
+                            'success': False,
+                            'message': str(item_error),
+                        })
+                        failed_count += 1
+            finally:
+                try:
+                    await xianyu_instance.close_session()
+                except Exception:
+                    pass
+
+        return {
+            "success": True,
+            "message": f"补全完成：成功 {updated_count} 条，失败 {failed_count} 条",
+            "updated_count": updated_count,
+            "failed_count": failed_count,
+            "skipped_count": max(0, len(raw_candidates) - len(candidates)),
+            "results": results,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"补全历史订单商品图失败: {e}")
+        raise HTTPException(status_code=500, detail=f"补全历史订单商品图失败: {str(e)}")
+
+
+@app.post('/api/orders/media/repair')
+async def repair_order_item_media(
+    request: OrderItemMediaRepairRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """稳定路径：按历史订单中的 item_id 定向补全商品标题/价格/主图。"""
+    return await _repair_order_item_media_impl(request, current_user)
+
+
+@app.post('/api/orders/repair-item-media')
+async def repair_order_item_media_legacy(
+    request: OrderItemMediaRepairRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """兼容旧路径的历史订单商品补图接口。"""
+    return await _repair_order_item_media_impl(request, current_user)
 
 
 @app.delete('/api/orders/{order_id}')
@@ -6648,7 +7038,7 @@ async def refresh_orders_status(
                             new_status_text = status_result.get('status_text', '')
 
                             # 将状态码转换为数据库状态
-                            # 完整的订单状态码映射（基于闲鱼API）
+                            # 完整的订单状态码映射（基于鱼鱼API）
                             status_mapping = {
                                 1: 'processing',      # 处理中
                                 2: 'pending_ship',    # 待发货
@@ -6819,7 +7209,7 @@ async def manual_ship_orders(
     手动发货
 
     发货模式：
-    - status_only: 仅在闲鱼标记为已发货（不发送卡券给买家）
+    - status_only: 仅在鱼鱼标记为已发货（不发送卡券给买家）
     - full_delivery: 完整发货流程（匹配卡券、发送卡券给买家、标记发货状态）
     """
     try:
@@ -6870,7 +7260,7 @@ async def manual_ship_orders(
                 buyer_id = order.get('buyer_id')
 
                 if ship_mode == 'status_only':
-                    # ====== 仅修改闲鱼发货状态 ======
+                    # ====== 仅修改鱼鱼发货状态 ======
                     if not item_id:
                         results.append({
                             'order_id': order_id,
@@ -6913,7 +7303,7 @@ async def manual_ship_orders(
                             results.append({
                                 'order_id': order_id,
                                 'success': True,
-                                'message': '已成功修改闲鱼发货状态'
+                                'message': '已成功修改鱼鱼发货状态'
                             })
                             success_count += 1
                         else:
@@ -7237,7 +7627,7 @@ from product_publisher import XianyuProductPublisher, ProductInfo
 
 class ProductInfoRequest(BaseModel):
     """商品信息请求（不包含 cookie_id）"""
-    title: Optional[str] = None  # 标题（可选，闲鱼页面没有标题输入框）
+    title: Optional[str] = None  # 标题（可选，鱼鱼页面没有标题输入框）
     description: str
     price: float
     images: List[str]  # 图片路径列表
@@ -7250,7 +7640,7 @@ class ProductInfoRequest(BaseModel):
 class ProductPublishRequest(BaseModel):
     """商品发布请求"""
     cookie_id: str
-    title: Optional[str] = None  # 标题（可选，闲鱼页面没有标题输入框）
+    title: Optional[str] = None  # 标题（可选，鱼鱼页面没有标题输入框）
     description: str
     price: float
     images: List[str]  # 图片路径列表
@@ -7298,7 +7688,7 @@ async def publish_single_product(
         
         # 创建商品信息对象
         product = ProductInfo(
-            title=request.title or "闲鱼商品",  # 如果没有标题，使用默认标题
+            title=request.title or "鱼鱼商品",  # 如果没有标题，使用默认标题
             description=request.description,
             price=request.price,
             images=request.images,
@@ -7669,6 +8059,196 @@ async def get_publish_statistics(
 
 # ==================== 聊天记录 API ====================
 
+CONVERSATION_COOKIE_SUFFIX_PATTERN = re.compile(r'^(?P<base>.+?)_(?P<suffix>\d+)$')
+
+
+def _iter_conversation_cookie_aliases(cookie_id: str):
+    """迭代账号ID及其可回溯的主账号ID，例如 3083424450_1 -> 3083424450。"""
+    current = str(cookie_id or '').strip()
+    visited = set()
+    while current and current not in visited:
+        yield current
+        visited.add(current)
+        match = CONVERSATION_COOKIE_SUFFIX_PATTERN.match(current)
+        if not match:
+            break
+        current = match.group('base')
+
+
+def _resolve_owned_conversation_cookie(cookie_id: str, owned_cookie_ids: set[str]) -> Optional[str]:
+    """将聊天账号ID解析到当前用户拥有的主账号ID。"""
+    for candidate in _iter_conversation_cookie_aliases(cookie_id):
+        if candidate in owned_cookie_ids:
+            return candidate
+    return None
+
+
+def _get_accessible_conversation_context(user_id: int) -> Dict[str, Any]:
+    """获取当前用户可访问的聊天账号集合（含派生聊天账号）。"""
+    registered_cookies = db_manager.get_all_cookies(user_id)
+    owned_cookie_ids = set(registered_cookies.keys())
+    summaries = db_manager.get_conversation_cookie_summaries()
+
+    accessible_cookie_ids: List[str] = []
+    accessible_cookie_set = set()
+    summary_by_cookie = {}
+
+    for summary in summaries:
+        conversation_cookie_id = str(summary.get('cookie_id') or '').strip()
+        if not conversation_cookie_id or conversation_cookie_id in accessible_cookie_set:
+            continue
+
+        if _resolve_owned_conversation_cookie(conversation_cookie_id, owned_cookie_ids):
+            accessible_cookie_ids.append(conversation_cookie_id)
+            accessible_cookie_set.add(conversation_cookie_id)
+            summary_by_cookie[conversation_cookie_id] = summary
+
+    for cookie_id in registered_cookies.keys():
+        if cookie_id in accessible_cookie_set:
+            continue
+        accessible_cookie_ids.append(cookie_id)
+        accessible_cookie_set.add(cookie_id)
+
+    return {
+        'registered_cookies': registered_cookies,
+        'owned_cookie_ids': owned_cookie_ids,
+        'accessible_cookie_ids': accessible_cookie_ids,
+        'accessible_cookie_set': accessible_cookie_set,
+        'summary_by_cookie': summary_by_cookie,
+    }
+
+
+def _build_conversation_account_item(cookie_id: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    """构建聊天页使用的账号信息，兼容未注册但已有聊天记录的派生账号。"""
+    registered_cookies = context['registered_cookies']
+    owned_cookie_ids = context['owned_cookie_ids']
+    source_cookie_id = _resolve_owned_conversation_cookie(cookie_id, owned_cookie_ids) or cookie_id
+    is_conversation_only = cookie_id not in registered_cookies
+
+    cookie_details = db_manager.get_cookie_details(cookie_id)
+    source_details = cookie_details
+    if not source_details and source_cookie_id and source_cookie_id != cookie_id:
+        source_details = db_manager.get_cookie_details(source_cookie_id)
+    source_details = source_details or {}
+
+    status_cookie_id = cookie_id if cookie_id in registered_cookies else source_cookie_id
+    if status_cookie_id:
+        enabled = (
+            cookie_manager.manager.get_cookie_status(status_cookie_id)
+            if cookie_manager.manager is not None
+            else db_manager.get_cookie_status(status_cookie_id)
+        )
+    else:
+        enabled = True
+
+    base_label = source_details.get('remark') or source_details.get('username') or cookie_id
+    if is_conversation_only and base_label and base_label != cookie_id:
+        nickname = f"{base_label} · {cookie_id}"
+    else:
+        nickname = base_label or cookie_id
+
+    summary = context['summary_by_cookie'].get(cookie_id, {})
+
+    return {
+        'id': cookie_id,
+        'value': registered_cookies.get(cookie_id, ''),
+        'enabled': enabled,
+        'auto_confirm': source_details.get('auto_confirm', True),
+        'remark': source_details.get('remark', ''),
+        'pause_duration': source_details.get('pause_duration', 10),
+        'username': source_details.get('username', ''),
+        'login_password': source_details.get('password', '') if not is_conversation_only else '',
+        'show_browser': source_details.get('show_browser', False),
+        'nickname': nickname,
+        'conversation_only': is_conversation_only,
+        'derived_from': source_cookie_id if source_cookie_id != cookie_id else None,
+        'message_count': summary.get('message_count', 0),
+        'session_count': summary.get('session_count', 0),
+        'last_message_at': summary.get('last_message_at'),
+    }
+
+
+def _best_effort_sync_conversations(cookie_id: str, chat_id: Optional[str] = None, max_sessions: int = 6):
+    """尽量从本机已登录 Chrome 同步聊天页最新消息，不影响主接口可用性。"""
+    try:
+        from utils.conversation_browser_sync import sync_conversation_messages_best_effort
+
+        return sync_conversation_messages_best_effort(
+            cookie_id=str(cookie_id or '').strip(),
+            chat_id=str(chat_id or '').strip() or None,
+            max_sessions=max_sessions,
+        )
+    except Exception as e:
+        logger.warning(f"聊天页同步失败: cookie_id={cookie_id}, chat_id={chat_id}, error={e}")
+        return {'success': False, 'error': str(e)}
+
+
+_conversation_sync_threads: Dict[Tuple[str, str], threading.Thread] = {}
+_conversation_sync_threads_guard = threading.Lock()
+
+
+def _normalize_conversation_sync_mode(mode: Optional[str], default: str = 'auto') -> str:
+    normalized = str(mode or '').strip().lower()
+    if normalized in {'auto', 'none', 'background', 'force'}:
+        return normalized
+    return default
+
+
+def _schedule_best_effort_sync_conversations(cookie_id: str, chat_id: Optional[str] = None, max_sessions: int = 6) -> bool:
+    """异步调度聊天页补同步，避免接口请求阻塞或点开会话时拉起浏览器。"""
+    normalized_cookie_id = str(cookie_id or '').strip()
+    normalized_chat_id = str(chat_id or '').strip() or '__recent__'
+    if not normalized_cookie_id:
+        return False
+
+    job_key = (normalized_cookie_id, normalized_chat_id)
+
+    with _conversation_sync_threads_guard:
+        existing_thread = _conversation_sync_threads.get(job_key)
+        if existing_thread and existing_thread.is_alive():
+            return False
+
+        def _runner():
+            try:
+                _best_effort_sync_conversations(
+                    cookie_id=normalized_cookie_id,
+                    chat_id=None if normalized_chat_id == '__recent__' else normalized_chat_id,
+                    max_sessions=max_sessions,
+                )
+            finally:
+                with _conversation_sync_threads_guard:
+                    current_thread = _conversation_sync_threads.get(job_key)
+                    if current_thread is threading.current_thread():
+                        _conversation_sync_threads.pop(job_key, None)
+
+        thread = threading.Thread(
+            target=_runner,
+            daemon=True,
+            name=f"conversation-sync-{normalized_cookie_id}-{normalized_chat_id}",
+        )
+        _conversation_sync_threads[job_key] = thread
+        thread.start()
+        return True
+
+
+@app.get('/api/conversation-accounts')
+def get_conversation_accounts(
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """获取聊天页面可访问的账号列表，包含派生聊天账号。"""
+    try:
+        user_id = current_user['user_id']
+        log_with_user('info', "查询聊天账号列表", current_user)
+
+        context = _get_accessible_conversation_context(user_id)
+        return [
+            _build_conversation_account_item(cookie_id, context)
+            for cookie_id in context['accessible_cookie_ids']
+        ]
+    except Exception as e:
+        log_with_user('error', f"查询聊天账号列表失败: {str(e)}", current_user)
+        raise HTTPException(status_code=500, detail=f"查询聊天账号列表失败: {str(e)}")
+
 @app.get('/api/conversations')
 def get_conversations(
     cookie_id: Optional[str] = Query(None),
@@ -7681,10 +8261,11 @@ def get_conversations(
         user_id = current_user['user_id']
         log_with_user('info', f"查询聊天记录: cookie_id={cookie_id}, page={page}", current_user)
         
-        # 获取用户的所有Cookie
-        user_cookies = db_manager.get_all_cookies(user_id)
+        conversation_context = _get_accessible_conversation_context(user_id)
+        accessible_cookie_ids = conversation_context['accessible_cookie_ids']
+        accessible_cookie_set = conversation_context['accessible_cookie_set']
         
-        if not user_cookies:
+        if not accessible_cookie_ids:
             return {
                 "success": True,
                 "data": [],
@@ -7692,10 +8273,10 @@ def get_conversations(
                 "page": page,
                 "page_size": page_size,
                 "total_pages": 0
-            }
+        }
         
         # 如果指定了cookie_id，验证是否属于当前用户
-        if cookie_id and cookie_id not in user_cookies:
+        if cookie_id and cookie_id not in accessible_cookie_set:
             raise HTTPException(status_code=403, detail="无权访问该账号的聊天记录")
         
         # 获取聊天记录
@@ -7707,9 +8288,8 @@ def get_conversations(
             total = db_manager.count_conversations_by_cookie(cookie_id)
         else:
             # 查询所有账号的聊天记录
-            cookie_ids = list(user_cookies.keys())
-            conversations = db_manager.get_conversations_by_cookies(cookie_ids, limit=page_size, offset=offset)
-            total = db_manager.count_conversations_by_cookies(cookie_ids)
+            conversations = db_manager.get_conversations_by_cookies(accessible_cookie_ids, limit=page_size, offset=offset)
+            total = db_manager.count_conversations_by_cookies(accessible_cookie_ids)
         
         total_pages = (total + page_size - 1) // page_size
         
@@ -7731,6 +8311,126 @@ def get_conversations(
         raise HTTPException(status_code=500, detail=f"查询聊天记录失败: {str(e)}")
 
 
+@app.get('/api/conversation-sessions')
+def get_conversation_sessions(
+    cookie_id: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    sync_mode: Optional[str] = Query('auto'),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """按会话维度获取聊天列表。"""
+    try:
+        user_id = current_user['user_id']
+        normalized_sync_mode = _normalize_conversation_sync_mode(sync_mode, default='auto')
+        log_with_user('info', f"查询聊天会话列表: cookie_id={cookie_id}, page={page}, sync_mode={normalized_sync_mode}", current_user)
+
+        conversation_context = _get_accessible_conversation_context(user_id)
+        accessible_cookie_ids = conversation_context['accessible_cookie_ids']
+        accessible_cookie_set = conversation_context['accessible_cookie_set']
+
+        if not accessible_cookie_ids:
+            return {
+                "success": True,
+                "data": [],
+                "total": 0,
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0
+            }
+
+        if cookie_id and cookie_id not in accessible_cookie_set:
+            raise HTTPException(status_code=403, detail="无权访问该账号的聊天记录")
+
+        sync_targets = [cookie_id] if cookie_id else accessible_cookie_ids[:1]
+        if normalized_sync_mode == 'force' and page == 1:
+            for sync_cookie_id in sync_targets:
+                if sync_cookie_id:
+                    _best_effort_sync_conversations(sync_cookie_id, max_sessions=min(page_size, 8))
+
+        offset = (page - 1) * page_size
+        if cookie_id:
+            sessions = db_manager.get_conversation_sessions_by_cookie(cookie_id, limit=page_size, offset=offset)
+            total = db_manager.count_conversation_sessions_by_cookie(cookie_id)
+        else:
+            sessions = db_manager.get_conversation_sessions_by_cookies(accessible_cookie_ids, limit=page_size, offset=offset)
+            total = db_manager.count_conversation_sessions_by_cookies(accessible_cookie_ids)
+
+        sync_triggered = False
+        if page == 1:
+            if normalized_sync_mode == 'auto' and total == 0:
+                for sync_cookie_id in sync_targets:
+                    if sync_cookie_id:
+                        _best_effort_sync_conversations(sync_cookie_id, max_sessions=min(page_size, 8))
+                if cookie_id:
+                    sessions = db_manager.get_conversation_sessions_by_cookie(cookie_id, limit=page_size, offset=offset)
+                    total = db_manager.count_conversation_sessions_by_cookie(cookie_id)
+                else:
+                    sessions = db_manager.get_conversation_sessions_by_cookies(accessible_cookie_ids, limit=page_size, offset=offset)
+                    total = db_manager.count_conversation_sessions_by_cookies(accessible_cookie_ids)
+            elif normalized_sync_mode == 'background':
+                for sync_cookie_id in sync_targets:
+                    if sync_cookie_id and _schedule_best_effort_sync_conversations(sync_cookie_id, max_sessions=min(page_size, 8)):
+                        sync_triggered = True
+
+        total_pages = (total + page_size - 1) // page_size
+        return {
+            "success": True,
+            "data": sessions,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages,
+            "sync_mode": normalized_sync_mode,
+            "sync_triggered": sync_triggered,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        log_with_user('error', f"查询聊天会话列表失败: {str(e)}", current_user)
+        raise HTTPException(status_code=500, detail=f"查询聊天会话列表失败: {str(e)}")
+
+
+@app.get('/api/conversation-thread')
+def get_conversation_thread(
+    cookie_id: str = Query(...),
+    chat_id: str = Query(...),
+    sync_mode: Optional[str] = Query('none'),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """获取单个聊天会话的完整消息。"""
+    try:
+        user_id = current_user['user_id']
+        normalized_sync_mode = _normalize_conversation_sync_mode(sync_mode, default='none')
+        log_with_user('info', f"查询聊天会话详情: cookie_id={cookie_id}, chat_id={chat_id}, sync_mode={normalized_sync_mode}", current_user)
+
+        conversation_context = _get_accessible_conversation_context(user_id)
+        if cookie_id not in conversation_context['accessible_cookie_set']:
+            raise HTTPException(status_code=403, detail="无权访问该账号的聊天记录")
+
+        messages = db_manager.get_conversation_thread(cookie_id, chat_id)
+        sync_triggered = False
+        if not messages:
+            if normalized_sync_mode == 'force':
+                _best_effort_sync_conversations(cookie_id, chat_id=chat_id, max_sessions=1)
+                messages = db_manager.get_conversation_thread(cookie_id, chat_id)
+            elif normalized_sync_mode == 'background':
+                sync_triggered = _schedule_best_effort_sync_conversations(cookie_id, chat_id=chat_id, max_sessions=1)
+
+        return {
+            "success": True,
+            "data": messages,
+            "total": len(messages),
+            "sync_mode": normalized_sync_mode,
+            "sync_triggered": sync_triggered,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        log_with_user('error', f"查询聊天会话详情失败: {str(e)}", current_user)
+        raise HTTPException(status_code=500, detail=f"查询聊天会话详情失败: {str(e)}")
+
+
 @app.get('/api/conversations/{conversation_id}')
 def get_conversation_detail(
     conversation_id: int,
@@ -7741,8 +8441,7 @@ def get_conversation_detail(
         user_id = current_user['user_id']
         log_with_user('info', f"查询聊天记录详情: {conversation_id}", current_user)
         
-        # 获取用户的所有Cookie
-        user_cookies = db_manager.get_all_cookies(user_id)
+        conversation_context = _get_accessible_conversation_context(user_id)
         
         # 获取聊天记录
         conversation = db_manager.get_conversation_by_id(conversation_id)
@@ -7751,7 +8450,7 @@ def get_conversation_detail(
             raise HTTPException(status_code=404, detail="聊天记录不存在")
         
         # 验证是否属于当前用户
-        if conversation.get('cookie_id') not in user_cookies:
+        if conversation.get('cookie_id') not in conversation_context['accessible_cookie_set']:
             raise HTTPException(status_code=403, detail="无权访问该聊天记录")
         
         log_with_user('info', f"聊天记录详情查询成功: {conversation_id}", current_user)

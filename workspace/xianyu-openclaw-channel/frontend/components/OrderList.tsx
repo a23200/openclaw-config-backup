@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Order, OrderStatus, Item } from '../types';
-import { getOrders, syncOrders, syncSingleOrder, manualShipOrder, updateOrder, deleteOrder, importOrders, getItems } from '../services/api';
+import { getOrders, syncOrders, syncSingleOrder, manualShipOrder, updateOrder, deleteOrder, importOrders, getItems, repairOrderItemMedia } from '../services/api';
 import { Search, MoreHorizontal, Truck, RefreshCw, Copy, ChevronLeft, ChevronRight, PackageCheck, Edit, Eye, Plus, Save, X, User as UserIcon, Phone, MapPin, Upload, ExternalLink, Trash2 } from 'lucide-react';
+import { buildItemPlaceholderDataUrl } from '../utils/image';
 
 const StatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
   const styles = {
@@ -65,6 +66,17 @@ const OrderList: React.FC = () => {
   });
   const [syncingOrderId, setSyncingOrderId] = useState<string | null>(null);
   const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
+  const [repairingMedia, setRepairingMedia] = useState(false);
+
+  const itemLookup = useMemo(() => {
+    const lookup: Record<string, Item> = {};
+    items.forEach((item) => {
+      if (item.item_id) {
+        lookup[item.item_id] = item;
+      }
+    });
+    return lookup;
+  }, [items]);
 
   // 搜索过滤订单
   const filterOrders = (ordersToFilter: Order[]): Order[] => {
@@ -118,21 +130,31 @@ const OrderList: React.FC = () => {
       }
   };
 
+  const loadItems = async () => {
+    try {
+      const itemsList = await getItems();
+      setItems(itemsList);
+      buildItemNamesMap(itemsList);
+    } catch (e) {
+      console.error('加载商品列表失败:', e);
+    }
+  };
+
   // 当订单数据改变时，重新过滤订单
   useEffect(() => {
     setOrders(filterOrders(allOrders));
   }, [allOrders, searchText]);
 
   // 从订单的 item_id 查找对应的商品名称（通过标题匹配）
-  const getItemNameById = (orderId: string, orderItemTitle?: string): string => {
+  const getItemNameById = (itemId: string, orderItemTitle?: string): string => {
       // 如果订单有 item_title，优先使用
       if (orderItemTitle && orderItemTitle.trim()) {
           return orderItemTitle;
       }
 
       // 尝试通过 item_id 直接匹配
-      if (itemNames[orderId]) {
-          return itemNames[orderId];
+      if (itemNames[itemId]) {
+          return itemNames[itemId];
       }
 
       // 尝试在商品列表中查找相似标题的商品
@@ -154,10 +176,17 @@ const OrderList: React.FC = () => {
       return '未知商品';
   };
 
+  const getOrderItemPrice = (order: Order) => order.item_price || itemLookup[order.item_id]?.item_price || '';
+
+  const getOrderItemImage = (order: Order) =>
+    itemLookup[order.item_id]?.item_image ||
+    order.item_image ||
+    buildItemPlaceholderDataUrl(getItemNameById(order.item_id, order.item_title), getOrderItemPrice(order));
+
   // 从商品列表构建商品ID到商品名的映射
-  const buildItemNamesMap = () => {
+  const buildItemNamesMap = (sourceItems: Item[]) => {
       const namesMap: Record<string, string> = {};
-      items.forEach(item => {
+      sourceItems.forEach(item => {
           // 使用 item_id 作为键，商品标题作为值
           if (item.item_id) {
               namesMap[item.item_id] = item.item_title || item.item_id;
@@ -168,19 +197,27 @@ const OrderList: React.FC = () => {
 
   useEffect(() => {
     loadOrders();
-    // 加载商品列表
-    getItems().then((itemsList) => {
-      setItems(itemsList);
-      buildItemNamesMap();
-    }).catch((e) => {
-      console.error('加载商品列表失败:', e);
-    });
+    loadItems();
   }, [filter, page, searchText]);
 
   const handleSync = async () => {
       setLoading(true);
       await syncOrders();
-      loadOrders();
+      await Promise.all([loadOrders(), loadItems()]);
+  };
+
+  const handleRepairItemMedia = async () => {
+    setRepairingMedia(true);
+    try {
+      const result = await repairOrderItemMedia({ limit: 50 });
+      await Promise.all([loadOrders(), loadItems()]);
+      alert(`补全完成：成功 ${result.updated_count || 0} 条，失败 ${result.failed_count || 0} 条，跳过 ${result.skipped_count || 0} 条。`);
+    } catch (error: any) {
+      console.error('补全订单商品信息失败:', error);
+      alert(error?.message || '补全订单商品信息失败，请重试');
+    } finally {
+      setRepairingMedia(false);
+    }
   };
 
   const handleShip = (id: string) => {
@@ -309,7 +346,7 @@ const OrderList: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
         <div>
           <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">订单中心</h2>
-          <p className="text-gray-500 mt-2 font-medium">查看所有闲鱼交易记录与状态。</p>
+          <p className="text-gray-500 mt-2 font-medium">查看所有鱼鱼交易记录与状态。</p>
         </div>
         <div className="flex items-center gap-3">
             <button onClick={loadOrders} className="p-3 rounded-2xl bg-white border border-gray-100 text-gray-600 hover:bg-gray-50 hover:text-black transition-colors shadow-sm">
@@ -321,6 +358,14 @@ const OrderList: React.FC = () => {
             >
               <Plus className="w-4 h-4" />
               插入订单
+            </button>
+            <button
+              onClick={handleRepairItemMedia}
+              disabled={repairingMedia}
+              className="px-5 py-3 rounded-2xl font-bold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors text-sm flex items-center gap-2 shadow-sm disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${repairingMedia ? 'animate-spin' : ''}`} />
+              补全订单商品信息
             </button>
             <button onClick={handleSync} className="ios-btn-primary px-6 py-3 rounded-2xl font-bold shadow-lg shadow-yellow-200 text-sm flex items-center gap-2">
                 <Truck className="w-5 h-5" />
@@ -379,11 +424,17 @@ const OrderList: React.FC = () => {
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-5">
                       <div className="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden shadow-sm border border-gray-100 flex-shrink-0">
-                        {order.item_image ? (
-                            <img src={order.item_image} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-300"><PackageCheck /></div>
-                        )}
+                        <img
+                          src={getOrderItemImage(order)}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={(event) => {
+                            event.currentTarget.src = buildItemPlaceholderDataUrl(
+                              getItemNameById(order.item_id, order.item_title),
+                              getOrderItemPrice(order),
+                            );
+                          }}
+                        />
                       </div>
                       <div className="min-w-0">
                         <div className="font-bold text-gray-900 line-clamp-1 text-sm">
@@ -436,7 +487,7 @@ const OrderList: React.FC = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mr-2 inline-flex text-gray-400 hover:text-amber-600 p-2 rounded-xl hover:bg-amber-50 transition-colors"
-                      title="查看闲鱼详情"
+                      title="查看鱼鱼详情"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </a>
@@ -549,16 +600,24 @@ const OrderList: React.FC = () => {
               <div className="space-y-4">
                 <h4 className="text-lg font-bold text-gray-800">商品信息</h4>
                 <div className="p-4 bg-gray-50 rounded-xl flex items-center gap-4">
-                  {selectedOrder.item_image && (
-                    <img src={selectedOrder.item_image} alt="" className="w-20 h-20 rounded-xl object-cover border border-gray-200" />
-                  )}
+                  <img
+                    src={getOrderItemImage(selectedOrder)}
+                    alt=""
+                    className="w-20 h-20 rounded-xl object-cover border border-gray-200"
+                    onError={(event) => {
+                      event.currentTarget.src = buildItemPlaceholderDataUrl(
+                        getItemNameById(selectedOrder.item_id, selectedOrder.item_title),
+                        getOrderItemPrice(selectedOrder),
+                      );
+                    }}
+                  />
                   <div className="flex-1">
                     <div className="font-bold text-gray-900 mb-1">
                       {getItemNameById(selectedOrder.item_id, selectedOrder.item_title)}
                     </div>
                     <div className="text-sm text-gray-500">商品ID: {selectedOrder.item_id}</div>
-                    {selectedOrder.item_price && (
-                      <div className="text-sm text-gray-500 mt-1">标价: ¥{selectedOrder.item_price}</div>
+                    {getOrderItemPrice(selectedOrder) && (
+                      <div className="text-sm text-gray-500 mt-1">标价: {getOrderItemPrice(selectedOrder)}</div>
                     )}
                   </div>
                 </div>
@@ -710,10 +769,10 @@ const OrderList: React.FC = () => {
                     <Truck className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <div className="font-bold text-gray-900 text-sm">仅修改闲鱼发货状态</div>
+                    <div className="font-bold text-gray-900 text-sm">仅修改鱼鱼发货状态</div>
                     <div className="text-xs text-gray-500 mt-1 leading-relaxed">
-                      不实际扣除或发送卡券，仅在闲鱼平台将订单标记为"已发货"。
-                      适用于已经给客户发过货、只是忘记在闲鱼修改状态的情况。
+                      不实际扣除或发送卡券，仅在鱼鱼平台将订单标记为"已发货"。
+                      适用于已经给客户发过货、只是忘记在鱼鱼修改状态的情况。
                     </div>
                   </div>
                 </div>

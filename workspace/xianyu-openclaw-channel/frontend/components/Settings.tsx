@@ -333,7 +333,7 @@ const Settings: React.FC = () => {
                   type="text"
                   value={settings.smtp_from || ''}
                   onChange={e => setSettings({...settings, smtp_from: e.target.value})}
-                  placeholder="闲鱼自动回复系统"
+                  placeholder="鱼鱼自动回复系统"
                   className="w-full ios-input px-4 py-3 rounded-xl text-sm"
                 />
               </div>

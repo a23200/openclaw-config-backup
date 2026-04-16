@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>霸霸精准流量获取工具</title>
+    <link rel="stylesheet" href="/static/app.css?v=__ASSET_VERSION__" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">BABA Growth</p>
+          <h1>霸霸精准流量获取工具</h1>
+          <p class="subtext">抓视频、抓评论、筛线索、建任务、顺序执行代发送。</p>
+          <div class="hero-pills">
+            <span class="hero-pill">视频发现</span>
+            <span class="hero-pill">评论筛选</span>
+            <span class="hero-pill">线索打分</span>
+            <span class="hero-pill">任务队列</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button id="refreshAllBtn" class="primary">刷新全部</button>
+          <a href="/docs" target="_blank" rel="noreferrer" class="button-link">打开 Swagger</a>
+        </div>
+      </header>
+
+      <section class="workflow-strip">
+        <article class="workflow-item">
+          <span class="workflow-step">01</span>
+          <strong>抓取视频</strong>
+          <p>根据关键词自动发现目标内容池。</p>
+        </article>
+        <article class="workflow-item">
+          <span class="workflow-step">02</span>
+          <strong>抓取评论</strong>
+          <p>按规则过滤，只保留高价值评论。</p>
+        </article>
+        <article class="workflow-item">
+          <span class="workflow-step">03</span>
+          <strong>沉淀线索</strong>
+          <p>进入线索池，支持筛选与追加建任务。</p>
+        </article>
+        <article class="workflow-item">
+          <span class="workflow-step">04</span>
+          <strong>执行任务</strong>
+          <p>批量顺序打开私信，展示实时进度。</p>
+        </article>
+      </section>
+
+      <section class="summary-grid" id="summaryGrid">
+        <article class="summary-card">
+          <span>视频数</span>
+          <strong id="summaryVideos">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>评论数</span>
+          <strong id="summaryComments">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>线索数</span>
+          <strong id="summaryLeads">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>高意向</span>
+          <strong id="summaryHighIntent">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>外呼任务</span>
+          <strong id="summaryTasks">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>已发送</span>
+          <strong id="summarySentTasks">0</strong>
+        </article>
+      </section>
+
+      <section class="panel control-panel">
+        <div class="panel-header">
+          <div>
+            <h2>统一采集工作台</h2>
+            <p class="panel-subtext">所有抓视频、抓评论、批量执行按钮统一放在这里；下方列表只保留各自数据操作。</p>
+          </div>
+        </div>
+
+        <div class="scope-grid">
+          <div class="scope-card">
+            <strong>评论筛选作用范围</strong>
+            <span>只影响“抓取当前视频 / 一键抓取评论 / 全自动执行”时保留哪些评论。</span>
+          </div>
+          <div class="scope-card">
+            <strong>线索池筛选作用范围</strong>
+            <span>只影响下方“线索池”列表显示，不会反过来影响抓评结果。</span>
+          </div>
+        </div>
+
+        <div class="control-grid">
+          <section class="control-card">
+            <div class="control-card-header">
+              <div>
+                <h3>视频发现设置</h3>
+                <p class="hint">控制“抓取视频”和“全自动执行”如何找视频。</p>
+              </div>
+              <span class="section-badge">步骤 1</span>
+            </div>
+            <form id="discoverVideosForm" class="form-grid compact-grid">
+              <label class="wide">
+                <span>抓取视频关键词</span>
+                <input
+                  id="quickKeywords"
+                  name="keywords"
+                  placeholder="副业, 创业, 兼职；留空则走系统默认关键词"
+                />
+              </label>
+              <label>
+                <span>关键词数</span>
+                <input name="max_keywords" type="number" min="1" max="10" value="3" />
+              </label>
+              <label>
+                <span>每词视频数</span>
+                <input name="max_videos_per_keyword" type="number" min="1" max="30" value="8" />
+              </label>
+              <label>
+                <span>排序依据</span>
+                <select name="sort_by">
+                  <option value="comprehensive" selected>综合排序</option>
+                  <option value="latest">最新发布</option>
+                  <option value="most_liked">最多点赞</option>
+                </select>
+              </label>
+              <label>
+                <span>发布时间</span>
+                <select name="publish_time">
+                  <option value="all" selected>不限</option>
+                  <option value="day">一天内</option>
+                  <option value="week">一周内</option>
+                  <option value="half_year">半年内</option>
+                </select>
+              </label>
+              <label>
+                <span>视频时长</span>
+                <select name="video_duration">
+                  <option value="all" selected>不限</option>
+                  <option value="lt_1m">1分钟以下</option>
+                  <option value="between_1m_5m">1-5分钟</option>
+                  <option value="gt_5m">5分钟以上</option>
+                </select>
+              </label>
+              <label>
+                <span>搜索范围</span>
+                <select name="search_scope">
+                  <option value="all" selected>不限</option>
+                  <option value="following">关注的人</option>
+                  <option value="recent">最近看过</option>
+                  <option value="unseen">还未看过</option>
+                </select>
+              </label>
+              <label>
+                <span>批量处理视频数</span>
+                <input id="quickBatchLimit" type="number" min="1" max="30" value="5" />
+              </label>
+              <label class="checkbox-field card-checkbox">
+                <input name="auto_connect" type="checkbox" checked />
+                <span>复用当前本机 Chrome 会话</span>
+              </label>
+              <label class="checkbox-field card-checkbox">
+                <input id="quickOnlyUningested" type="checkbox" checked />
+                <span>批量时只抓未采集视频</span>
+              </label>
+              <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true">提交发现设置</button>
+            </form>
+            <p class="hint">当前这块固定在视频搜索页，内容形式默认就是“视频”。</p>
+          </section>
+
+          <section class="control-card">
+            <div class="control-card-header">
+              <div>
+                <h3>评论抓取设置</h3>
+                <p class="hint">控制“抓取当前视频 / 一键抓取评论 / 全自动执行”的抓评规则。</p>
+              </div>
+              <span class="section-badge">步骤 2</span>
+            </div>
+            <form id="douyinCollectForm" class="form-grid compact-grid">
+              <label class="wide">
+                <span>当前视频链接（只给“抓取当前视频”使用）</span>
+                <input name="video_url" placeholder="https://www.douyin.com/video/..." required />
+              </label>
+              <label class="wide">
+                <span>评论规则关键词（智能匹配）</span>
+                <input
+                  name="rule_keywords"
+                  placeholder="价格, 联系方式, 新手, 想做；批量抓评和全自动执行也会复用这里"
+                />
+              </label>
+              <label>
+                <span>评论筛选</span>
+                <select name="min_level">
+                  <option value="medium" selected>保留 medium + high</option>
+                  <option value="high">只保留 high</option>
+                  <option value="all">保留全部</option>
+                </select>
+              </label>
+              <label>
+                <span>滚动次数</span>
+                <input name="max_scrolls" type="number" min="0" max="120" value="8" />
+              </label>
+              <label>
+                <span>最大评论数</span>
+                <input name="max_comments" type="number" min="1" max="1000" value="80" />
+              </label>
+              <label class="checkbox-field card-checkbox">
+                <input name="auto_connect" type="checkbox" checked />
+                <span>复用当前本机 Chrome 会话</span>
+              </label>
+              <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true">提交抓评设置</button>
+            </form>
+          </section>
+        </div>
+
+        <div class="action-bar">
+          <div class="action-bar-main">
+            <button id="quickDiscoverBtn" class="primary" data-quick-action="discover">抓取视频</button>
+            <button id="collectCurrentVideoBtn" class="secondary">抓取当前视频</button>
+            <button id="quickBatchCollectBtn" class="secondary" data-quick-action="collect">一键抓取评论</button>
+            <button id="quickAutoPipelineBtn" class="ghost" data-quick-action="pipeline">全自动执行</button>
+          </div>
+          <p class="hint action-bar-hint">推荐顺序：先抓取视频 → 再一键抓取评论；如果只测单条视频，就用“抓取当前视频”。</p>
+        </div>
+
+        <div class="results-board">
+          <div id="discoverResultPanel" class="result-panel hidden">
+            <div class="panel-header">
+              <h3>最近一次视频发现结果</h3>
+            </div>
+            <div class="result-grid">
+              <div class="muted-card">
+                <span>使用关键词</span>
+                <strong id="discoverResultKeywords">-</strong>
+              </div>
+              <div class="muted-card">
+                <span>发现筛选</span>
+                <strong id="discoverResultFilters">-</strong>
+              </div>
+              <div class="muted-card">
+                <span>发现视频数</span>
+                <strong id="discoverResultCount">0</strong>
+              </div>
+              <div class="muted-card">
+                <span>新入库视频</span>
+                <strong id="discoverResultCreated">0</strong>
+              </div>
+              <div class="muted-card">
+                <span>已存在视频</span>
+                <strong id="discoverResultExisting">0</strong>
+              </div>
+            </div>
+            <div id="discoverResultVideos" class="history-list"></div>
+          </div>
+
+          <div id="collectResultPanel" class="result-panel hidden">
+            <div class="panel-header">
+              <h3>最近一次评论采集结果</h3>
+            </div>
+            <div class="result-grid">
+              <div class="muted-card">
+                <span>视频标题</span>
+                <strong id="collectResultTitle">-</strong>
+              </div>
+              <div class="muted-card">
+                <span>真实视频 ID</span>
+                <strong id="collectResultVideoId">-</strong>
+              </div>
+              <div class="muted-card">
+                <span>保留评论数</span>
+                <strong id="collectResultCount">0</strong>
+              </div>
+              <div class="muted-card">
+                <span>原始评论数</span>
+                <strong id="collectResultRawCount">0</strong>
+              </div>
+              <div class="muted-card">
+                <span>过滤评论数</span>
+                <strong id="collectResultFiltered">0</strong>
+              </div>
+              <div class="muted-card">
+                <span>新建线索数</span>
+                <strong id="collectResultLeads">0</strong>
+              </div>
+            </div>
+            <div class="detail-grid">
+              <div>
+                <span class="detail-label">视频链接</span>
+                <a id="collectResultUrl" href="#" target="_blank" rel="noreferrer">-</a>
+              </div>
+              <div>
+                <span class="detail-label">示例主页</span>
+                <div id="collectResultProfiles" class="tag-list"></div>
+              </div>
+            </div>
+            <div>
+              <span class="detail-label">页面文本片段</span>
+              <pre id="collectResultSnippet" class="snippet-box">-</pre>
+            </div>
+          </div>
+        </div>
+
+        <div id="batchCollectResultPanel" class="result-panel hidden">
+          <div class="panel-header">
+            <h3>批量抓评队列进度</h3>
+          </div>
+          <div class="result-grid">
+            <div class="muted-card">
+              <span>计划处理</span>
+              <strong id="batchCollectRequested">0</strong>
+            </div>
+            <div class="muted-card">
+              <span>成功视频数</span>
+              <strong id="batchCollectSuccess">0</strong>
+            </div>
+            <div class="muted-card">
+              <span>保留评论总数</span>
+              <strong id="batchCollectComments">0</strong>
+            </div>
+            <div class="muted-card">
+              <span>新增线索</span>
+              <strong id="batchCollectLeads">0</strong>
+            </div>
+          </div>
+          <div id="batchCollectResultList" class="history-list"></div>
+        </div>
+      </section>
+
+      <section id="videosPanel" class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>目标视频列表</h2>
+            <p class="panel-subtext">这里只做视频池管理；批量抓评请使用上方“统一采集工作台”。</p>
+          </div>
+          <div class="filters">
+            <button id="loadVideosBtn" class="ghost" type="button">刷新视频</button>
+            <button id="clearVideoCacheBtn" class="ghost" type="button">清空视频缓存</button>
+            <button id="clearVideosBtn" class="ghost" type="button">清空视频列表</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table videos-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>视频标题</th>
+                <th>平台视频 ID</th>
+                <th>状态</th>
+                <th>最近导入</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="videosTableBody"></tbody>
+          </table>
+        </div>
+        <p class="hint">列表里的“抓评论”会复用上方“评论抓取设置”中的筛选、关键词、滚动次数和评论上限。</p>
+        <div class="subpanel">
+          <div class="panel-header">
+            <h3>手动补录视频</h3>
+          </div>
+          <form id="videoForm" class="form-grid compact-grid">
+            <label>
+              <span>平台视频 ID</span>
+              <input name="platform_video_id" placeholder="7490050011223344556" required />
+            </label>
+            <label>
+              <span>视频链接</span>
+              <input name="video_url" placeholder="https://www.douyin.com/video/..." required />
+            </label>
+            <label>
+              <span>标题</span>
+              <input name="title" placeholder="创业副业案例视频" />
+            </label>
+            <button type="submit" class="primary">创建视频</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>线索池</h2>
+            <p class="panel-subtext">下面两个筛选只影响这张线索表，不影响上方抓评保留规则。</p>
+          </div>
+          <div class="filters">
+            <select id="leadLevelFilter">
+              <option value="">全部等级</option>
+              <option value="high">high</option>
+              <option value="medium">medium</option>
+              <option value="low">low</option>
+            </select>
+            <select id="leadStatusFilter">
+              <option value="">全部状态</option>
+              <option value="new">new</option>
+              <option value="qualified">qualified</option>
+              <option value="working">working</option>
+              <option value="contacted">contacted</option>
+              <option value="followup_needed">followup_needed</option>
+            </select>
+            <button id="loadLeadsBtn" class="ghost" type="button">刷新线索</button>
+            <button id="clearCommentCacheBtn" class="ghost" type="button">清空采集缓存</button>
+            <button id="clearCommentsBtn" class="ghost" type="button">清空评论线索</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table leads-table">
+            <thead>
+              <tr>
+                <th class="col-select">
+                  <input id="toggleAllLeads" type="checkbox" aria-label="全选当前线索" />
+                </th>
+                <th>ID</th>
+                <th>用户</th>
+                <th>最新评论</th>
+                <th>等级</th>
+                <th>分数</th>
+                <th>关键词</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="leadsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>任务工作台</h2>
+            <p class="panel-subtext">从已抓取线索追加创建任务；执行时会依次打开私信并填入文案，方便继续确认发送。</p>
+          </div>
+          <div class="filters">
+            <span id="selectedLeadCount" class="tag">已选 0 条线索</span>
+            <button id="clearLeadSelectionBtn" class="ghost" type="button">清空线索选择</button>
+          </div>
+        </div>
+        <div class="control-grid">
+          <section class="control-card">
+            <div class="control-card-header">
+              <div>
+                <h3>添加任务</h3>
+                <p class="hint">支持单条手动创建，也支持把当前线索列表追加进任务池。</p>
+              </div>
+              <span class="section-badge">步骤 3</span>
+            </div>
+            <form id="taskForm" class="form-grid compact-grid">
+              <label>
+                <span>手动线索 ID（单条时填写）</span>
+                <input name="lead_id" placeholder="1" />
+              </label>
+              <label>
+                <span>模板编码</span>
+                <input name="template_code" placeholder="hello_v1" />
+              </label>
+              <label class="wide">
+                <span>消息内容</span>
+                <textarea name="message_content" placeholder="您好" required>您好</textarea>
+              </label>
+              <div class="task-form-actions wide">
+                <button type="submit" class="primary">手动创建单条</button>
+                <button id="addSelectedLeadsTasksBtn" type="button" class="secondary">添加选中线索</button>
+                <button id="addVisibleLeadsTasksBtn" type="button" class="ghost">添加当前列表</button>
+              </div>
+            </form>
+            <p class="hint">添加式创建，不会覆盖旧任务；“当前列表”会复用线索池筛选结果。</p>
+          </section>
+
+          <section class="control-card">
+            <div class="control-card-header">
+              <div>
+                <h3>执行进度</h3>
+                <p class="hint">按任务创建顺序逐条处理待执行任务。</p>
+              </div>
+              <span class="section-badge">步骤 4</span>
+            </div>
+            <div class="result-grid">
+              <div class="muted-card">
+                <span>计划执行</span>
+                <strong id="taskQueuePlanned">0</strong>
+              </div>
+              <div class="muted-card">
+                <span>已完成</span>
+                <strong id="taskQueueCompleted">0</strong>
+              </div>
+              <div class="muted-card">
+                <span>成功</span>
+                <strong id="taskQueueSuccess">0</strong>
+              </div>
+              <div class="muted-card">
+                <span>失败</span>
+                <strong id="taskQueueFailed">0</strong>
+              </div>
+              <div class="muted-card wide-card">
+                <span>当前任务</span>
+                <strong id="taskQueueCurrent">-</strong>
+              </div>
+            </div>
+            <div class="inline-actions">
+              <button id="runDraftTasksBtn" class="primary" type="button">一键执行待处理任务</button>
+            </div>
+            <div id="taskQueueProgressList" class="history-list">
+              <p class="hint">还没有执行记录。</p>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>外呼任务</h2>
+            <p class="panel-subtext">`draft` 表示待执行，`prepared` 表示已打开私信并填好文案，等待你确认发送。</p>
+          </div>
+          <button id="loadTasksBtn" class="ghost" type="button">刷新任务</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table tasks-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Lead ID</th>
+                <th>用户</th>
+                <th>模板</th>
+                <th>状态</th>
+                <th>发送时间</th>
+                <th>消息内容</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="tasksTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel panel-muted">
+        <div class="panel-header">
+          <div>
+            <h2>评论导入</h2>
+            <p class="panel-subtext">调试或手动补数据时使用，日常抓评不需要进这里。</p>
+          </div>
+          <button id="loadExampleBtn" class="ghost">填充样例</button>
+        </div>
+        <form id="importForm">
+          <label class="stacked">
+            <span>JSON Payload</span>
+            <textarea id="importPayload" spellcheck="false"></textarea>
+          </label>
+          <div class="inline-actions">
+            <button type="submit" class="primary">导入评论</button>
+            <span class="hint">先创建视频，再把 `video_id` 改成真实值。</span>
+          </div>
+        </form>
+      </section>
+
+      <div id="toast" class="toast hidden"></div>
+      <div id="leadDrawer" class="drawer hidden">
+        <div id="leadDrawerBackdrop" class="drawer-backdrop"></div>
+        <aside class="drawer-panel">
+          <div class="panel-header">
+            <h2>线索详情</h2>
+            <button id="closeLeadDrawerBtn" class="ghost" type="button">关闭</button>
+          </div>
+          <div id="leadDrawerContent" class="drawer-content">
+            <p class="hint">请选择一条线索查看详情。</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <script src="/static/app.js?v=__ASSET_VERSION__" defer></script>
+  </body>
+</html>

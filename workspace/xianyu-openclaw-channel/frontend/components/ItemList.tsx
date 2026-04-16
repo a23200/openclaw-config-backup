@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Item, AccountDetail } from '../types';
 import { getItems, getAccountDetails, syncItemsFromAccount, updateItemAiKnowledge } from '../services/api';
-import { Box, RefreshCw, ShoppingBag, Edit, Trash2, Plus, Save, X, Eye, EyeOff, Brain } from 'lucide-react';
+import { RefreshCw, ShoppingBag, Edit, Trash2, Plus, Save, X, Eye, EyeOff, Brain } from 'lucide-react';
+import { buildItemPlaceholderDataUrl } from '../utils/image';
 
 const ItemList: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -149,12 +150,15 @@ const ItemList: React.FC = () => {
     }
   };
 
+  const getItemCardImage = (item: Item) =>
+    item.item_image || buildItemPlaceholderDataUrl(item.item_title, item.item_price);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold text-gray-900">商品管理</h2>
-          <p className="text-gray-500 mt-2 text-sm">监控并管理所有账号下的闲鱼商品。</p>
+          <p className="text-gray-500 mt-2 text-sm">监控并管理所有账号下的鱼鱼商品。</p>
         </div>
         <div className="flex gap-3">
             <select
@@ -214,15 +218,16 @@ const ItemList: React.FC = () => {
                       </button>
                   </div>
                   <div className="aspect-square bg-gray-100 rounded-2xl mb-4 overflow-hidden relative">
-                      {item.item_image ? (
-                          <img src={item.item_image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-300">
-                              <Box className="w-10 h-10" />
-                          </div>
-                      )}
+                      <img
+                        src={getItemCardImage(item)}
+                        alt=""
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(event) => {
+                          event.currentTarget.src = buildItemPlaceholderDataUrl(item.item_title, item.item_price);
+                        }}
+                      />
                       <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg">
-                          ¥{item.item_price}
+                          {item.item_price || '价格待补充'}
                       </div>
                   </div>
                   <h3 className="font-bold text-gray-900 line-clamp-2 text-sm mb-2 h-10">{item.item_title}</h3>

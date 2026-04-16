@@ -1,0 +1,1436 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Word to PPT Studio</title>
+    <style>
+      :root {
+        --bg: #07111f;
+        --panel: rgba(10, 19, 36, 0.78);
+        --panel-2: rgba(17, 29, 54, 0.92);
+        --line: rgba(255, 255, 255, 0.12);
+        --text: #f4f7fb;
+        --muted: #98a7c2;
+        --brand: #7c9cff;
+        --brand-2: #67e8f9;
+        --ok: #34d399;
+        --warn: #fbbf24;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(103, 232, 249, 0.18), transparent 28%),
+          radial-gradient(circle at top right, rgba(124, 156, 255, 0.24), transparent 32%),
+          linear-gradient(180deg, #07111f 0%, #0c172a 100%);
+        min-height: 100vh;
+      }
+      .shell {
+        width: min(1180px, calc(100% - 32px));
+        margin: 24px auto 40px;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .panel {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        backdrop-filter: blur(16px);
+        border-radius: 24px;
+        box-shadow: 0 18px 64px rgba(0, 0, 0, 0.28);
+      }
+      .hero-main {
+        padding: 28px;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(124, 156, 255, 0.25);
+        color: #d9e3ff;
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 13px;
+        background: rgba(124, 156, 255, 0.08);
+      }
+      h1 {
+        font-size: 46px;
+        line-height: 1.08;
+        margin: 16px 0 14px;
+      }
+      .lead {
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.7;
+        max-width: 680px;
+      }
+      .hero-stats {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 22px;
+      }
+      .stat {
+        min-width: 150px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .stat strong {
+        display: block;
+        font-size: 20px;
+        margin-bottom: 4px;
+      }
+      .hero-side {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .timeline-step {
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+      }
+      .timeline-step b { display: block; margin-bottom: 6px; }
+      .main {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 20px;
+      }
+      .composer { padding: 24px; }
+      .results { padding: 24px; }
+      .section-title {
+        font-size: 20px;
+        margin: 0 0 8px;
+      }
+      .section-subtitle {
+        margin: 0 0 18px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .dropzone {
+        border: 1.5px dashed rgba(124, 156, 255, 0.35);
+        border-radius: 20px;
+        padding: 24px;
+        background: rgba(124, 156, 255, 0.06);
+      }
+      .dropzone input { display: none; }
+      .dropzone label {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+        color: #08111f;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .file-meta {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
+      .field { display: flex; flex-direction: column; gap: 8px; }
+      .field label { font-size: 14px; color: #dce7fa; }
+      .field input, .field select, .field textarea {
+        width: 100%;
+        border: 1px solid rgba(255,255,255,0.09);
+        background: var(--panel-2);
+        color: var(--text);
+        border-radius: 14px;
+        padding: 12px 14px;
+        font: inherit;
+      }
+      .field textarea { min-height: 120px; resize: vertical; }
+      .span-2 { grid-column: span 2; }
+      .template-toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .filter-chip {
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.04);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .filter-chip.active {
+        border-color: rgba(103, 232, 249, 0.8);
+        background: rgba(103, 232, 249, 0.12);
+        color: #dff7ff;
+      }
+      .template-picker-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-end;
+        margin-top: 0;
+      }
+      .template-sidebar {
+        margin-bottom: 22px;
+        padding-bottom: 22px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+      }
+      .picker-count {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .template-select-fallback {
+        display: none;
+      }
+      .template-current {
+        display: grid;
+        grid-template-columns: 112px 1fr;
+        gap: 12px;
+        align-items: center;
+        padding: 14px 16px;
+        min-height: 88px;
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+      .template-current-copy {
+        display: grid;
+        gap: 6px;
+      }
+      .template-current .template-thumb {
+        border-radius: 12px;
+      }
+      .template-current strong {
+        display: block;
+        font-size: 15px;
+      }
+      .template-current small {
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .template-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 14px;
+      }
+      .template-grid.sidebar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .template-card {
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 22px;
+        padding: 14px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+        cursor: pointer;
+        transition: 180ms ease;
+        box-shadow: 0 10px 36px rgba(0, 0, 0, 0.12);
+      }
+      .template-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(124, 156, 255, 0.3);
+      }
+      .template-thumb-wrap {
+        position: relative;
+      }
+      .template-thumb {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.04);
+      }
+      .template-thumb svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .template-thumb-image {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        background: #f8fafc;
+      }
+      .template-selected {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(6, 13, 24, 0.72);
+        color: #dff7ff;
+        border: 1px solid rgba(103, 232, 249, 0.28);
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .template-card-body {
+        padding: 12px 2px 2px;
+      }
+      .template-title-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .template-card b {
+        display: block;
+        margin: 0;
+        font-size: 16px;
+        line-height: 1.3;
+      }
+      .template-en {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+      }
+      .template-summary {
+        margin-top: 10px;
+        color: #d7e1f3;
+        font-size: 13px;
+        line-height: 1.6;
+        min-height: 42px;
+      }
+      .template-card .meta,
+      .template-pill {
+        display: inline-flex;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: rgba(255,255,255,0.06);
+        color: var(--muted);
+      }
+      .template-meta-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .template-pager {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 14px;
+      }
+      .template-page-info {
+        color: var(--muted);
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .pager-btn {
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.04);
+        color: var(--text);
+        border-radius: 12px;
+        padding: 9px 14px;
+        font: inherit;
+        cursor: pointer;
+      }
+      .pager-btn:disabled {
+        opacity: 0.42;
+        cursor: not-allowed;
+      }
+      .template-card.active {
+        border-color: rgba(103, 232, 249, 0.8);
+        box-shadow:
+          inset 0 0 0 1px rgba(103, 232, 249, 0.25),
+          0 18px 42px rgba(8, 18, 38, 0.22);
+        background: linear-gradient(180deg, rgba(103, 232, 249, 0.12), rgba(255,255,255,0.04));
+      }
+      .actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-top: 20px;
+      }
+      button {
+        border: 0;
+        border-radius: 14px;
+        padding: 13px 18px;
+        font: inherit;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .primary {
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+        color: #08111f;
+      }
+      .secondary {
+        background: rgba(255,255,255,0.06);
+        color: var(--text);
+        border: 1px solid rgba(255,255,255,0.09);
+      }
+      .pipeline {
+        display: grid;
+        gap: 12px;
+      }
+      .pipeline-item {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.03);
+      }
+      .pipeline-item .tag {
+        display: inline-flex;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        margin-bottom: 10px;
+        background: rgba(52, 211, 153, 0.12);
+        color: #b7f7dc;
+      }
+      .artifact-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .artifact {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.03);
+      }
+      .artifact small { color: var(--muted); display: block; margin-top: 4px; }
+      .status {
+        margin-top: 18px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        color: #dff7ff;
+        background: rgba(124, 156, 255, 0.1);
+        border: 1px solid rgba(124, 156, 255, 0.22);
+        min-height: 52px;
+      }
+      .simple-hero {
+        padding: 28px;
+        margin-bottom: 20px;
+      }
+      .steps-inline {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .step-pill {
+        padding: 14px 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.04);
+      }
+      .step-pill b { display: block; margin-bottom: 6px; }
+      .tip-card {
+        margin-top: 18px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(103, 232, 249, 0.2);
+        background: rgba(103, 232, 249, 0.08);
+        color: #dff7ff;
+      }
+      .simple-main {
+        grid-template-columns: 1fr 1fr;
+      }
+      .quick-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-top: 18px;
+      }
+      .quick-hint {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+      }
+      .advanced-box {
+        margin-top: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.03);
+        overflow: hidden;
+      }
+      .advanced-box summary {
+        cursor: pointer;
+        list-style: none;
+        padding: 16px 18px;
+        font-weight: 700;
+      }
+      .advanced-box summary::-webkit-details-marker { display: none; }
+      .advanced-inner {
+        padding: 0 18px 18px;
+      }
+      .link-btn, .artifact-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        min-width: 112px;
+      }
+      .artifact {
+        align-items: flex-start;
+      }
+      .artifact-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .artifact strong {
+        display: block;
+      }
+      .artifact-note {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 6px;
+      }
+      .result-ok {
+        border-color: rgba(52, 211, 153, 0.28);
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .result-warn {
+        border-color: rgba(251, 191, 36, 0.28);
+        background: rgba(251, 191, 36, 0.08);
+      }
+      .step-state {
+        display: inline-flex;
+        margin-top: 8px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: rgba(255,255,255,0.08);
+        color: var(--muted);
+      }
+      .step-state.done {
+        background: rgba(52, 211, 153, 0.12);
+        color: #b7f7dc;
+      }
+      .step-state.waiting {
+        background: rgba(251, 191, 36, 0.12);
+        color: #fde7a6;
+      }
+      @media (max-width: 980px) {
+        .hero, .main, .simple-main, .steps-inline, .quick-grid { grid-template-columns: 1fr; }
+        .template-grid, .template-grid.sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .template-picker-head { flex-direction: column; align-items: flex-start; }
+      }
+      @media (max-width: 720px) {
+        h1 { font-size: 34px; }
+        .template-current { grid-template-columns: 1fr; }
+        .grid, .template-grid, .template-grid.sidebar { grid-template-columns: 1fr; }
+        .span-2 { grid-column: auto; }
+        .template-pager { flex-wrap: wrap; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <section class="panel simple-hero">
+        <span class="eyebrow">AI PPT Factory · 极简模式</span>
+        <h1>只要两步：上传 Word，然后点生成</h1>
+        <p class="lead">默认参数已经配好。你不需要先研究页面，完成后右侧会直接出现下载按钮。</p>
+        <div class="steps-inline">
+          <div class="step-pill"><b>第 1 步</b><span>选择 `.docx` / `.pdf` / `.md` 文件</span></div>
+          <div class="step-pill"><b>第 2 步</b><span>点击“开始生成 PPT”</span></div>
+          <div class="step-pill"><b>第 3 步</b><span>在右侧直接下载 PPT 和大纲</span></div>
+        </div>
+        <div class="tip-card">如果你什么都不改，也能直接生成。高级设置已经收起来了。</div>
+      </section>
+
+      <section class="main simple-main">
+        <div class="panel composer">
+          <h2 class="section-title">开始生成</h2>
+          <p class="section-subtitle">先选文档，再点按钮。项目名和模板都有默认值。</p>
+
+          <div class="dropzone">
+            <label for="fileInput">第 1 步：选择 Word / PDF</label>
+            <input id="fileInput" type="file" accept=".doc,.docx,.pdf,.md" />
+            <div class="file-meta" id="fileMeta">还没有选择文件，建议上传 `.docx`。</div>
+          </div>
+
+          <div class="quick-grid">
+            <div class="field">
+              <label for="projectName">项目名称（可不填）</label>
+              <input id="projectName" placeholder="默认会自动使用文件名" />
+            </div>
+            <div class="field">
+              <label for="templateSelect">当前模板</label>
+              <div class="template-current" id="templateCurrent"></div>
+              <select id="templateSelect" class="template-select-fallback"></select>
+            </div>
+          </div>
+          <div class="quick-hint" id="providerHint">默认模板更适合商务汇报；需要细调时再展开下面的高级设置。</div>
+
+          <details class="advanced-box">
+            <summary>页数和附加要求（可不改）</summary>
+            <div class="advanced-inner">
+              <div class="grid">
+                <div class="field">
+                  <label for="pages">页数范围</label>
+                  <select id="pages">
+                    <option>8-10 页</option>
+                    <option>10-12 页</option>
+                    <option>12-15 页</option>
+                    <option>15-20 页</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="audience">目标受众</label>
+                  <input id="audience" placeholder="投资人 / 客户 / 老板 / 政府 / 学员" />
+                </div>
+                <div class="field">
+                  <label for="tone">风格目标</label>
+                  <select id="tone">
+                    <option>高端商务</option>
+                    <option>科技极简</option>
+                    <option>苹果发布会</option>
+                    <option>咨询顾问风</option>
+                    <option>深色艺术感</option>
+                  </select>
+                </div>
+                <div class="field span-2">
+                  <label for="prompt">附加要求</label>
+                  <textarea id="prompt" placeholder="例如：标题要结论化表达；少字多图；封面要大气；统一蓝黑配色。"></textarea>
+                </div>
+              </div>
+              <div class="actions">
+                <button class="secondary" id="demoBtn" type="button">填充演示数据</button>
+              </div>
+            </div>
+          </details>
+
+          <div class="actions">
+            <button class="primary" id="generateBtn" type="button">第 2 步：开始生成 PPT</button>
+          </div>
+
+          <div class="status" id="statusBox">先选 Word，再点“开始生成 PPT”。完成后右侧会直接出现下载按钮。</div>
+        </div>
+
+        <div class="panel results">
+          <div class="template-sidebar">
+            <div class="template-picker-head">
+              <div>
+                <h2 class="section-title">右侧选模板</h2>
+                <p class="section-subtitle" style="margin-bottom: 0;">先按分类，再用上一页 / 下一页切换模板，这里不再一口气堆满。</p>
+              </div>
+              <span class="picker-count" id="templateCount">正在加载模板...</span>
+            </div>
+            <div class="template-toolbar" id="templateFilters"></div>
+            <div class="template-pager">
+              <button type="button" class="pager-btn" id="templatePrevBtn">上一页</button>
+              <span class="template-page-info" id="templatePageInfo">第 1 / 1 页</span>
+              <button type="button" class="pager-btn" id="templateNextBtn">下一页</button>
+            </div>
+            <div class="template-grid sidebar" id="templateGrid"></div>
+          </div>
+
+          <h2 class="section-title">生成结果</h2>
+          <p class="section-subtitle">生成完成后，这里会直接显示“下载 PPTX / 下载预览版 / 下载大纲”。</p>
+          <div class="pipeline" id="pipeline"></div>
+
+          <h2 class="section-title" style="margin-top: 22px;">可下载文件</h2>
+          <div class="artifact-list" id="artifactList"></div>
+
+          <details class="advanced-box" style="margin-top: 22px;">
+            <summary>最近生成记录</summary>
+            <div class="advanced-inner">
+              <div class="artifact-list" id="projectList"></div>
+            </div>
+          </details>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      let templates = {};
+      let templateCategories = { all: '全部模板' };
+      let currentProvider = 'ppt_master';
+      let currentProviderLabel = 'PPT Master';
+      let defaultTemplateKey = '';
+
+      const pipelineContainer = document.getElementById('pipeline');
+      const artifactList = document.getElementById('artifactList');
+      const projectList = document.getElementById('projectList');
+      const templateFilters = document.getElementById('templateFilters');
+      const templateGrid = document.getElementById('templateGrid');
+      const templateSelect = document.getElementById('templateSelect');
+      const templateCurrent = document.getElementById('templateCurrent');
+      const templateCount = document.getElementById('templateCount');
+      const templatePageInfo = document.getElementById('templatePageInfo');
+      const templatePrevBtn = document.getElementById('templatePrevBtn');
+      const templateNextBtn = document.getElementById('templateNextBtn');
+      const providerHint = document.getElementById('providerHint');
+      const fileInput = document.getElementById('fileInput');
+      const fileMeta = document.getElementById('fileMeta');
+      const statusBox = document.getElementById('statusBox');
+      const projectName = document.getElementById('projectName');
+      const pages = document.getElementById('pages');
+      const audience = document.getElementById('audience');
+      const tone = document.getElementById('tone');
+      const prompt = document.getElementById('prompt');
+      const generateBtn = document.getElementById('generateBtn');
+      const templatesPerPage = 4;
+      let selectedTemplate = '';
+      let selectedTemplateCategory = 'all';
+      let templatePage = 0;
+      let projectsCache = [];
+      let selectedFile = null;
+      let selectedFileState = { status: 'idle', sizeBytes: 0, previewText: '', error: '' };
+      let selectedFileReadPromise = Promise.resolve();
+      let currentProject = null;
+      let generating = false;
+
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function formatBytes(bytes) {
+        if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let value = bytes;
+        let index = 0;
+        while (value >= 1024 && index < units.length - 1) {
+          value /= 1024;
+          index += 1;
+        }
+        return `${value.toFixed(value >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
+      }
+
+      function inferProjectName(fileName) {
+        return String(fileName || '')
+          .replace(/\.[^.]+$/, '')
+          .replace(/[_]+/g, ' · ')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+
+      function setGenerating(next) {
+        generating = next;
+        generateBtn.disabled = next;
+        generateBtn.textContent = next ? '正在生成，请稍候...' : '第 2 步：开始生成 PPT';
+      }
+
+      function getArtifact(project, kind) {
+        return Array.isArray(project?.artifacts)
+          ? project.artifacts.find((item) => item.kind === kind)
+          : null;
+      }
+
+      function templateEntries() {
+        return Object.entries(templates || {});
+      }
+
+      function filteredTemplateEntries() {
+        return templateEntries().filter(([, template]) => {
+          return selectedTemplateCategory === 'all' || template.category === selectedTemplateCategory;
+        });
+      }
+
+      function clampTemplatePage(entryCount) {
+        const maxPage = Math.max(0, Math.ceil(entryCount / templatesPerPage) - 1);
+        templatePage = Math.max(0, Math.min(templatePage, maxPage));
+        return maxPage;
+      }
+
+      function syncTemplatePageToSelection(entries) {
+        const selectedIndex = entries.findIndex(([key]) => key === selectedTemplate);
+        if (selectedIndex >= 0) {
+          templatePage = Math.floor(selectedIndex / templatesPerPage);
+        }
+      }
+
+      function hashString(input) {
+        let hash = 0;
+        const text = String(input || '');
+        for (let index = 0; index < text.length; index += 1) {
+          hash = ((hash << 5) - hash + text.charCodeAt(index)) | 0;
+        }
+        return Math.abs(hash);
+      }
+
+      function hsl(h, s, l) {
+        return `hsl(${Math.round(h)} ${s}% ${l}%)`;
+      }
+
+      function templatePalette(key, template) {
+        const exactPalettes = {
+          aurora: { canvas: 'url(#grad-aurora)', bgA: '#2d1b69', bgB: '#7c3aed', bgC: '#22d3ee', panel: '#ffffff', accent: '#f472b6', accentSoft: '#d8b4fe', line: '#ffffff', text: '#ffffff', muted: '#e9d5ff' },
+          blackboard: { canvas: '#0f231b', panel: '#173229', accent: '#bbf7d0', accentSoft: '#fef08a', line: '#e5e7eb', text: '#f8fafc', muted: '#d1fae5' },
+          brut_brick: { canvas: '#2b0f11', panel: '#f4e6d3', accent: '#ef4444', accentSoft: '#f59e0b', line: '#22100f', text: '#f9fafb', muted: '#fecaca' },
+          brut_seascape: { canvas: '#06283d', panel: '#e0f2fe', accent: '#06b6d4', accentSoft: '#38bdf8', line: '#082f49', text: '#f8fafc', muted: '#bae6fd' },
+          brut_tigris: { canvas: '#171717', panel: '#fef3c7', accent: '#f97316', accentSoft: '#facc15', line: '#0a0a0a', text: '#fafaf9', muted: '#fde68a' },
+          composition_book: { canvas: '#f7f0df', panel: '#fffdf7', accent: '#ef4444', accentSoft: '#94a3b8', line: '#d6cbb6', text: '#1f2937', muted: '#6b7280' },
+          corporate_blue: { canvas: '#0a2a66', panel: '#ffffff', accent: '#3b82f6', accentSoft: '#93c5fd', line: '#dbeafe', text: '#f8fafc', muted: '#bfdbfe' },
+          editorial: { canvas: '#f6f4ef', panel: '#ffffff', accent: '#111827', accentSoft: '#cbd5e1', line: '#d4d4d8', text: '#111827', muted: '#6b7280' },
+          feemo: { canvas: '#fff7ed', panel: '#ffffff', accent: '#fb7185', accentSoft: '#fdba74', line: '#fed7aa', text: '#7c2d12', muted: '#9a3412' },
+          forest_floor: { canvas: '#16351f', panel: '#f0fdf4', accent: '#4ade80', accentSoft: '#86efac', line: '#14532d', text: '#f0fdf4', muted: '#bbf7d0' },
+          fred: { canvas: '#fff7ed', panel: '#ffffff', accent: '#f97316', accentSoft: '#38bdf8', line: '#fdba74', text: '#7c2d12', muted: '#9ca3af' },
+          herbert: { canvas: '#faf5ff', panel: '#ffffff', accent: '#8b5cf6', accentSoft: '#f472b6', line: '#e9d5ff', text: '#4c1d95', muted: '#7c3aed' },
+          indigo: { canvas: '#eef2ff', panel: '#ffffff', accent: '#4f46e5', accentSoft: '#818cf8', line: '#c7d2fe', text: '#312e81', muted: '#6366f1' },
+          insight: { canvas: '#10274d', panel: '#ffffff', accent: '#3b82f6', accentSoft: '#38bdf8', line: '#dbeafe', text: '#eff6ff', muted: '#bfdbfe' },
+          insight_bold: { canvas: '#0f172a', panel: '#fff7ed', accent: '#f97316', accentSoft: '#facc15', line: '#1e293b', text: '#f8fafc', muted: '#fdba74' },
+          insight_modern: { canvas: '#0f172a', panel: '#f8fafc', accent: '#22c55e', accentSoft: '#38bdf8', line: '#cbd5e1', text: '#f8fafc', muted: '#93c5fd' },
+          kin: { canvas: '#faf5ff', panel: '#ffffff', accent: '#a855f7', accentSoft: '#f9a8d4', line: '#f3e8ff', text: '#581c87', muted: '#7e22ce' },
+          mallorca: { canvas: '#fff7ed', panel: '#ffffff', accent: '#f59e0b', accentSoft: '#fb7185', line: '#ffedd5', text: '#7c2d12', muted: '#c2410c' },
+          manila: { canvas: '#fdf2f8', panel: '#ffffff', accent: '#ec4899', accentSoft: '#fb7185', line: '#fbcfe8', text: '#831843', muted: '#9d174d' },
+          metro: { canvas: '#eff6ff', panel: '#ffffff', accent: '#0284c7', accentSoft: '#38bdf8', line: '#dbeafe', text: '#0f172a', muted: '#0369a1' },
+          minimalist_light: { canvas: '#f8fafc', panel: '#ffffff', accent: '#64748b', accentSoft: '#cbd5e1', line: '#e2e8f0', text: '#0f172a', muted: '#64748b' },
+          modern_sketchpad: { canvas: '#fffef7', panel: '#fffdf5', accent: '#0f172a', accentSoft: '#94a3b8', line: '#d6d3d1', text: '#292524', muted: '#57534e' },
+          modernist_professional: { canvas: '#eef2ff', panel: '#ffffff', accent: '#334155', accentSoft: '#6366f1', line: '#cbd5e1', text: '#0f172a', muted: '#475569' },
+          modernist_siena: { canvas: '#faf6f1', panel: '#ffffff', accent: '#9a3412', accentSoft: '#fb923c', line: '#e7d8c8', text: '#431407', muted: '#9a3412' },
+          plus_default: { canvas: '#eff6ff', panel: '#ffffff', accent: '#2563eb', accentSoft: '#60a5fa', line: '#dbeafe', text: '#1e3a8a', muted: '#2563eb' },
+          potpourri: { canvas: '#fff7ed', panel: '#ffffff', accent: '#f43f5e', accentSoft: '#8b5cf6', line: '#fed7aa', text: '#7c2d12', muted: '#9d174d' },
+          simple_notebook: { canvas: '#fffdf4', panel: '#fffdf8', accent: '#2563eb', accentSoft: '#94a3b8', line: '#ddd6c7', text: '#334155', muted: '#64748b' },
+          spiral_notebook: { canvas: '#fefce8', panel: '#fffef5', accent: '#ef4444', accentSoft: '#2563eb', line: '#e7e5d4', text: '#3f3f46', muted: '#71717a' },
+          swiss_dark: { canvas: '#09090b', panel: '#18181b', accent: '#22d3ee', accentSoft: '#38bdf8', line: '#3f3f46', text: '#fafafa', muted: '#a1a1aa' },
+          swiss_light: { canvas: '#f8fafc', panel: '#ffffff', accent: '#0f172a', accentSoft: '#38bdf8', line: '#e2e8f0', text: '#0f172a', muted: '#64748b' },
+        };
+        if (exactPalettes[key]) return exactPalettes[key];
+
+        const hue = hashString(key) % 360;
+        const category = template?.category || 'professional';
+        const defaults = {
+          professional: { canvas: hsl(hue, 70, 95), panel: '#ffffff', accent: hsl(hue, 68, 46), accentSoft: hsl((hue + 18) % 360, 76, 66), line: hsl(hue, 30, 85), text: '#0f172a', muted: '#475569' },
+          consulting: { canvas: hsl(hue, 58, 18), panel: '#ffffff', accent: hsl((hue + 8) % 360, 80, 58), accentSoft: hsl((hue + 32) % 360, 80, 64), line: '#dbeafe', text: '#f8fafc', muted: '#cbd5e1' },
+          modern: { canvas: hsl(hue, 46, 96), panel: '#ffffff', accent: hsl(hue, 70, 52), accentSoft: hsl((hue + 24) % 360, 76, 72), line: '#dbeafe', text: '#0f172a', muted: '#64748b' },
+          dark: { canvas: hsl(hue, 28, 10), panel: hsl(hue, 20, 16), accent: hsl((hue + 18) % 360, 88, 62), accentSoft: hsl((hue + 54) % 360, 82, 68), line: '#3f3f46', text: '#fafafa', muted: '#a1a1aa' },
+          creative: { canvas: hsl(hue, 82, 95), panel: '#ffffff', accent: hsl(hue, 82, 58), accentSoft: hsl((hue + 50) % 360, 88, 68), line: hsl(hue, 44, 84), text: '#312e81', muted: '#6b7280' },
+          brutalist: { canvas: hsl(hue, 42, 12), panel: hsl((hue + 40) % 360, 54, 89), accent: hsl((hue + 12) % 360, 82, 54), accentSoft: hsl((hue + 44) % 360, 84, 64), line: '#0f172a', text: '#f8fafc', muted: '#fde68a' },
+          notebook: { canvas: '#fffdf3', panel: '#fffef7', accent: hsl(hue, 64, 48), accentSoft: '#94a3b8', line: '#d6d3d1', text: '#44403c', muted: '#78716c' },
+          nature: { canvas: hsl(140, 32, 18), panel: '#f0fdf4', accent: hsl(142, 70, 45), accentSoft: hsl(120, 66, 72), line: '#14532d', text: '#f0fdf4', muted: '#bbf7d0' },
+        };
+        return defaults[category] || defaults.professional;
+      }
+
+      function buildTemplateThumbnail(template, key) {
+        const palette = templatePalette(key, template);
+        const uid = `thumb-${key.replace(/[^a-z0-9]+/gi, '-')}`;
+        const category = template?.category || 'professional';
+        const thumbnailUrl = typeof template?.thumbnailUrl === 'string' ? template.thumbnailUrl.trim() : '';
+
+        const background = palette.bgA && palette.bgB
+          ? `
+              <defs>
+                <linearGradient id="${uid}-bg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="${palette.bgA}" />
+                  <stop offset="58%" stop-color="${palette.bgB}" />
+                  <stop offset="100%" stop-color="${palette.bgC || palette.bgB}" />
+                </linearGradient>
+              </defs>
+              <rect x="0" y="0" width="320" height="180" rx="18" fill="url(#${uid}-bg)" />
+            `
+          : `<rect x="0" y="0" width="320" height="180" rx="18" fill="${palette.canvas}" />`;
+
+        const commonOverlays = `
+          <rect x="18" y="16" width="120" height="10" rx="5" fill="${palette.accent}" opacity="0.95" />
+          <rect x="18" y="34" width="164" height="7" rx="3.5" fill="${palette.muted}" opacity="0.45" />
+        `;
+
+        let content = '';
+        if (category === 'consulting') {
+          content = `
+            <rect x="18" y="56" width="284" height="36" rx="10" fill="${palette.panel}" opacity="0.96" />
+            <rect x="18" y="104" width="88" height="54" rx="12" fill="${palette.panel}" opacity="0.98" />
+            <rect x="116" y="104" width="88" height="54" rx="12" fill="${palette.panel}" opacity="0.98" />
+            <rect x="214" y="104" width="88" height="54" rx="12" fill="${palette.panel}" opacity="0.98" />
+            <rect x="30" y="116" width="46" height="6" rx="3" fill="${palette.accent}" />
+            <rect x="30" y="128" width="64" height="6" rx="3" fill="${palette.line}" />
+            <rect x="128" y="116" width="46" height="6" rx="3" fill="${palette.accent}" />
+            <rect x="128" y="128" width="62" height="6" rx="3" fill="${palette.line}" />
+            <rect x="226" y="116" width="46" height="6" rx="3" fill="${palette.accent}" />
+            <rect x="226" y="128" width="58" height="6" rx="3" fill="${palette.line}" />
+            <rect x="30" y="68" width="64" height="8" rx="4" fill="${palette.accent}" />
+            <rect x="30" y="81" width="188" height="5" rx="2.5" fill="${palette.line}" />
+          `;
+        } else if (category === 'professional') {
+          content = `
+            <rect x="18" y="56" width="138" height="102" rx="14" fill="${palette.panel}" opacity="0.98" />
+            <rect x="166" y="56" width="136" height="48" rx="14" fill="${palette.panel}" opacity="0.96" />
+            <rect x="166" y="112" width="136" height="46" rx="14" fill="${palette.panel}" opacity="0.96" />
+            <rect x="32" y="72" width="72" height="8" rx="4" fill="${palette.accent}" />
+            <rect x="32" y="88" width="98" height="6" rx="3" fill="${palette.line}" />
+            <rect x="32" y="104" width="88" height="6" rx="3" fill="${palette.line}" />
+            <rect x="182" y="70" width="80" height="8" rx="4" fill="${palette.accent}" />
+            <rect x="182" y="84" width="96" height="6" rx="3" fill="${palette.line}" />
+            <rect x="182" y="126" width="88" height="8" rx="4" fill="${palette.accentSoft}" />
+            <rect x="182" y="140" width="78" height="6" rx="3" fill="${palette.line}" />
+          `;
+        } else if (category === 'modern') {
+          content = `
+            <rect x="18" y="56" width="284" height="104" rx="18" fill="${palette.panel}" opacity="0.98" />
+            <circle cx="254" cy="92" r="42" fill="${palette.accentSoft}" opacity="0.24" />
+            <rect x="34" y="72" width="92" height="10" rx="5" fill="${palette.accent}" />
+            <rect x="34" y="88" width="140" height="6" rx="3" fill="${palette.line}" />
+            <rect x="34" y="102" width="122" height="6" rx="3" fill="${palette.line}" />
+            <rect x="34" y="122" width="70" height="32" rx="10" fill="${palette.accentSoft}" opacity="0.65" />
+            <rect x="112" y="122" width="78" height="32" rx="10" fill="${palette.line}" opacity="0.95" />
+            <rect x="198" y="122" width="88" height="32" rx="10" fill="${palette.line}" opacity="0.72" />
+          `;
+        } else if (category === 'dark') {
+          content = `
+            <rect x="18" y="56" width="284" height="104" rx="18" fill="${palette.panel}" opacity="0.9" />
+            <path d="M28 138 C72 126, 90 108, 126 112 C160 116, 184 92, 228 86 C252 82, 276 88, 292 72" stroke="${palette.accent}" stroke-width="5" fill="none" stroke-linecap="round" />
+            <path d="M28 148 C58 142, 88 148, 122 132 C154 118, 180 140, 216 126 C246 114, 274 126, 292 118" stroke="${palette.accentSoft}" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.9" />
+            <rect x="34" y="72" width="88" height="8" rx="4" fill="${palette.accent}" />
+            <rect x="34" y="86" width="130" height="6" rx="3" fill="${palette.line}" />
+            <circle cx="264" cy="92" r="18" fill="${palette.accentSoft}" opacity="0.3" />
+          `;
+        } else if (category === 'creative') {
+          content = `
+            <circle cx="256" cy="62" r="34" fill="${palette.accentSoft}" opacity="0.42" />
+            <circle cx="224" cy="118" r="48" fill="${palette.accent}" opacity="0.22" />
+            <rect x="18" y="56" width="166" height="104" rx="18" fill="${palette.panel}" opacity="0.97" />
+            <rect x="198" y="56" width="104" height="46" rx="16" fill="${palette.panel}" opacity="0.92" />
+            <rect x="198" y="112" width="104" height="48" rx="16" fill="${palette.panel}" opacity="0.92" />
+            <rect x="34" y="72" width="82" height="8" rx="4" fill="${palette.accent}" />
+            <rect x="34" y="86" width="116" height="6" rx="3" fill="${palette.line}" />
+            <rect x="34" y="102" width="96" height="6" rx="3" fill="${palette.line}" />
+          `;
+        } else if (category === 'brutalist') {
+          content = `
+            <rect x="18" y="56" width="110" height="48" rx="4" fill="${palette.panel}" />
+            <rect x="134" y="56" width="168" height="32" rx="4" fill="${palette.accent}" />
+            <rect x="134" y="92" width="88" height="68" rx="4" fill="${palette.panel}" />
+            <rect x="228" y="92" width="74" height="68" rx="4" fill="${palette.accentSoft}" />
+            <rect x="18" y="110" width="110" height="50" rx="4" fill="${palette.accent}" />
+            <rect x="30" y="72" width="58" height="8" rx="2" fill="${palette.line}" />
+            <rect x="146" y="68" width="82" height="8" rx="2" fill="${palette.line}" opacity="0.7" />
+          `;
+        } else if (category === 'notebook') {
+          content = `
+            <rect x="18" y="56" width="284" height="104" rx="16" fill="${palette.panel}" />
+            <rect x="18" y="56" width="18" height="104" rx="16" fill="${palette.accentSoft}" opacity="0.35" />
+            <circle cx="28" cy="76" r="5" fill="${palette.panel}" stroke="${palette.accent}" stroke-width="2" />
+            <circle cx="28" cy="108" r="5" fill="${palette.panel}" stroke="${palette.accent}" stroke-width="2" />
+            <circle cx="28" cy="140" r="5" fill="${palette.panel}" stroke="${palette.accent}" stroke-width="2" />
+            <rect x="48" y="72" width="92" height="8" rx="4" fill="${palette.accent}" />
+            <rect x="48" y="90" width="220" height="2" rx="1" fill="${palette.line}" />
+            <rect x="48" y="110" width="196" height="2" rx="1" fill="${palette.line}" />
+            <rect x="48" y="130" width="204" height="2" rx="1" fill="${palette.line}" />
+          `;
+        } else if (category === 'nature') {
+          content = `
+            <path d="M0 144 C52 112, 104 132, 154 112 C204 92, 254 122, 320 102 L320 180 L0 180 Z" fill="${palette.accent}" opacity="0.28" />
+            <path d="M0 156 C58 132, 110 152, 164 136 C214 122, 264 152, 320 132 L320 180 L0 180 Z" fill="${palette.accentSoft}" opacity="0.24" />
+            <rect x="18" y="56" width="160" height="92" rx="18" fill="${palette.panel}" opacity="0.98" />
+            <rect x="188" y="64" width="114" height="84" rx="18" fill="${palette.panel}" opacity="0.92" />
+            <rect x="34" y="72" width="86" height="8" rx="4" fill="${palette.accent}" />
+            <rect x="34" y="88" width="104" height="6" rx="3" fill="${palette.line}" />
+            <circle cx="246" cy="104" r="28" fill="${palette.accentSoft}" opacity="0.45" />
+          `;
+        } else {
+          content = `
+            <rect x="18" y="56" width="284" height="104" rx="16" fill="${palette.panel}" opacity="0.98" />
+            <rect x="34" y="72" width="96" height="8" rx="4" fill="${palette.accent}" />
+            <rect x="34" y="88" width="132" height="6" rx="3" fill="${palette.line}" />
+            <rect x="34" y="110" width="118" height="36" rx="10" fill="${palette.accentSoft}" opacity="0.5" />
+            <rect x="164" y="110" width="120" height="36" rx="10" fill="${palette.line}" opacity="0.78" />
+          `;
+        }
+
+        return `
+          <div class="template-thumb${thumbnailUrl ? ' has-image' : ''}">
+            <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="presentation" aria-hidden="true">
+              ${background}
+              ${commonOverlays}
+              ${content}
+            </svg>
+            ${thumbnailUrl ? `<img class="template-thumb-image" src="${escapeHtml(thumbnailUrl)}" alt="${escapeHtml(template?.displayName || template?.name || '模板预览')}" loading="lazy" decoding="async" onerror="this.remove()" />` : ''}
+          </div>
+        `;
+      }
+
+      function renderTemplateCurrent() {
+        const template = templates?.[selectedTemplate];
+        if (!template) {
+          templateCurrent.innerHTML = `
+            <strong>模板加载中</strong>
+            <small>稍后会显示可视化模板缩略图。</small>
+          `;
+          return;
+        }
+        templateCurrent.innerHTML = `
+          <div class="template-current-thumb">${buildTemplateThumbnail(template, selectedTemplate)}</div>
+          <div class="template-current-copy">
+            <strong>${escapeHtml(template.displayName || template.name)}</strong>
+            <small>${escapeHtml(template.name || '')}</small>
+            <small>${escapeHtml(template.summary || template.style || '适合通用演示场景')}</small>
+          </div>
+        `;
+      }
+
+      function renderTemplateSelect() {
+        if (!templateSelect) return;
+        const entries = templateEntries();
+        if (!entries.length) {
+          templateSelect.innerHTML = '<option value="">暂无模板</option>';
+          return;
+        }
+        const currentValue = selectedTemplate || defaultTemplateKey || entries[0][0];
+        templateSelect.innerHTML = entries.map(([key, template]) => `
+          <option value="${key}" ${currentValue === key ? 'selected' : ''}>${template.displayName || template.name}</option>
+        `).join('');
+        selectedTemplate = currentValue;
+        templateSelect.value = currentValue;
+      }
+
+      function syncTemplateUi() {
+        syncTemplatePageToSelection(filteredTemplateEntries());
+        renderTemplateSelect();
+        renderTemplateCurrent();
+        renderTemplates();
+        renderPipeline(currentProject);
+      }
+
+      function renderFileMeta() {
+        if (!selectedFile) {
+          fileMeta.textContent = '还没有选择文件，建议上传 `.docx`。';
+          return;
+        }
+        if (selectedFileState.status === 'reading') {
+          fileMeta.textContent = `已选择：${selectedFile.name} · ${formatBytes(selectedFile.size)} · 正在读取...`;
+          return;
+        }
+        if (selectedFileState.status === 'error') {
+          fileMeta.textContent = `读取失败：${selectedFile.name} · ${selectedFileState.error}`;
+          return;
+        }
+        const preview = selectedFileState.previewText ? ` · 预览：${selectedFileState.previewText}` : '';
+        fileMeta.textContent = `已选择并读取：${selectedFile.name} · ${formatBytes(selectedFileState.sizeBytes || selectedFile.size)}${preview}`;
+      }
+
+      async function readSelectedFile(file) {
+        const isTextLike = file.type.startsWith('text/') || /\.(md|txt|json|csv|yaml|yml)$/i.test(file.name);
+        if (isTextLike) {
+          const text = await file.text();
+          return {
+            status: 'ready',
+            sizeBytes: new TextEncoder().encode(text).length || file.size || 0,
+            previewText: text.replace(/\s+/g, ' ').trim().slice(0, 72),
+            error: '',
+          };
+        }
+        const buffer = await file.arrayBuffer();
+        return {
+          status: 'ready',
+          sizeBytes: buffer.byteLength || file.size || 0,
+          previewText: '',
+          error: '',
+        };
+      }
+
+      fileInput.addEventListener('change', () => {
+        selectedFile = fileInput.files?.[0] || null;
+        selectedFileState = selectedFile
+          ? { status: 'reading', sizeBytes: 0, previewText: '', error: '' }
+          : { status: 'idle', sizeBytes: 0, previewText: '', error: '' };
+        renderFileMeta();
+        if (!selectedFile) {
+          statusBox.textContent = '还没有选择文件，建议上传 `.docx`。';
+          selectedFileReadPromise = Promise.resolve();
+          return;
+        }
+
+        if (!projectName.value.trim()) {
+          projectName.value = inferProjectName(selectedFile.name);
+        }
+
+        const currentFile = selectedFile;
+        selectedFileReadPromise = readSelectedFile(currentFile)
+          .then((state) => {
+            if (selectedFile !== currentFile) return;
+            selectedFileState = state;
+            renderFileMeta();
+            statusBox.textContent = `文档已读取：${currentFile.name} · ${formatBytes(state.sizeBytes || currentFile.size)}。可以开始生成 PPT。`;
+          })
+          .catch((error) => {
+            if (selectedFile !== currentFile) return;
+            selectedFileState = {
+              status: 'error',
+              sizeBytes: 0,
+              previewText: '',
+              error: error?.message || '无法读取所选文件',
+            };
+            renderFileMeta();
+            statusBox.textContent = `文件读取失败：${selectedFileState.error}`;
+          });
+      });
+
+      templateSelect?.addEventListener('change', () => {
+        selectedTemplate = templateSelect.value || defaultTemplateKey || templateEntries()[0]?.[0] || '';
+        syncTemplateUi();
+      });
+
+      templateGrid.addEventListener('click', (event) => {
+        const card = event.target.closest('.template-card');
+        if (!card) return;
+        selectedTemplate = card.dataset.template;
+        syncTemplateUi();
+      });
+
+      templateFilters.addEventListener('click', (event) => {
+        const chip = event.target.closest('.filter-chip');
+        if (!chip) return;
+        selectedTemplateCategory = chip.dataset.category;
+        templatePage = 0;
+        renderTemplates();
+      });
+
+      templatePrevBtn?.addEventListener('click', () => {
+        templatePage = Math.max(0, templatePage - 1);
+        renderTemplates();
+      });
+
+      templateNextBtn?.addEventListener('click', () => {
+        const entryCount = filteredTemplateEntries().length;
+        const maxPage = Math.max(0, Math.ceil(entryCount / templatesPerPage) - 1);
+        templatePage = Math.min(maxPage, templatePage + 1);
+        renderTemplates();
+      });
+
+      document.getElementById('demoBtn').addEventListener('click', () => {
+        projectName.value = 'AI 智能体应用工厂';
+        audience.value = '创业者 / 中小企业老板 / 产品经理';
+        tone.value = '科技极简';
+        pages.value = '10-12 页';
+        prompt.value = '突出从需求到应用生成再到安装包导出的完整闭环；标题要结论化；封面高级；适当加入产品流程图。';
+        selectedTemplate = defaultTemplateKey || templateEntries()[0]?.[0] || '';
+        syncTemplateUi();
+        statusBox.textContent = '演示数据已填充。可以直接点“开始生成 PPT”。';
+      });
+
+      generateBtn.addEventListener('click', async () => {
+        const name = projectName.value.trim() || '未命名项目';
+        if (!selectedFile) {
+          statusBox.textContent = '请先选择 Word / PDF / Markdown 文件。';
+          fileInput.focus();
+          return;
+        }
+        if (selectedFileState.status === 'reading') {
+          statusBox.textContent = `正在读取 ${selectedFile.name}，马上开始生成...`;
+          await selectedFileReadPromise;
+        }
+        if (selectedFileState.status === 'error') {
+          statusBox.textContent = `文件读取失败：${selectedFileState.error}`;
+          return;
+        }
+        if (!selectedTemplate) {
+          statusBox.textContent = '模板还没加载好，请稍后再试。';
+          return;
+        }
+        const fileLabel = selectedFile.name;
+
+        try {
+          setGenerating(true);
+          currentProject = null;
+          renderPipeline();
+          renderArtifacts();
+          statusBox.textContent = `正在上传并创建「${name}」，已读取 ${formatBytes(selectedFileState.sizeBytes || selectedFile.size)}...`;
+          const formData = new FormData();
+          formData.append('provider', currentProvider);
+          formData.append('projectName', name);
+          formData.append('templateKey', selectedTemplate);
+          formData.append('fileName', fileLabel);
+          formData.append('fileType', selectedFile?.type || 'application/octet-stream');
+          formData.append('audience', audience.value.trim());
+          formData.append('pages', pages.value);
+          formData.append('tone', tone.value);
+          formData.append('prompt', prompt.value.trim());
+          formData.append('summary', prompt.value.trim() || audience.value.trim() || name);
+          if (selectedFile) {
+            formData.append('sourceFile', selectedFile, selectedFile.name);
+          }
+
+          const response = await fetch('/api/projects', {
+            method: 'POST',
+            body: formData,
+          });
+          const payload = await response.json();
+          if (!response.ok) {
+            throw new Error(payload.error || '创建项目失败');
+          }
+          currentProject = payload.project;
+          const sourceSizeText = payload.project?.sourceSizeBytes
+            ? `，服务器已收到 ${formatBytes(payload.project.sourceSizeBytes)}`
+            : '';
+          statusBox.textContent = payload.project?.ready
+            ? `已生成完成：${payload.project.projectName}${sourceSizeText}。右侧现在可以直接下载 PPT。`
+            : `已创建项目：${payload.project.projectName}${sourceSizeText}。如未出现 PPT 下载，请先下载运行日志查看失败步骤。`;
+          renderPipeline(currentProject);
+          renderArtifacts(currentProject);
+          await loadProjects({ preferLatest: false });
+        } catch (error) {
+          statusBox.textContent = `创建失败：${error.message}`;
+          renderPipeline();
+          renderArtifacts();
+        } finally {
+          setGenerating(false);
+        }
+      });
+
+      async function loadProjects({ preferLatest = true } = {}) {
+        try {
+          const response = await fetch('/api/projects');
+          const payload = await response.json();
+          projectsCache = Array.isArray(payload.projects) ? payload.projects : [];
+          if (currentProject?.id) {
+            currentProject = projectsCache.find((item) => item.id === currentProject.id) || currentProject;
+          } else if (preferLatest) {
+            currentProject = projectsCache[0] || null;
+          }
+          renderProjects();
+          renderPipeline(currentProject);
+          renderArtifacts(currentProject);
+        } catch (error) {
+          projectList.innerHTML = `<div class="artifact"><div><strong>读取失败</strong><small>${error.message}</small></div></div>`;
+        }
+      }
+
+      function renderArtifacts(project = currentProject) {
+        const preferredKinds = ['pptx', 'svg_pptx', 'outline', 'markdown', 'runs', 'provider_meta'];
+        const artifacts = preferredKinds
+          .map((kind) => getArtifact(project, kind))
+          .filter(Boolean);
+
+        if (!project) {
+          artifactList.innerHTML = `
+            <div class="artifact">
+              <div>
+                <strong>还没有生成结果</strong>
+                <small>上传 Word 后，下载按钮会直接出现在这里。</small>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        if (!artifacts.length) {
+          artifactList.innerHTML = `
+            <div class="artifact result-warn">
+              <div>
+                <strong>这次还没有可下载产物</strong>
+                <small>可以先下载运行日志，看是哪一步失败了。</small>
+              </div>
+              <div class="artifact-actions">
+                ${getArtifact(project, 'runs') ? `<a class="secondary link-btn" href="${escapeHtml(getArtifact(project, 'runs').url)}">下载运行日志</a>` : ''}
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        artifactList.innerHTML = artifacts.map((artifact) => `
+          <div class="artifact ${artifact.kind === 'pptx' ? 'result-ok' : ''}">
+            <div>
+              <strong>${escapeHtml(artifact.label)}</strong>
+              <small>${escapeHtml(artifact.fileName)}</small>
+              <div class="artifact-note">${artifact.kind === 'pptx'
+                ? '原生可编辑 PPT，直接下载即可。'
+                : artifact.kind === 'svg_pptx'
+                  ? '预览版，用来核对视觉效果。'
+                  : artifact.kind === 'outline'
+                    ? '自动生成的大纲。'
+                    : artifact.kind === 'markdown'
+                      ? '源文档转换后的 Markdown。'
+                      : artifact.kind === 'provider_meta'
+                        ? '第三方引擎原始返回，便于排查问题。'
+                      : '用于排查问题的运行日志。'}</div>
+            </div>
+            <div class="artifact-actions">
+              <a class="secondary link-btn" href="${escapeHtml(artifact.url)}">${escapeHtml(artifact.label)}</a>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function renderProjects() {
+        if (!projectsCache.length) {
+          projectList.innerHTML = `
+            <div class="artifact">
+              <div>
+                <strong>还没有生成记录</strong>
+                <small>你生成过一次以后，这里会保留最近结果和下载入口。</small>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        projectList.innerHTML = projectsCache.slice(0, 5).map((project) => `
+          <div class="artifact">
+            <div>
+              <strong>${escapeHtml(project.projectName)}</strong>
+              <small>引擎：${escapeHtml(project.providerName || currentProviderLabel)} · 模板：${escapeHtml(project.templateName || '-')} · 文件：${escapeHtml(project.fileName || '-')} · 状态：${escapeHtml(project.ready ? '已生成' : project.status || '处理中')}</small>
+              <div class="artifact-note">${project.sourceSizeBytes ? `文件大小：${formatBytes(project.sourceSizeBytes)}` : '等待文件信息'}</div>
+            </div>
+            <div class="artifact-actions">
+              ${getArtifact(project, 'pptx') ? `<a class="secondary link-btn" href="${escapeHtml(getArtifact(project, 'pptx').url)}">下载 PPTX</a>` : ''}
+              ${getArtifact(project, 'runs') ? `<a class="secondary link-btn" href="${escapeHtml(getArtifact(project, 'runs').url)}">运行日志</a>` : ''}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function renderTemplates() {
+        templateFilters.innerHTML = Object.entries(templateCategories).map(([key, label]) => `
+          <button type="button" class="filter-chip ${selectedTemplateCategory === key ? 'active' : ''}" data-category="${key}">${label}</button>
+        `).join('');
+
+        const allEntries = templateEntries();
+        const entries = filteredTemplateEntries();
+        const maxPage = clampTemplatePage(entries.length);
+        const pageCount = Math.max(1, maxPage + 1);
+        const pageStart = templatePage * templatesPerPage;
+        const pageEntries = entries.slice(pageStart, pageStart + templatesPerPage);
+        templateCount.textContent = entries.length === allEntries.length
+          ? `共 ${allEntries.length} 个模板`
+          : `当前 ${entries.length} / 共 ${allEntries.length} 个模板`;
+        templatePageInfo.textContent = `第 ${templatePage + 1} / ${pageCount} 页`;
+        templatePrevBtn.disabled = templatePage <= 0;
+        templateNextBtn.disabled = templatePage >= maxPage;
+
+        if (!entries.length) {
+          templateGrid.innerHTML = `
+            <div class="template-card active">
+              <div class="template-card-body">
+                <b>暂无可用模板</b>
+                <div class="template-summary">请切换分类或稍后重试。</div>
+                <div class="template-meta-row"><span class="meta">请稍候</span></div>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        templateGrid.innerHTML = pageEntries.map(([key, template]) => `
+          <div class="template-card ${selectedTemplate === key ? 'active' : ''}" data-template="${key}">
+            <div class="template-thumb-wrap">
+              ${buildTemplateThumbnail(template, key)}
+              ${selectedTemplate === key ? '<span class="template-selected">已选模板</span>' : ''}
+            </div>
+            <div class="template-card-body">
+              <div class="template-title-row">
+                <div>
+                  <b>${escapeHtml(template.displayName || template.name)}</b>
+                  <span class="template-en">${escapeHtml(template.name || '')}</span>
+                </div>
+                <span class="template-pill">${escapeHtml(templateCategories[template.category] || template.category)}</span>
+              </div>
+              <div class="template-summary">${escapeHtml(template.summary || template.style || template.color || template.name)}</div>
+              <div class="template-meta-row">
+                ${template.style ? `<span class="meta">${escapeHtml(template.style)}</span>` : ''}
+                ${template.color ? `<span class="meta">${escapeHtml(template.color)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      async function loadTemplates() {
+        const response = await fetch('/api/templates');
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error || '模板列表加载失败');
+        }
+        templates = payload.templates || {};
+        templateCategories = { all: '全部模板', ...(payload.templateCategories || {}) };
+        currentProvider = payload.provider || 'ppt_master';
+        currentProviderLabel = payload.providerLabel || 'PPT Master';
+        defaultTemplateKey = payload.defaultTemplateKey || Object.keys(templates)[0] || '';
+        selectedTemplate = selectedTemplate || defaultTemplateKey;
+        syncTemplatePageToSelection(filteredTemplateEntries());
+        providerHint.textContent = `当前引擎：${currentProviderLabel}。模板已经挪到右侧分页切换，左边只保留当前模板。`;
+        renderTemplateSelect();
+        renderTemplateCurrent();
+        renderTemplates();
+      }
+
+      function renderPipeline(project = currentProject) {
+        const markdownReady = Boolean(getArtifact(project, 'markdown') || getArtifact(project, 'outline'));
+        const pptReady = Boolean(getArtifact(project, 'pptx'));
+        const previewReady = Boolean(getArtifact(project, 'svg_pptx'));
+
+        if (!project && !generating) {
+          pipelineContainer.innerHTML = `
+            <div class="pipeline-item">
+              <span class="tag">现在怎么用</span>
+              <div><strong>1. 选 Word → 2. 点生成 → 3. 下载 PPT</strong></div>
+              <div style="margin-top: 8px; color: var(--muted); line-height: 1.6;">默认模板已选好，高级设置可以不看。</div>
+            </div>
+          `;
+          return;
+        }
+
+        pipelineContainer.innerHTML = `
+          <div class="pipeline-item">
+            <span class="tag">步骤 1</span>
+            <div><strong>读取源文档</strong></div>
+            <div style="margin-top: 8px; color: var(--muted); line-height: 1.6;">${project ? `已收到：${escapeHtml(project.fileName || '源文档')}` : '正在读取并上传文档...'}</div>
+            <span class="step-state ${project || generating ? 'done' : 'waiting'}">${project || generating ? '已完成' : '等待中'}</span>
+          </div>
+          <div class="pipeline-item">
+            <span class="tag">步骤 2</span>
+            <div><strong>生成结构化内容</strong></div>
+            <div style="margin-top: 8px; color: var(--muted); line-height: 1.6;">${markdownReady ? 'Markdown / 大纲已生成。' : '系统会自动解析 Word 并生成大纲。'}</div>
+            <span class="step-state ${markdownReady ? 'done' : 'waiting'}">${markdownReady ? '已完成' : '处理中'}</span>
+          </div>
+          <div class="pipeline-item ${pptReady ? 'result-ok' : ''}">
+            <span class="tag">步骤 3</span>
+            <div><strong>导出 PPT</strong></div>
+            <div style="margin-top: 8px; color: var(--muted); line-height: 1.6;">${pptReady ? `PPT 已生成${previewReady ? '，预览版也已准备好。' : '。'}` : '完成后右下方会直接出现下载按钮。'}</div>
+            <span class="step-state ${pptReady ? 'done' : 'waiting'}">${pptReady ? '可下载' : '等待中'}</span>
+          </div>
+        `;
+      }
+
+      renderPipeline();
+      renderArtifacts();
+      (async () => {
+        try {
+          await loadTemplates();
+        } catch (error) {
+          providerHint.textContent = `模板加载失败：${error.message}`;
+          statusBox.textContent = `模板加载失败：${error.message}`;
+        }
+        await loadProjects();
+      })();
+    </script>
+  </body>
+</html>

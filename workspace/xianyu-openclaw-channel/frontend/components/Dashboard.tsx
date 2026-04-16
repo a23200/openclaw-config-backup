@@ -375,7 +375,7 @@ const Dashboard: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
         <div>
           <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">运营概览</h2>
-          <p className="text-gray-500 mt-2 text-base">欢迎回来，以下是闲鱼店铺的实时经营数据。</p>
+          <p className="text-gray-500 mt-2 text-base">欢迎回来，以下是鱼鱼店铺的实时经营数据。</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="text-sm font-bold text-gray-700 bg-white px-5 py-2.5 rounded-full shadow-sm border border-gray-100 flex items-center gap-2">
@@ -707,7 +707,7 @@ const Dashboard: React.FC = () => {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex text-gray-400 hover:text-amber-600 p-2 rounded-xl hover:bg-amber-50 transition-colors"
-                            title="查看闲鱼详情"
+                            title="查看鱼鱼详情"
                           >
                             <ExternalLink className="w-4 h-4" />
                           </a>

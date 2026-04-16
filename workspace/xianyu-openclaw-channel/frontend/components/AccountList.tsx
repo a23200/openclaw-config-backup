@@ -21,6 +21,7 @@ import {
   MessageSquare, RefreshCw, Save, User, Clock, MessageCircle,
   Upload, Key, Eye, EyeOff, Bot, Settings
 } from 'lucide-react';
+import { buildAvatarDataUrl } from '../utils/image';
 
 type ModalType = 'edit' | 'ai-settings' | null;
 
@@ -240,7 +241,7 @@ const AccountList: React.FC = () => {
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">账号管理</h2>
-          <p className="text-gray-500 mt-2 font-medium">管理您的闲鱼授权账号及设置。</p>
+          <p className="text-gray-500 mt-2 font-medium">管理您的鱼鱼授权账号及设置。</p>
         </div>
         <button
             onClick={startQRLogin}
@@ -261,6 +262,9 @@ const AccountList: React.FC = () => {
                   src={account.avatar_url}
                   alt="avatar"
                   className="w-20 h-20 rounded-3xl object-cover shadow-md ring-4 ring-white"
+                  onError={(event) => {
+                    event.currentTarget.src = buildAvatarDataUrl(account.nickname || account.remark || account.id, account.id);
+                  }}
                 />
                 <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-4 border-white flex items-center justify-center ${account.enabled ? 'bg-green-500' : 'bg-gray-300'}`}>
                     {account.enabled && <Check className="w-3 h-3 text-white" />}
@@ -324,7 +328,7 @@ const AccountList: React.FC = () => {
                     <User className="w-10 h-10 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900">暂无账号</h3>
-                <p className="text-gray-500 mt-1">请点击右上角扫码添加您的闲鱼账号</p>
+                <p className="text-gray-500 mt-1">请点击右上角扫码添加您的鱼鱼账号</p>
             </div>
         )}
       </div>
@@ -343,7 +347,7 @@ const AccountList: React.FC = () => {
                   <div className="modal-body">
                       <div className="text-center">
                           <h3 className="text-2xl font-extrabold text-gray-900 mb-2">扫码登录</h3>
-                          <p className="text-gray-500 mb-8 font-medium">请打开闲鱼APP扫描下方二维码</p>
+                          <p className="text-gray-500 mb-8 font-medium">请打开鱼鱼APP扫描下方二维码</p>
 
                           <div className="w-64 h-64 bg-[#F7F8FA] rounded-[2rem] mx-auto flex items-center justify-center overflow-hidden border-4 border-white shadow-inner mb-8 relative">
                               {qrStatus === 'loading' && <Loader2 className="w-10 h-10 text-[#FFE815] animate-spin" />}
@@ -480,7 +484,7 @@ const AccountList: React.FC = () => {
                       type="text"
                       value={editForm.username}
                       onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                      placeholder="闲鱼账号/手机号"
+                      placeholder="鱼鱼账号/手机号"
                       className="w-full ios-input px-4 py-3 rounded-xl"
                     />
                   </div>

@@ -5,9 +5,15 @@ import time
 import base64
 import os
 import random
+import mimetypes
+import subprocess
+import tempfile
 from enum import Enum
+from pathlib import Path
 from loguru import logger
 import websockets
+from urllib.parse import urljoin, urlparse
+import urllib.request
 from utils.xianyu_utils import (
     decrypt, generate_mid, generate_uuid, trans_cookies,
     generate_device_id, generate_sign
@@ -657,7 +663,7 @@ class XianyuLive:
             return 0
 
     def __init__(self, cookies_str=None, cookie_id: str = "default", user_id: int = None):
-        """初始化闲鱼直播类"""
+        """初始化鱼鱼直播类"""
         logger.info(f"【{cookie_id}】开始初始化XianyuLive...")
 
         if not cookies_str:
@@ -686,6 +692,7 @@ class XianyuLive:
         self.heartbeat_timeout = HEARTBEAT_TIMEOUT
         self.last_heartbeat_time = 0
         self.last_heartbeat_response = 0
+        self.last_heartbeat_mid = ''
         self.heartbeat_task = None
         self.ws = None
 
@@ -721,7 +728,7 @@ class XianyuLive:
 
         # Cookie刷新定时任务
         self.cookie_refresh_task = None
-        self.cookie_refresh_interval = 1200  # 1小时 = 3600秒
+        self.cookie_refresh_interval = cfg.get('COOKIE_REFRESH_INTERVAL', 3600)  # 默认1小时
         self.last_cookie_refresh_time = 0
         self.cookie_refresh_lock = asyncio.Lock()  # 使用Lock防止重复执行Cookie刷新
         self.cookie_refresh_enabled = True  # 是否启用Cookie刷新功能
@@ -745,6 +752,9 @@ class XianyuLive:
         # 浏览器Cookie刷新成功标志
         self.browser_cookie_refreshed = False  # 标记_refresh_cookies_via_browser是否成功更新过数据库
         self.restarted_in_browser_refresh = False  # 刷新流程内部是否已触发重启（用于去重）
+        self.auto_local_browser_cookie_sync_enabled = cfg.get('LOCAL_BROWSER_COOKIE_SYNC', {}).get('enabled', False)
+        self.last_local_browser_page_open_time = 0  # 上次在本机浏览器中打开接管页的时间
+        self.local_browser_page_open_cooldown = cfg.get('LOCAL_BROWSER_COOKIE_SYNC', {}).get('page_open_cooldown', 300)
 
 
         # 滑块验证相关
@@ -770,6 +780,11 @@ class XianyuLive:
         self.message_debounce_tasks = {}  # 存储每个chat_id的防抖任务
         self.message_debounce_delay = 1  # 防抖延迟时间（秒）：用户停止发送消息1秒后才回复
         self.message_debounce_lock = asyncio.Lock()  # 防抖任务管理的锁
+        self.send_once_lock = asyncio.Lock()
+        self.pending_ws_requests = {}
+        self.pending_ws_requests_lock = asyncio.Lock()
+        self.item_chat_peer_user_cache = {}
+        self.item_chat_peer_user_cache_lock = asyncio.Lock()
         
         # 消息去重机制：防止同一条消息被处理多次
         self.processed_message_ids = {}  # 存储已处理的消息ID和时间戳 {message_id: timestamp}
@@ -1380,8 +1395,13 @@ class XianyuLive:
             try:
                 from db_manager import db_manager
                 account_info = db_manager.get_cookie_details(self.cookie_id)
-                if account_info and account_info.get('cookie_value'):
-                    new_cookies_str = account_info.get('cookie_value')
+                new_cookies_str = (
+                    (account_info or {}).get('cookie_value')
+                    or (account_info or {}).get('cookies_str')
+                    or (account_info or {}).get('value')
+                    or ''
+                )
+                if new_cookies_str:
                     if new_cookies_str != self.cookies_str:
                         logger.info(f"【{self.cookie_id}】检测到数据库中的cookie已更新，重新加载cookie")
                         self.cookies_str = new_cookies_str
@@ -1775,6 +1795,16 @@ class XianyuLive:
 
             logger.info(f"【{self.cookie_id}】验证URL: {verification_url}")
 
+            local_browser_handled, local_browser_cookies = await self._handle_captcha_with_local_browser(
+                verification_url
+            )
+            if local_browser_handled:
+                if local_browser_cookies:
+                    logger.info(f"【{self.cookie_id}】本机Chrome人工验证码完成，已获取最新cookies")
+                    return local_browser_cookies
+                logger.warning(f"【{self.cookie_id}】本机Chrome人工验证码未在当前等待窗口内完成")
+                return None
+
             # 使用滑块验证器（独立实例，解决并发冲突）
             try:
                 # 使用集成的滑块验证方法（无需猴子补丁）
@@ -2149,13 +2179,26 @@ class XianyuLive:
             
             # 【重要】先检查数据库中的cookie是否已经更新
             # 如果用户已经手动更新了cookie，就不需要触发密码登录刷新
-            db_cookie_value = account_info.get('cookie_value', '')
+            db_cookie_value = (
+                account_info.get('cookie_value')
+                or account_info.get('cookies_str')
+                or account_info.get('value')
+                or ''
+            )
             if db_cookie_value and db_cookie_value != self.cookies_str:
                 logger.info(f"【{self.cookie_id}】检测到数据库中的cookie已更新，重新加载cookie")
                 self.cookies_str = db_cookie_value
                 self.cookies = trans_cookies(self.cookies_str)
                 logger.info(f"【{self.cookie_id}】Cookie已从数据库重新加载，跳过密码登录刷新")
                 return True
+
+            if self.auto_local_browser_cookie_sync_enabled:
+                local_browser_refresh_success = await self._sync_cookies_from_local_browser(trigger_reason)
+                if local_browser_refresh_success:
+                    logger.info(f"【{self.cookie_id}】已通过本机Chrome同步到最新Cookie，跳过密码登录刷新")
+                    return True
+            else:
+                logger.info(f"【{self.cookie_id}】已禁用非验证码场景的本机Chrome自动接管，避免频繁弹窗")
             
             username = account_info.get('username', '')
             password = account_info.get('password', '')
@@ -3328,12 +3371,12 @@ class XianyuLive:
                 return f"__IMAGE_SEND__{image_url}"
 
             elif image_url.startswith('/static/uploads/') or image_url.startswith('static/uploads/'):
-                # 本地图片，需要上传到闲鱼CDN
+                # 本地图片，需要上传到鱼鱼CDN
                 local_image_path = image_url.replace('/static/uploads/', 'static/uploads/')
                 if os.path.exists(local_image_path):
-                    logger.info(f"准备上传本地图片到闲鱼CDN: {local_image_path}")
+                    logger.info(f"准备上传本地图片到鱼鱼CDN: {local_image_path}")
 
-                    # 使用图片上传器上传到闲鱼CDN
+                    # 使用图片上传器上传到鱼鱼CDN
                     from utils.image_uploader import ImageUploader
                     uploader = ImageUploader(self.cookies_str)
 
@@ -3364,11 +3407,11 @@ class XianyuLive:
             return f"抱歉，图片发送失败: {str(e)}"
 
     def _is_cdn_url(self, url: str) -> bool:
-        """检查URL是否是闲鱼CDN链接"""
+        """检查URL是否是鱼鱼CDN链接"""
         if not url:
             return False
 
-        # 闲鱼CDN域名列表
+        # 鱼鱼CDN域名列表
         cdn_domains = [
             'gw.alicdn.com',
             'img.alicdn.com',
@@ -3466,7 +3509,8 @@ class XianyuLive:
         except Exception as e:
             logger.error(f"【{self.cookie_id}】更新默认回复图片URL失败: {e}")
 
-    async def get_ai_reply(self, send_user_name: str, send_user_id: str, send_message: str, item_id: str, chat_id: str):
+    async def get_ai_reply(self, send_user_name: str, send_user_id: str, send_message: str, item_id: str,
+                           chat_id: str, msg_time: str = None, conversation_profile: dict | None = None):
         """获取AI回复"""
         try:
             from ai_reply_engine import ai_reply_engine
@@ -3479,15 +3523,27 @@ class XianyuLive:
             # 从数据库获取商品信息
             from db_manager import db_manager
             item_info_raw = db_manager.get_item_info(self.cookie_id, item_id)
+            profile = conversation_profile or db_manager.get_conversation_profile(
+                self.cookie_id,
+                chat_id=chat_id,
+                counterpart_user_id=send_user_id,
+                item_id=item_id,
+            ) or {}
 
             if not item_info_raw:
                 logger.warning(f"数据库中无商品信息: {item_id}")
-                # 使用默认商品信息
-                item_info = {
-                    'title': '商品信息获取失败',
-                    'price': 0,
-                    'desc': '暂无商品描述'
-                }
+                if str(profile.get('our_role') or '').strip() == 'buyer':
+                    item_info = {
+                        'title': profile.get('item_title') or '目标商品',
+                        'price': self._parse_price(profile.get('item_price', '0')),
+                        'desc': f"调研沟通对象：{profile.get('counterpart_name') or send_user_name or '卖家'}；当前为买家视角跟进对话"
+                    }
+                else:
+                    item_info = {
+                        'title': '商品信息获取失败',
+                        'price': 0,
+                        'desc': '暂无商品描述'
+                    }
             else:
                 # 解析数据库中的商品信息
                 item_info = {
@@ -3505,7 +3561,11 @@ class XianyuLive:
                 cookie_id=self.cookie_id,
                 user_id=send_user_id,
                 item_id=item_id,
-                skip_wait=True  # 跳过内部等待，因为外部已实现防抖
+                skip_wait=True,  # 跳过内部等待，因为外部已实现防抖
+                message_created_at=msg_time,
+                skip_user_message_save=True,
+                skip_assistant_message_save=True,
+                conversation_profile=profile,
             )
 
             if reply:
@@ -3689,7 +3749,7 @@ class XianyuLive:
             data = {
                 "msgtype": "markdown",
                 "markdown": {
-                    "title": "闲鱼自动回复通知",
+                    "title": "鱼鱼自动回复通知",
                     "text": message
                 }
             }
@@ -3791,7 +3851,7 @@ class XianyuLive:
             # 解析配置
             server_url = config_data.get('server_url', 'https://api.day.app').rstrip('/')
             device_key = config_data.get('device_key', '')
-            title = config_data.get('title', '闲鱼自动回复通知')
+            title = config_data.get('title', '鱼鱼自动回复通知')
             sound = config_data.get('sound', 'default')
             icon = config_data.get('icon', '')
             group = config_data.get('group', 'xianyu')
@@ -3888,7 +3948,7 @@ class XianyuLive:
             msg = MIMEMultipart()
             msg['From'] = email_user
             msg['To'] = recipient_email
-            msg['Subject'] = "闲鱼自动回复通知"
+            msg['Subject'] = "鱼鱼自动回复通知"
 
             # 添加邮件正文
             msg.attach(MIMEText(message, 'plain', 'utf-8'))
@@ -5172,11 +5232,12 @@ class XianyuLive:
             # 确保任务能正常结束
             logger.info(f"【{self.cookie_id}】Token刷新循环已退出")
 
-    async def create_chat(self, ws, toid, item_id='891198795482'):
+    async def create_chat(self, ws, toid, item_id='891198795482', request_mid=None):
+        request_mid = request_mid or generate_mid()
         msg = {
             "lwp": "/r/SingleChatConversation/create",
             "headers": {
-                "mid": generate_mid()
+                "mid": request_mid
             },
             "body": [
                 {
@@ -5184,7 +5245,9 @@ class XianyuLive:
                     "pairSecond": f"{self.myid}@goofish",
                     "bizType": "1",
                     "extension": {
-                        "itemId": item_id
+                        "itemId": item_id,
+                        "orderId": "",
+                        "source": ""
                     },
                     "ctx": {
                         "appVersion": "1.0",
@@ -5194,9 +5257,11 @@ class XianyuLive:
             ]
         }
         await ws.send(json.dumps(msg))
+        return request_mid
 
-    async def send_msg(self, ws, cid, toid, text):
+    async def send_msg(self, ws, cid, toid, text, request_mid=None):
         logger.info(f"[send_msg] 开始发送消息: cid={cid}, toid={toid}, text={text[:50] if len(text) > 50 else text}")
+        request_mid = request_mid or generate_mid()
         text = {
             "contentType": 1,
             "text": {
@@ -5207,7 +5272,7 @@ class XianyuLive:
         msg = {
             "lwp": "/r/MessageSend/sendByReceiverScope",
             "headers": {
-                "mid": generate_mid()
+                "mid": request_mid
             },
             "body": [
                 {
@@ -5241,6 +5306,7 @@ class XianyuLive:
             ]
         }
         await ws.send(json.dumps(msg))
+        return request_mid
 
     async def init(self, ws):
         # 如果没有token或者token过期，获取新token
@@ -5312,6 +5378,7 @@ class XianyuLive:
         try:
             await asyncio.wait_for(ws.send(json.dumps(msg)), timeout=2.0)
             self.last_heartbeat_time = time.time()
+            self.last_heartbeat_mid = str(msg["headers"].get("mid") or "").strip()
             logger.warning(f"【{self.cookie_id}】心跳包已发送")
         except asyncio.TimeoutError:
             raise ConnectionError("心跳发送超时，WebSocket可能已断开")
@@ -5373,8 +5440,15 @@ class XianyuLive:
     async def handle_heartbeat_response(self, message_data):
         """处理心跳响应"""
         try:
-            if message_data.get("code") == 200:
+            headers = message_data.get("headers") if isinstance(message_data, dict) else {}
+            response_mid = str((headers or {}).get("mid") or "").strip()
+            if (
+                message_data.get("code") == 200
+                and response_mid
+                and response_mid == str(self.last_heartbeat_mid or "").strip()
+            ):
                 self.last_heartbeat_response = time.time()
+                self.last_heartbeat_mid = ''
                 logger.warning("心跳响应正常")
                 return True
         except Exception as e:
@@ -6414,6 +6488,336 @@ class XianyuLive:
         remaining_time = max(0, self.qr_cookie_refresh_cooldown - time_since_qr_refresh)
         return int(remaining_time)
 
+    async def _resolve_local_browser_cdp_url(self) -> str:
+        """解析本机已运行 Chrome 的 CDP 地址。"""
+        base_url = str(
+            os.getenv("LOCAL_BROWSER_CDP_URL")
+            or os.getenv("EXISTING_BROWSER_CDP_URL")
+            or "http://127.0.0.1:9222"
+        ).strip()
+        if base_url.startswith(("ws://", "wss://")):
+            return base_url
+
+        parsed_base = urlparse(base_url if "://" in base_url else f"http://{base_url}")
+        base_host = parsed_base.hostname or "127.0.0.1"
+        base_port = parsed_base.port
+
+        active_port_candidates = []
+        explicit_profile_dir = os.getenv("LOCAL_BROWSER_USER_DATA_DIR") or os.getenv("CHROME_USER_DATA_DIR")
+        if explicit_profile_dir:
+            active_port_candidates.append(Path(explicit_profile_dir) / "DevToolsActivePort")
+
+        home_dir = Path.home()
+        active_port_candidates.extend([
+            home_dir / "Library/Application Support/Google/Chrome/DevToolsActivePort",
+            home_dir / "Library/Application Support/Google/Chrome Beta/DevToolsActivePort",
+            home_dir / "Library/Application Support/Chromium/DevToolsActivePort",
+        ])
+
+        for active_port_file in active_port_candidates:
+            try:
+                if not active_port_file.exists():
+                    continue
+
+                lines = [
+                    line.strip()
+                    for line in active_port_file.read_text(encoding="utf-8").splitlines()
+                    if line.strip()
+                ]
+                if len(lines) < 2:
+                    continue
+
+                discovered_port = int(lines[0])
+                discovered_path = lines[1]
+                if not discovered_path.startswith("/"):
+                    discovered_path = f"/{discovered_path}"
+
+                if base_port and discovered_port != base_port:
+                    logger.debug(
+                        f"【{self.cookie_id}】DevToolsActivePort端口不匹配，忽略 {active_port_file}: "
+                        f"{discovered_port} != {base_port}"
+                    )
+                    continue
+
+                websocket_url = f"ws://{base_host}:{discovered_port}{discovered_path}"
+                logger.info(f"【{self.cookie_id}】已通过DevToolsActivePort解析本机浏览器CDP地址: {websocket_url}")
+                return websocket_url
+            except Exception as active_port_error:
+                logger.debug(f"【{self.cookie_id}】读取DevToolsActivePort失败 {active_port_file}: {active_port_error}")
+
+        normalized = base_url.rstrip("/")
+        candidate_endpoints = [
+            f"{normalized}/json/version",
+            f"{normalized}/json",
+            f"{normalized}/json/list",
+        ]
+
+        async def fetch_json(endpoint: str):
+            def _load():
+                with urllib.request.urlopen(endpoint, timeout=3) as response:
+                    return json.loads(response.read().decode("utf-8"))
+
+            return await asyncio.to_thread(_load)
+
+        for endpoint in candidate_endpoints:
+            try:
+                payload = await fetch_json(endpoint)
+                if isinstance(payload, dict):
+                    websocket_url = payload.get("webSocketDebuggerUrl")
+                    if websocket_url:
+                        logger.info(f"【{self.cookie_id}】已解析本机浏览器CDP地址: {websocket_url}")
+                        return websocket_url
+                elif isinstance(payload, list):
+                    for item in payload:
+                        websocket_url = (item or {}).get("webSocketDebuggerUrl")
+                        if websocket_url:
+                            logger.info(f"【{self.cookie_id}】已从标签页列表解析本机浏览器CDP地址: {websocket_url}")
+                            return websocket_url
+            except Exception as resolve_error:
+                logger.debug(f"【{self.cookie_id}】解析本机浏览器CDP地址失败 {endpoint}: {resolve_error}")
+
+        logger.warning(f"【{self.cookie_id}】未能提前解析CDP ws地址，回退使用原始地址: {base_url}")
+        return base_url
+
+    async def _sync_cookies_from_local_browser(self, trigger_reason: str = "令牌/Session过期") -> bool:
+        """从本机正在运行的 Chrome 同步最新 Cookie。"""
+        playwright = None
+        page = None
+        opened_new_page = False
+        keep_page_open = False
+
+        def _collect_cookie_dict(cookie_items):
+            domains = ("goofish.com", "taobao.com", "tmall.com")
+            result = {}
+            for cookie in cookie_items or []:
+                name = cookie.get("name")
+                value = cookie.get("value")
+                domain = (cookie.get("domain") or "").lower()
+                if not name or value is None:
+                    continue
+                if domain and not any(token in domain for token in domains):
+                    continue
+                result[name] = value
+            return result
+
+        try:
+            from playwright.async_api import async_playwright
+
+            logger.warning(f"【{self.cookie_id}】检测到{trigger_reason}，尝试从本机Chrome同步最新Cookie...")
+            resolved_cdp_url = await self._resolve_local_browser_cdp_url()
+
+            playwright = await asyncio.wait_for(async_playwright().start(), timeout=10.0)
+            browser = await asyncio.wait_for(
+                playwright.chromium.connect_over_cdp(resolved_cdp_url),
+                timeout=10.0
+            )
+
+            if not browser.contexts:
+                logger.warning(f"【{self.cookie_id}】本机Chrome未返回默认上下文，无法同步Cookie")
+                return False
+
+            context = browser.contexts[0]
+            context.set_default_timeout(15000)
+            cookie_urls = [
+                "https://www.goofish.com",
+                "https://www.goofish.com/im",
+                "https://h5api.m.goofish.com",
+                "https://www.taobao.com",
+                "https://login.taobao.com",
+            ]
+
+            extracted_cookies = _collect_cookie_dict(await context.cookies(cookie_urls))
+
+            should_open_page = (
+                time.time() - self.last_local_browser_page_open_time >= self.local_browser_page_open_cooldown
+            )
+            if should_open_page:
+                page = await context.new_page()
+                opened_new_page = True
+                self.last_local_browser_page_open_time = time.time()
+                target_url = "https://www.goofish.com/im"
+                logger.warning(f"【{self.cookie_id}】已在本机Chrome新开标签页，请保持登录态或完成验证: {target_url}")
+                try:
+                    await page.goto(target_url, wait_until="domcontentloaded", timeout=15000)
+                except Exception as nav_error:
+                    logger.warning(f"【{self.cookie_id}】本机Chrome接管页加载异常，继续读取Cookie: {self._safe_str(nav_error)}")
+
+                await asyncio.sleep(3)
+                extracted_cookies = _collect_cookie_dict(await context.cookies(cookie_urls))
+
+                try:
+                    current_url = page.url
+                    current_title = await page.title()
+                    if (
+                        "login" in current_url.lower()
+                        or "captcha" in current_url.lower()
+                        or "verify" in current_url.lower()
+                        or any(word in current_title for word in ["登录", "验证", "验证码"])
+                    ):
+                        keep_page_open = True
+                        logger.warning(
+                            f"【{self.cookie_id}】本机Chrome页面仍需人工处理，标签页已保留。"
+                            f"完成登录/验证后系统会自动继续重试。"
+                        )
+                except Exception as page_state_error:
+                    logger.debug(f"【{self.cookie_id}】读取本机Chrome页面状态失败: {page_state_error}")
+
+            if not extracted_cookies:
+                logger.warning(f"【{self.cookie_id}】未从本机Chrome提取到有效Cookie")
+                return False
+
+            changed_cookies = [
+                name for name, value in extracted_cookies.items()
+                if self.cookies.get(name) != value
+            ]
+            new_cookies = [name for name in extracted_cookies if name not in self.cookies]
+
+            important_keys = ['unb', '_m_h5_tk', '_m_h5_tk_enc', 'cookie2', 't', 'sgcookie']
+            important_status = {
+                key: key in extracted_cookies and bool(extracted_cookies.get(key))
+                for key in important_keys
+            }
+            logger.info(f"【{self.cookie_id}】本机Chrome Cookie字段数: {len(extracted_cookies)}")
+            logger.info(f"【{self.cookie_id}】本机Chrome关键字段: {important_status}")
+
+            if not changed_cookies and not new_cookies:
+                logger.warning(f"【{self.cookie_id}】本机Chrome Cookie与当前运行态一致，暂无可同步更新")
+                return False
+
+            self.cookies.update(extracted_cookies)
+            self.cookies_str = '; '.join([f"{k}={v}" for k, v in self.cookies.items()])
+            await self.update_config_cookies()
+            logger.warning(
+                f"【{self.cookie_id}】已从本机Chrome同步Cookie: "
+                f"新增{len(new_cookies)}个, 更新{len(changed_cookies)}个, 当前总数{len(self.cookies)}个"
+            )
+            return True
+
+        except Exception as local_browser_error:
+            logger.warning(f"【{self.cookie_id}】从本机Chrome同步Cookie失败: {self._safe_str(local_browser_error)}")
+            return False
+        finally:
+            try:
+                if page and opened_new_page and not keep_page_open and not page.is_closed():
+                    await page.close()
+            except Exception as page_close_error:
+                logger.debug(f"【{self.cookie_id}】关闭本机Chrome接管标签页失败: {page_close_error}")
+
+            if playwright:
+                try:
+                    await asyncio.wait_for(playwright.stop(), timeout=5.0)
+                except Exception as stop_error:
+                    logger.debug(f"【{self.cookie_id}】断开本机Chrome CDP连接失败: {stop_error}")
+
+    async def _handle_captcha_with_local_browser(self, verification_url: str, timeout_seconds: int = 300):
+        """在本机正在运行的 Chrome 中打开验证码页面，等待人工完成。"""
+        playwright = None
+
+        def _collect_cookie_dict(cookie_items):
+            domains = ("goofish.com", "taobao.com", "tmall.com")
+            result = {}
+            for cookie in cookie_items or []:
+                name = cookie.get("name")
+                value = cookie.get("value")
+                domain = (cookie.get("domain") or "").lower()
+                if not name or value is None:
+                    continue
+                if domain and not any(token in domain for token in domains):
+                    continue
+                result[name] = value
+            return result
+
+        try:
+            from playwright.async_api import async_playwright
+
+            resolved_cdp_url = await self._resolve_local_browser_cdp_url()
+            playwright = await asyncio.wait_for(async_playwright().start(), timeout=10.0)
+            browser = await asyncio.wait_for(
+                playwright.chromium.connect_over_cdp(resolved_cdp_url),
+                timeout=10.0
+            )
+            if not browser.contexts:
+                logger.warning(f"【{self.cookie_id}】本机Chrome未返回默认上下文，无法进行人工验证码接管")
+                return False, None
+
+            context = browser.contexts[0]
+            context.set_default_timeout(15000)
+            page = await context.new_page()
+            try:
+                await page.bring_to_front()
+            except Exception:
+                pass
+
+            logger.warning(f"【{self.cookie_id}】已在本机Chrome打开验证码页，请手动完成验证: {verification_url}")
+            await page.goto(verification_url, wait_until="domcontentloaded", timeout=20000)
+
+            cookie_urls = [
+                "https://www.goofish.com",
+                "https://www.goofish.com/im",
+                "https://h5api.m.goofish.com",
+                verification_url,
+            ]
+            baseline_cookies = _collect_cookie_dict(await context.cookies(cookie_urls))
+            baseline_markers = {
+                key: baseline_cookies.get(key)
+                for key in ["x5sec", "x5secdata", "_m_h5_tk", "_m_h5_tk_enc"]
+            }
+
+            logger.warning(f"【{self.cookie_id}】等待你在本机Chrome完成验证码，最长 {timeout_seconds} 秒...")
+            elapsed = 0
+            check_interval = 2
+            while elapsed < timeout_seconds:
+                await asyncio.sleep(check_interval)
+                elapsed += check_interval
+
+                current_cookies = _collect_cookie_dict(await context.cookies(cookie_urls))
+                current_markers = {
+                    key: current_cookies.get(key)
+                    for key in ["x5sec", "x5secdata", "_m_h5_tk", "_m_h5_tk_enc"]
+                }
+
+                page_completed = False
+                try:
+                    current_url = (page.url or "").lower()
+                    current_title = await page.title()
+                    current_content = (await page.content()).lower()
+                    page_completed = (
+                        "_____tmd_____" not in current_url
+                        and "punish" not in current_url
+                        and "captcha" not in current_url
+                        and "验证码" not in current_title
+                        and "验证" not in current_title
+                        and "captcha" not in current_content
+                        and "验证码" not in current_content
+                        and "滑块" not in current_content
+                        and "验证失败" not in current_content
+                    )
+                except Exception:
+                    page_completed = (
+                        elapsed >= 5
+                        and current_markers != baseline_markers
+                    )
+
+                if page_completed and elapsed >= 3:
+                    self.cookies.update(current_cookies)
+                    self.cookies_str = '; '.join([f"{k}={v}" for k, v in self.cookies.items()])
+                    await self.update_config_cookies()
+                    logger.warning(f"【{self.cookie_id}】本机Chrome人工验证码已完成，Cookie已同步")
+                    return True, self.cookies_str
+
+            logger.warning(f"【{self.cookie_id}】等待本机Chrome人工验证码超时")
+            return True, None
+
+        except Exception as local_browser_error:
+            logger.warning(f"【{self.cookie_id}】本机Chrome人工验证码接管失败: {self._safe_str(local_browser_error)}")
+            return False, None
+        finally:
+            if playwright:
+                try:
+                    await asyncio.wait_for(playwright.stop(), timeout=5.0)
+                except Exception as stop_error:
+                    logger.debug(f"【{self.cookie_id}】断开本机Chrome验证码接管连接失败: {stop_error}")
+
     async def _refresh_cookies_via_browser(self, triggered_by_refresh_token: bool = False):
         """通过浏览器访问指定页面刷新Cookie
 
@@ -6867,7 +7271,198 @@ class XianyuLive:
         except Exception as e:
             logger.warning(f"【{self.cookie_id}】强制关闭时出现异常（已忽略）: {e}")
 
-    async def send_msg_once(self, toid, item_id, text):
+    async def _register_pending_ws_request(self, request_mid: str):
+        loop = asyncio.get_running_loop()
+        future = loop.create_future()
+        async with self.pending_ws_requests_lock:
+            self.pending_ws_requests[request_mid] = future
+        return future
+
+    async def _remove_pending_ws_request(self, request_mid: str):
+        async with self.pending_ws_requests_lock:
+            return self.pending_ws_requests.pop(request_mid, None)
+
+    async def _fetch_item_info_for_peer_resolution(self, item_id: str) -> dict:
+        item_id = str(item_id or "").strip()
+        if not item_id:
+            return {}
+
+        params = {
+            'jsv': '2.7.2',
+            'appKey': '34839810',
+            't': str(int(time.time() * 1000)),
+            'sign': '',
+            'v': '1.0',
+            'type': 'originaljson',
+            'accountSite': 'xianyu',
+            'dataType': 'json',
+            'timeout': '20000',
+            'api': 'mtop.taobao.idle.pc.detail',
+            'sessionOption': 'AutoLoginOnly',
+            'spm_cnt': 'a21ybx.item.0.0',
+        }
+
+        data_val = json.dumps({"itemId": item_id}, ensure_ascii=False, separators=(',', ':'))
+        token = trans_cookies(self.cookies_str).get('_m_h5_tk', '').split('_')[0] if trans_cookies(self.cookies_str).get('_m_h5_tk') else ''
+        from utils.xianyu_utils import generate_sign
+        params['sign'] = generate_sign(params['t'], token, data_val)
+
+        headers = {
+            'accept': 'application/json',
+            'content-type': 'application/x-www-form-urlencoded',
+            'origin': 'https://www.goofish.com',
+            'referer': f'https://www.goofish.com/item?id={item_id}',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36',
+            'cookie': self.cookies_str,
+        }
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(headers=headers, timeout=timeout) as session:
+            async with session.post(
+                'https://h5api.m.goofish.com/h5/mtop.taobao.idle.pc.detail/1.0/',
+                params=params,
+                data={'data': data_val}
+            ) as response:
+                return await response.json(content_type=None)
+
+    async def resolve_chat_peer_user_id(self, item_id: str, fallback_user_id: str = "") -> str:
+        item_id = str(item_id or "").strip()
+        normalized_fallback = self._normalize_goofish_user_id(fallback_user_id)
+        if normalized_fallback.isdigit():
+            return normalized_fallback
+        if not item_id:
+            return normalized_fallback
+
+        async with self.item_chat_peer_user_cache_lock:
+            cached_user_id = self.item_chat_peer_user_cache.get(item_id)
+        if cached_user_id:
+            return cached_user_id
+
+        try:
+            item_info = await self._fetch_item_info_for_peer_resolution(item_id)
+        except Exception as exc:
+            logger.warning(f"【{self.cookie_id}】解析聊天用户ID失败: item={item_id}, fallback={normalized_fallback}, error={exc}")
+            return normalized_fallback
+
+        data = item_info.get("data") if isinstance(item_info, dict) else {}
+        track_params = data.get("trackParams") if isinstance(data, dict) else {}
+        seller_do = data.get("sellerDO") if isinstance(data, dict) else {}
+        user_do = data.get("userDO") if isinstance(data, dict) else {}
+
+        resolved_user_id = self._normalize_goofish_user_id(
+            (track_params.get("sellerId") if isinstance(track_params, dict) else "")
+            or (data.get("sellerId") if isinstance(data, dict) else "")
+            or (seller_do.get("sellerId") if isinstance(seller_do, dict) else "")
+            or (seller_do.get("userId") if isinstance(seller_do, dict) else "")
+            or (user_do.get("userId") if isinstance(user_do, dict) else "")
+            or normalized_fallback
+        )
+
+        if resolved_user_id and resolved_user_id.isdigit():
+            async with self.item_chat_peer_user_cache_lock:
+                self.item_chat_peer_user_cache[item_id] = resolved_user_id
+            if normalized_fallback and resolved_user_id != normalized_fallback:
+                logger.info(
+                    f"【{self.cookie_id}】已将搜索卖家ID映射为真实聊天ID: "
+                    f"item={item_id}, search_id={normalized_fallback}, peer_id={resolved_user_id}"
+                )
+        return resolved_user_id or normalized_fallback
+
+    def _extract_ws_response_error(self, message_data) -> str:
+        if not isinstance(message_data, dict):
+            return "鱼鱼返回了未知响应"
+
+        body = message_data.get("body")
+        if isinstance(body, dict):
+            for key in ("reason", "message", "msg", "developerMessage", "moreInfo"):
+                value = str(body.get(key) or "").strip()
+                if value:
+                    return value
+            nested_conversation = body.get("singleChatConversation")
+            if isinstance(nested_conversation, dict):
+                for key in ("reason", "message", "msg"):
+                    value = str(nested_conversation.get(key) or "").strip()
+                    if value:
+                        return value
+
+        code = message_data.get("code")
+        return f"鱼鱼返回异常响应{f' (code={code})' if code is not None else ''}"
+
+    def _extract_chat_id_from_ws_response(self, message_data) -> str:
+        if not isinstance(message_data, dict):
+            return ""
+
+        body = message_data.get("body")
+        if isinstance(body, dict):
+            single_chat = body.get("singleChatConversation")
+            if isinstance(single_chat, dict):
+                cid = str(single_chat.get("cid") or "").strip()
+                if cid:
+                    return cid.split('@')[0]
+
+        return ""
+
+    async def _resolve_pending_ws_request(self, message_data) -> bool:
+        if not isinstance(message_data, dict):
+            return False
+
+        headers = message_data.get("headers")
+        if not isinstance(headers, dict):
+            return False
+
+        request_mid = str(headers.get("mid") or "").strip()
+        if not request_mid:
+            return False
+
+        future = await self._remove_pending_ws_request(request_mid)
+        if not future:
+            return False
+
+        if future.done():
+            return True
+
+        code = message_data.get("code")
+        try:
+            code_num = int(code)
+        except (TypeError, ValueError):
+            code_num = None
+
+        if code_num is not None and code_num >= 400:
+            future.set_exception(RuntimeError(self._extract_ws_response_error(message_data)))
+            return True
+
+        future.set_result(message_data)
+        return True
+
+    async def _send_msg_once_via_active_ws(self, websocket, toid, item_id, text):
+        create_mid = generate_mid()
+        create_future = await self._register_pending_ws_request(create_mid)
+
+        try:
+            await self.create_chat(websocket, toid, item_id, request_mid=create_mid)
+            create_response = await asyncio.wait_for(create_future, timeout=12.0)
+            cid = self._extract_chat_id_from_ws_response(create_response)
+            if not cid:
+                raise RuntimeError("创建会话失败：未拿到会话ID")
+        except Exception:
+            pending = await self._remove_pending_ws_request(create_mid)
+            if pending and not pending.done():
+                pending.cancel()
+            raise
+
+        send_mid = generate_mid()
+        send_future = await self._register_pending_ws_request(send_mid)
+
+        try:
+            await self.send_msg(websocket, cid, toid, text, request_mid=send_mid)
+            await asyncio.wait_for(send_future, timeout=12.0)
+            return cid
+        except Exception:
+            pending = await self._remove_pending_ws_request(send_mid)
+            if pending and not pending.done():
+                pending.cancel()
+            raise
+
+    async def _send_msg_once_via_temp_ws(self, toid, item_id, text):
         headers = {
             "Cookie": self.cookies_str,
             "Host": "wss-goofish.dingtalk.com",
@@ -6886,8 +7481,7 @@ class XianyuLive:
                 self.base_url,
                 headers=headers
             ) as websocket:
-                await self._handle_websocket_connection(websocket, toid, item_id, text)
-                return
+                return await self._handle_websocket_connection(websocket, toid, item_id, text)
         except Exception as e:
             error_msg = self._safe_str(e)
             logger.warning(f"headers参数失败: {error_msg}")
@@ -6898,8 +7492,7 @@ class XianyuLive:
                 self.base_url,
                 extra_headers=headers
             ) as websocket:
-                await self._handle_websocket_connection(websocket, toid, item_id, text)
-                return
+                return await self._handle_websocket_connection(websocket, toid, item_id, text)
         except TypeError as e:
             error_msg = self._safe_str(e)
             if "extra_headers" in error_msg:
@@ -6912,7 +7505,7 @@ class XianyuLive:
             self.base_url,
             extra_headers=headers
         ) as websocket:
-            await self._handle_websocket_connection(websocket, toid, item_id, text)
+            return await self._handle_websocket_connection(websocket, toid, item_id, text)
         headers = {
             "Cookie": self.cookies_str,
             "Host": "wss-goofish.dingtalk.com",
@@ -6930,7 +7523,7 @@ class XianyuLive:
                 self.base_url,
                 extra_headers=headers
             ) as websocket:
-                await self._handle_websocket_connection(websocket, toid, item_id, text)
+                return await self._handle_websocket_connection(websocket, toid, item_id, text)
         except TypeError as e:
             # 安全地检查异常信息
             error_msg = self._safe_str(e)
@@ -6942,9 +7535,30 @@ class XianyuLive:
                     self.base_url,
                     extra_headers=headers
                 ) as websocket:
-                    await self._handle_websocket_connection(websocket, toid, item_id, text)
+                    return await self._handle_websocket_connection(websocket, toid, item_id, text)
             else:
                 raise
+
+    async def _wait_for_active_ws(self, timeout: float = 8.0, interval: float = 0.2):
+        deadline = time.time() + max(0.5, timeout)
+        while time.time() < deadline:
+            websocket = self.ws
+            if websocket is not None:
+                return websocket
+            await asyncio.sleep(max(0.05, interval))
+        return None
+
+    async def send_msg_once(self, toid, item_id, text):
+        async with self.send_once_lock:
+            websocket = self.ws or await self._wait_for_active_ws()
+            if websocket is None:
+                raise RuntimeError("当前聊天连接未就绪，请稍后重试")
+
+            resolved_toid = await self.resolve_chat_peer_user_id(item_id, toid)
+            if not resolved_toid:
+                raise RuntimeError("未能解析到可用的聊天用户ID")
+
+            return await self._send_msg_once_via_active_ws(websocket, resolved_toid, item_id, text)
 
     async def _create_websocket_connection(self, headers):
         """创建WebSocket连接，兼容不同版本的websockets库"""
@@ -6972,7 +7586,7 @@ class XianyuLive:
                 cid = cid.split('@')[0]
                 await self.send_msg(websocket, cid, toid, text)
                 logger.info(f'【{self.cookie_id}】send message')
-                return
+                return cid
             except Exception as e:
                 pass
 
@@ -6993,6 +7607,12 @@ class XianyuLive:
             # 类型 1: 系统提醒消息（有 reminderContent）
             if "10" in msg_1 and isinstance(msg_1["10"], dict) and "reminderContent" in msg_1["10"]:
                 return True
+
+            # 类型 1.5: 语音/音频消息（可能没有 reminderContent，但有语音资源字段）
+            if "10" in msg_1 and isinstance(msg_1["10"], dict):
+                voice_payload = self._extract_voice_message_payload(msg_1["10"])
+                if voice_payload.get('detected'):
+                    return True
             
             # 类型 2: 普通文本消息（有 "11" 字段表示文本内容）
             if "11" in msg_1:
@@ -7162,7 +7782,7 @@ class XianyuLive:
 
     async def _schedule_debounced_reply(self, chat_id: str, message_data: dict, websocket, 
                                        send_user_name: str, send_user_id: str, send_message: str,
-                                       item_id: str, msg_time: str):
+                                       item_id: str, msg_time: str, conversation_profile: dict | None = None):
         """
         调度防抖回复：如果用户连续发送消息，等待用户停止发送后再回复最后一条消息
         
@@ -7252,7 +7872,8 @@ class XianyuLive:
                     'send_user_id': send_user_id,
                     'send_message': send_message,
                     'item_id': item_id,
-                    'msg_time': msg_time
+                    'msg_time': msg_time,
+                    'conversation_profile': conversation_profile,
                 },
                 'timer': current_timer
             }
@@ -7291,7 +7912,8 @@ class XianyuLive:
                         last_msg['send_message'],
                         last_msg['item_id'],
                         chat_id,
-                        last_msg['msg_time']
+                        last_msg['msg_time'],
+                        last_msg.get('conversation_profile'),
                     )
                     
                 except asyncio.CancelledError:
@@ -7307,9 +7929,563 @@ class XianyuLive:
             self.message_debounce_tasks[chat_id]['task'] = task
             logger.warning(f"【{self.cookie_id}】为chat_id {chat_id} 创建防抖任务，延迟 {self.message_debounce_delay} 秒")
 
+    def _normalize_goofish_user_id(self, value) -> str:
+        """规范化鱼鱼用户ID，去掉 @goofish 后缀。"""
+        if value is None:
+            return ''
+        normalized = str(value).strip()
+        if '@' in normalized:
+            normalized = normalized.split('@', 1)[0]
+        return normalized
+
+    def _is_valid_buyer_user_id(self, value) -> bool:
+        """判断是否像真实鱼鱼用户ID，过滤 0/21/unknown 这类异常占位值。"""
+        normalized = self._normalize_goofish_user_id(value)
+        if not normalized:
+            return False
+        if normalized.lower() in {'0', 'unknown', 'unknown_user', 'none', 'null'}:
+            return False
+        return len(normalized) >= 6
+
+    def _extract_peer_user_id_from_url(self, url: str) -> str:
+        """从鱼鱼消息链接中提取 peerUserId。"""
+        if not isinstance(url, str) or 'peerUserId=' not in url:
+            return ''
+        match = re.search(r'(?:[?&])peerUserId=([^&]+)', url)
+        return self._normalize_goofish_user_id(match.group(1)) if match else ''
+
+    def _extract_nested_sender_user_id(self, message_1: dict) -> str:
+        """从 message[1][1][1] 这类原始字段中提取发送者ID。"""
+        if not isinstance(message_1, dict):
+            return ''
+        nested_user = message_1.get('1')
+        if isinstance(nested_user, dict):
+            return self._normalize_goofish_user_id(nested_user.get('1'))
+        if isinstance(nested_user, str):
+            return self._normalize_goofish_user_id(nested_user)
+        return ''
+
+    def _extract_sender_identity(self, message_1: dict, message_10: dict) -> tuple[str, str]:
+        """提取买家昵称和用户ID，避免卡片/系统消息把买家显示为 0 或 21。"""
+        message_10 = message_10 if isinstance(message_10, dict) else {}
+
+        name_candidates = [
+            message_10.get('senderNick'),
+            message_10.get('senderName'),
+            message_10.get('reminderTitle'),
+        ]
+        send_user_name = next(
+            (
+                str(candidate).strip()
+                for candidate in name_candidates
+                if candidate and str(candidate).strip() and str(candidate).strip() != '未知用户'
+            ),
+            '未知买家',
+        )
+
+        id_candidates = [
+            message_10.get('senderUserId'),
+            self._extract_nested_sender_user_id(message_1),
+            self._extract_peer_user_id_from_url(message_10.get('reminderUrl', '')),
+        ]
+        for candidate in id_candidates:
+            if self._is_valid_buyer_user_id(candidate):
+                return send_user_name, self._normalize_goofish_user_id(candidate)
+
+        fallback_id = self._normalize_goofish_user_id(id_candidates[0]) or 'unknown_user'
+        return send_user_name, fallback_id
+
+    def _load_message_json_dict(self, value) -> dict:
+        """安全解析消息里的 JSON 字符串，仅返回 dict。"""
+        if isinstance(value, dict):
+            return value
+        if not isinstance(value, str):
+            return {}
+
+        stripped = value.strip()
+        if not stripped or stripped[0] not in '{[' or stripped[-1] not in '}]':
+            return {}
+
+        try:
+            parsed = json.loads(stripped)
+        except Exception:
+            return {}
+        return parsed if isinstance(parsed, dict) else {}
+
+    def _extract_message_meta(self, message_1: dict | None, message_10: dict | None) -> dict:
+        """提取消息类型和扩展元信息，供过滤/分类逻辑复用。"""
+        message_1 = message_1 if isinstance(message_1, dict) else {}
+        message_10 = message_10 if isinstance(message_10, dict) else {}
+
+        ext_json = self._load_message_json_dict(message_10.get('extJson'))
+        biz_tag = self._load_message_json_dict(message_10.get('bizTag'))
+
+        message_6 = message_1.get('6')
+        message_6_3 = message_6.get('3') if isinstance(message_6, dict) else {}
+        content_payload = self._load_message_json_dict(message_6_3.get('5')) if isinstance(message_6_3, dict) else {}
+
+        content_type = None
+        for candidate in (
+            ext_json.get('contentType'),
+            message_6_3.get('4') if isinstance(message_6_3, dict) else None,
+            content_payload.get('contentType'),
+        ):
+            if candidate in (None, ''):
+                continue
+            try:
+                content_type = int(str(candidate).strip())
+                break
+            except Exception:
+                continue
+
+        return {
+            'content_type': content_type,
+            'ext_json': ext_json,
+            'biz_tag': biz_tag,
+            'content_payload': content_payload,
+        }
+
+    def _get_auto_reply_skip_reason(self, message_1: dict | None, message_10: dict | None) -> str | None:
+        """识别平台提示/自动回复等非真人消息，只展示不自动回复。"""
+        message_10 = message_10 if isinstance(message_10, dict) else {}
+        meta = self._extract_message_meta(message_1, message_10)
+        ext_json = meta.get('ext_json') or {}
+        biz_tag = meta.get('biz_tag') or {}
+        content_type = meta.get('content_type')
+
+        edit_action = ext_json.get('editAction') if isinstance(ext_json.get('editAction'), dict) else {}
+
+        hint_parts = [
+            message_10.get('reminderContent'),
+            message_10.get('detailNotice'),
+            message_10.get('reminderTitle'),
+            ext_json.get('smartReplyBiz'),
+            ext_json.get('msgArg1'),
+            edit_action.get('arg1'),
+            biz_tag.get('sourceId'),
+            biz_tag.get('taskName'),
+        ]
+        hint_text = ' '.join(str(part).strip() for part in hint_parts if part)
+        hint_text_lower = hint_text.lower()
+
+        if ext_json.get('smartReplyTag') in (1, '1', True):
+            return '对方自动回复'
+
+        if ext_json.get('smartReplyBiz') or str(edit_action.get('arg1') or '').strip() == 'OfflineEdit':
+            return '离线自动回复'
+
+        if content_type == 14 and (
+            '叮一下' in hint_text or
+            '催促' in hint_text or
+            'msgtips' in hint_text_lower
+        ):
+            return '平台提示消息'
+
+        if (
+            'offlineupgrade' in hint_text_lower or
+            '不在线自动回复' in hint_text or
+            'msgtips' in hint_text_lower
+        ):
+            return '平台自动消息'
+
+        if content_type == 26 and any(token in hint_text for token in ('投缘优惠', '答题提醒', '店铺优惠')):
+            return '平台营销卡片'
+
+        if content_type == 6 and any(token in hint_text for token in ('脱离闲鱼沟通及交易', '线下交易', '交易安全', '安全指南')):
+            return '平台安全提醒'
+
+        if 'security:' in hint_text_lower or '欺诈' in hint_text:
+            return '平台安全提醒'
+
+        return None
+
+    def _resolve_conversation_profile(self, chat_id: str, counterpart_user_id: str, counterpart_name: str, item_id: str) -> dict | None:
+        try:
+            from db_manager import db_manager
+
+            profile = db_manager.get_conversation_profile(
+                self.cookie_id,
+                chat_id=chat_id,
+                counterpart_user_id=counterpart_user_id,
+                item_id=item_id,
+            )
+            if not profile:
+                return None
+
+            if not str(profile.get('chat_id') or '').strip() and chat_id:
+                db_manager.upsert_conversation_profile(
+                    cookie_id=self.cookie_id,
+                    counterpart_user_id=counterpart_user_id,
+                    counterpart_name=counterpart_name,
+                    item_id=item_id,
+                    chat_id=chat_id,
+                    item_title=profile.get('item_title') or '',
+                    item_price=profile.get('item_price') or '',
+                    scene_type=profile.get('scene_type') or 'seller_customer',
+                    our_role=profile.get('our_role') or 'seller',
+                    counterpart_role=profile.get('counterpart_role') or 'buyer',
+                    source=profile.get('source') or 'auto',
+                    status='active',
+                )
+                profile = db_manager.get_conversation_profile(
+                    self.cookie_id,
+                    chat_id=chat_id,
+                    counterpart_user_id=counterpart_user_id,
+                    item_id=item_id,
+                ) or profile
+
+            return profile
+        except Exception as e:
+            logger.warning(f"【{self.cookie_id}】解析会话画像失败: {self._safe_str(e)}")
+            return None
+
+    def _iter_nested_message_values(self, obj, path: str = ''):
+        """遍历嵌套消息结构，必要时尝试解析内嵌 JSON 字符串。"""
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                current_path = f"{path}.{key}" if path else str(key)
+                yield current_path, key, value, obj
+                if isinstance(value, (dict, list)):
+                    yield from self._iter_nested_message_values(value, current_path)
+                elif isinstance(value, str):
+                    stripped = value.strip()
+                    if stripped and len(stripped) < 20000 and stripped[0] in '{[' and stripped[-1] in '}]':
+                        try:
+                            parsed = json.loads(stripped)
+                        except Exception:
+                            continue
+                        yield from self._iter_nested_message_values(parsed, f"{current_path}#json")
+        elif isinstance(obj, list):
+            for index, item in enumerate(obj):
+                current_path = f"{path}[{index}]" if path else f"[{index}]"
+                yield current_path, str(index), item, obj
+                if isinstance(item, (dict, list)):
+                    yield from self._iter_nested_message_values(item, current_path)
+
+    def _normalize_remote_media_url(self, url: str) -> str:
+        """补全鱼鱼消息里的媒体链接。"""
+        if not isinstance(url, str):
+            return ''
+        normalized = url.strip()
+        if not normalized:
+            return ''
+        if normalized.startswith('//'):
+            return f"https:{normalized}"
+        if normalized.startswith('/'):
+            return urljoin('https://www.goofish.com', normalized)
+        return normalized
+
+    def _looks_like_audio_url(self, url: str, path: str = '', parent=None) -> bool:
+        """根据 URL、字段名和父级结构判断是否像语音资源。"""
+        if not isinstance(url, str):
+            return False
+        normalized = self._normalize_remote_media_url(url).lower()
+        if not normalized.startswith(('http://', 'https://')):
+            return False
+
+        audio_exts = ('.amr', '.aac', '.m4a', '.mp3', '.wav', '.ogg', '.oga', '.opus', '.webm', '.caf', '.3gp')
+        if any(ext in normalized for ext in audio_exts):
+            return True
+
+        path_lower = str(path).lower()
+        parent_keys = ''
+        if isinstance(parent, dict):
+            parent_keys = ' '.join(str(key).lower() for key in parent.keys())
+        hint_text = f"{path_lower} {parent_keys}"
+        if any(token in hint_text for token in ('voice', 'audio', 'sound', 'speech', 'record')):
+            return True
+
+        return any(token in normalized for token in ('/voice', '/audio', 'voice=', 'audio=', 'record'))
+
+    def _guess_audio_suffix(self, url: str, content_type: str = '') -> str:
+        """根据 URL / Content-Type 猜测音频扩展名。"""
+        parsed_path = urlparse(url).path if isinstance(url, str) else ''
+        _, ext = os.path.splitext(parsed_path)
+        ext = ext.lower()
+        if ext:
+            return ext
+
+        guessed = mimetypes.guess_extension((content_type or '').split(';', 1)[0].strip())
+        if guessed:
+            return guessed
+        return '.bin'
+
+    def _extract_voice_message_payload(self, message_10: dict) -> dict:
+        """从消息详情中提取语音资源地址和时长。"""
+        payload = {
+            'detected': False,
+            'audio_url': '',
+            'duration_ms': None,
+            'reminder_content': str((message_10 or {}).get('reminderContent') or '').strip(),
+        }
+        if not isinstance(message_10, dict):
+            return payload
+
+        reminder_content = payload['reminder_content']
+        if any(keyword in reminder_content for keyword in ('语音', '音频', '[voice]', '[语音]')):
+            payload['detected'] = True
+
+        best_candidate = None
+        best_score = -1
+        duration_keys = {'duration', 'durationms', 'duration_ms', 'voiceduration', 'audio_duration', 'audioduration', 'length'}
+        direct_hint_keys = {'voiceurl', 'voice_url', 'audiourl', 'audio_url'}
+
+        for current_path, key, value, parent in self._iter_nested_message_values(message_10):
+            key_lower = str(key).lower()
+
+            if payload['duration_ms'] is None and key_lower in duration_keys:
+                try:
+                    payload['duration_ms'] = int(float(value))
+                except Exception:
+                    pass
+
+            if not isinstance(value, str):
+                continue
+
+            candidate_url = self._normalize_remote_media_url(value)
+            if not candidate_url:
+                continue
+
+            is_direct_audio_key = (
+                key_lower in direct_hint_keys
+                and candidate_url.lower().startswith(('http://', 'https://'))
+            )
+            if not is_direct_audio_key and not self._looks_like_audio_url(candidate_url, current_path, parent):
+                continue
+
+            score = 0
+            path_lower = current_path.lower()
+            if 'voice' in path_lower:
+                score += 4
+            if 'audio' in path_lower:
+                score += 4
+            if 'download' in path_lower or 'media' in path_lower:
+                score += 2
+            if self._looks_like_audio_url(candidate_url, current_path, parent):
+                score += 2
+
+            if score > best_score:
+                best_score = score
+                best_candidate = candidate_url
+
+        if best_candidate:
+            payload['audio_url'] = best_candidate
+            payload['detected'] = True
+
+        return payload
+
+    async def _download_voice_message(self, audio_url: str, temp_dir: str) -> str:
+        """下载语音资源到临时目录。"""
+        normalized_url = self._normalize_remote_media_url(audio_url)
+        if not normalized_url:
+            return ''
+
+        headers = DEFAULT_HEADERS.copy()
+        headers['cookie'] = self.cookies_str
+        headers.setdefault('referer', 'https://www.goofish.com/')
+        headers.setdefault('origin', 'https://www.goofish.com')
+
+        timeout = aiohttp.ClientTimeout(total=40)
+        async with aiohttp.ClientSession(headers=headers, timeout=timeout) as session:
+            async with session.get(normalized_url) as response:
+                response.raise_for_status()
+                data = await response.read()
+                if not data:
+                    return ''
+                suffix = self._guess_audio_suffix(normalized_url, response.headers.get('Content-Type', ''))
+                local_path = os.path.join(temp_dir, f'voice_raw{suffix}')
+                with open(local_path, 'wb') as handle:
+                    handle.write(data)
+                return local_path
+
+    def _convert_audio_to_wav(self, source_path: str, temp_dir: str) -> str:
+        """统一转成 wav，提升转写兼容性。"""
+        if not source_path or not os.path.exists(source_path):
+            return ''
+
+        target_path = os.path.join(temp_dir, 'voice_transcribe.wav')
+        command = [
+            'ffmpeg', '-y',
+            '-i', source_path,
+            '-vn',
+            '-acodec', 'pcm_s16le',
+            '-ac', '1',
+            '-ar', '16000',
+            target_path,
+        ]
+        try:
+            subprocess.run(command, check=True, capture_output=True, text=True, timeout=60)
+            return target_path if os.path.exists(target_path) else ''
+        except Exception as exc:
+            logger.warning(f"【{self.cookie_id}】语音转 wav 失败，回退原文件: {self._safe_str(exc)}")
+            return source_path
+
+    async def _transcribe_voice_audio(self, audio_path: str) -> str:
+        """调用 OpenAI 兼容接口把语音转成文字。"""
+        if not audio_path or not os.path.exists(audio_path):
+            return ''
+
+        settings = db_manager.get_ai_reply_settings(self.cookie_id)
+        api_key = (settings or {}).get('api_key') or ''
+        if not api_key:
+            logger.warning(f"【{self.cookie_id}】未配置 AI Key，无法转写语音")
+            return ''
+
+        base_url = ((settings or {}).get('base_url') or 'https://api.openai.com/v1').rstrip('/')
+        if 'aliyuncs.com' in base_url and not base_url.endswith(('/v1', '/v1/')):
+            base_url = f"{base_url}/v1"
+
+        transcription_model = db_manager.get_system_setting('ai_transcription_model') or 'gpt-4o-mini-transcribe'
+        url = f"{base_url}/audio/transcriptions"
+        headers = {"Authorization": f"Bearer {api_key}"}
+
+        form = aiohttp.FormData()
+        form.add_field('model', transcription_model)
+        form.add_field('language', 'zh')
+        form.add_field('response_format', 'json')
+        form.add_field('temperature', '0')
+
+        audio_content_type = mimetypes.guess_type(audio_path)[0] or 'application/octet-stream'
+        try:
+            audio_size = os.path.getsize(audio_path)
+        except OSError:
+            audio_size = 0
+        logger.info(
+            f"【{self.cookie_id}】准备转写语音: file={os.path.basename(audio_path)}, "
+            f"content_type={audio_content_type}, size={audio_size}"
+        )
+
+        timeout = aiohttp.ClientTimeout(total=90)
+        with open(audio_path, 'rb') as audio_file:
+            form.add_field(
+                'file',
+                audio_file,
+                filename=os.path.basename(audio_path),
+                content_type=audio_content_type,
+            )
+
+            async with aiohttp.ClientSession(headers=headers, timeout=timeout) as session:
+                async with session.post(url, data=form) as response:
+                    response_text = await response.text()
+                    if response.status >= 400:
+                        logger.error(f"【{self.cookie_id}】语音转写失败: {response.status} - {response_text}")
+                        return ''
+                    try:
+                        result = json.loads(response_text)
+                    except Exception:
+                        logger.error(f"【{self.cookie_id}】语音转写响应不是有效 JSON: {response_text}")
+                        return ''
+
+        transcript = str(result.get('text') or '').strip()
+        transcript = re.sub(r'\s+', ' ', transcript)
+        return transcript
+
+    async def _resolve_voice_message_text(self, message_10: dict, message_context: dict = None) -> str | None:
+        """识别语音消息并转写为文本。未识别到语音时返回 None。"""
+        voice_payload = self._extract_voice_message_payload(message_10)
+        if message_context and (voice_payload.get('detected') or not voice_payload.get('audio_url')):
+            context_payload = self._extract_voice_message_payload({
+                'notice': message_10,
+                'message': message_context,
+            })
+            if context_payload.get('audio_url') or context_payload.get('detected'):
+                voice_payload['detected'] = voice_payload.get('detected') or context_payload.get('detected')
+                voice_payload['audio_url'] = voice_payload.get('audio_url') or context_payload.get('audio_url') or ''
+                voice_payload['duration_ms'] = voice_payload.get('duration_ms') or context_payload.get('duration_ms')
+
+        if not voice_payload.get('detected'):
+            return None
+
+        audio_url = voice_payload.get('audio_url') or ''
+        if not audio_url:
+            logger.warning(f"【{self.cookie_id}】检测到疑似语音消息，但未找到语音地址: {message_10}")
+            return ''
+
+        temp_dir = tempfile.mkdtemp(prefix=f"xianyu_voice_{self.cookie_id}_")
+        try:
+            downloaded_path = await self._download_voice_message(audio_url, temp_dir)
+            if not downloaded_path:
+                logger.warning(f"【{self.cookie_id}】语音下载失败: {audio_url}")
+                return ''
+
+            audio_path = self._convert_audio_to_wav(downloaded_path, temp_dir)
+            transcript = await self._transcribe_voice_audio(audio_path)
+            if transcript:
+                logger.info(f"【{self.cookie_id}】语音转写成功: {transcript}")
+            else:
+                logger.warning(f"【{self.cookie_id}】语音转写结果为空")
+            return transcript
+        except Exception as exc:
+            logger.error(f"【{self.cookie_id}】处理语音消息失败: {self._safe_str(exc)}")
+            return ''
+        finally:
+            try:
+                for name in os.listdir(temp_dir):
+                    os.remove(os.path.join(temp_dir, name))
+                os.rmdir(temp_dir)
+            except Exception:
+                pass
+
+    def _record_conversation_message(self, chat_id: str, user_id: str, item_id: str,
+                                     role: str, content: str, msg_time: str = None,
+                                     intent: str = None, user_name: str = None):
+        """按当前鱼鱼账号记录聊天消息，保证多账号聊天记录互不串台。"""
+        try:
+            if not chat_id or not content:
+                return None
+
+            from db_manager import db_manager
+
+            normalized_item_id = '' if not item_id or item_id == '未知商品' else str(item_id)
+            normalized_user_id = str(user_id or '')
+            normalized_user_name = str(user_name or '').strip()
+
+            if role == 'assistant':
+                buyer_user_id = db_manager.find_conversation_user_id(
+                    self.cookie_id,
+                    chat_id,
+                    exclude_user_id=getattr(self, 'myid', None),
+                )
+                if buyer_user_id:
+                    normalized_user_id = buyer_user_id
+
+            return db_manager.save_conversation(
+                cookie_id=self.cookie_id,
+                chat_id=str(chat_id),
+                user_id=normalized_user_id,
+                user_name=normalized_user_name,
+                item_id=normalized_item_id,
+                role=role,
+                content=str(content),
+                intent=intent,
+                created_at=msg_time,
+            )
+        except Exception as e:
+            logger.warning(f"【{self.cookie_id}】记录聊天消息失败: {self._safe_str(e)}")
+            return None
+
+    def _is_buyer_side_conversation(self, conversation_profile: dict | None = None) -> bool:
+        """判断当前会话是否是我们以买家身份沟通。"""
+        profile = conversation_profile or {}
+        return str(profile.get('our_role') or '').strip() == 'buyer'
+
+    def _build_buyer_side_safe_fallback(self, send_message: str) -> str:
+        """买家模式下的安全兜底，避免串成卖家口吻。"""
+        message_text = str(send_message or '').strip().lower()
+
+        if any(keyword in message_text for keyword in ['价格', '多少钱', '能少', '最低', '优惠', '包邮', '刀']):
+            return "我这边还想再比一下，价格还有空间吗？"
+        if any(keyword in message_text for keyword in ['发货', '多久到', '几天到', '快递']):
+            return "明白哈，我这边还想确认下成色和配件这些，方便说下吗？"
+        if any(keyword in message_text for keyword in ['要吗', '要不要', '拍下', '下单', '买吗']):
+            return "我这边还在看，主要想再确认下具体情况哈。"
+        if any(keyword in message_text for keyword in ['成色', '功能', '电池', '拆修', '瑕疵', '配件']):
+            return "嗯嗯，这块我比较关心，方便你具体说下吗？"
+        return "嗯嗯，我这边还想再确认下具体情况，方便说下吗？"
+
     async def _process_chat_message_reply(self, message_data: dict, websocket, send_user_name: str,
                                          send_user_id: str, send_message: str, item_id: str,
-                                         chat_id: str, msg_time: str):
+                                         chat_id: str, msg_time: str, conversation_profile: dict | None = None):
         """
         处理聊天消息的回复逻辑（从handle_message中提取出来的核心回复逻辑）
         
@@ -7324,6 +8500,8 @@ class XianyuLive:
             msg_time: 消息时间
         """
         try:
+            is_buyer_side_conversation = self._is_buyer_side_conversation(conversation_profile)
+
             # 自动回复消息
             if not AUTO_REPLY.get('enabled', True):
                 logger.info(f"[{msg_time}] 【{self.cookie_id}】【系统】自动回复已禁用")
@@ -7337,12 +8515,24 @@ class XianyuLive:
                 logger.info(f"[{msg_time}] 【{self.cookie_id}】【系统】chat_id {chat_id} 自动回复已暂停，剩余时间: {remaining_minutes}分{remaining_seconds}秒")
                 return
 
+            if send_message == "__VOICE_TRANSCRIPT_FAILED__":
+                fallback_reply = (
+                    "你刚发的是语音吗，我这边这条没转出来，方便打字说下吗？"
+                    if is_buyer_side_conversation
+                    else "我这边语音好像没听清，麻烦您打几个字发我一下哈"
+                )
+                await self.send_msg(websocket, chat_id, send_user_id, fallback_reply)
+                now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                self._record_conversation_message(chat_id, send_user_id, item_id, 'assistant', fallback_reply, now, user_name=send_user_name)
+                logger.info(f"[{now}] 【语音兜底发出】用户: {send_user_name} (ID: {send_user_id}), 商品({item_id}): {fallback_reply}")
+                return
+
             # 构造用户URL
             user_url = f'https://www.goofish.com/personal?userId={send_user_id}'
 
             reply = None
             # 判断是否启用API回复
-            if AUTO_REPLY.get('api', {}).get('enabled', False):
+            if not is_buyer_side_conversation and AUTO_REPLY.get('api', {}).get('enabled', False):
                 reply = await self.get_api_reply(
                     msg_time, user_url, send_user_id, send_user_name,
                     item_id, send_message, chat_id
@@ -7355,102 +8545,128 @@ class XianyuLive:
 
             # 如果API回复失败或未启用API，按新的优先级顺序处理
             if not reply:
-                # 1. 首先尝试关键词匹配（传入商品ID）
-                reply = await self.get_keyword_reply(send_user_name, send_user_id, send_message, item_id)
-                if reply == "EMPTY_REPLY":
-                    # 匹配到关键词但回复内容为空，不进行任何回复
-                    logger.info(f"[{msg_time}] 【{self.cookie_id}】匹配到空回复关键词，跳过自动回复")
-                    return
-                elif reply:
-                    reply_source = '关键词'  # 标记为关键词回复
-                else:
-                    # 2. 关键词匹配失败，如果AI开关打开，尝试AI回复
-                    reply = await self.get_ai_reply(send_user_name, send_user_id, send_message, item_id, chat_id)
+                if is_buyer_side_conversation:
+                    logger.info(f"[{msg_time}] 【{self.cookie_id}】买家视角会话，跳过卖家API/关键词/默认回复，直接走AI")
+                    reply = await self.get_ai_reply(
+                        send_user_name,
+                        send_user_id,
+                        send_message,
+                        item_id,
+                        chat_id,
+                        msg_time,
+                        conversation_profile=conversation_profile,
+                    )
                     if reply:
-                        reply_source = 'AI'  # 标记为AI回复
+                        reply_source = 'AI'
                     else:
-                        # 3. 最后使用默认回复
-                        default_reply_result = await self.get_default_reply(send_user_name, send_user_id, send_message, chat_id, item_id)
-                        if default_reply_result == "EMPTY_REPLY":
-                            # 默认回复内容为空，不进行任何回复
-                            logger.info(f"[{msg_time}] 【{self.cookie_id}】默认回复内容为空，跳过自动回复")
-                            return
-                        
-                        # 处理默认回复（可能包含图片和文字）
-                        if default_reply_result and isinstance(default_reply_result, dict):
-                            reply_source = '默认'  # 标记为默认回复
-                            default_image_url = default_reply_result.get('image_url')
-                            default_text = default_reply_result.get('text')
-                            
-                            # 如果存在图片，先发送图片
-                            if default_image_url:
-                                try:
-                                    # 处理图片URL（上传到CDN如果需要）
-                                    final_image_url = default_image_url
-                                    image_width, image_height = 800, 600  # 默认尺寸
-                                    
-                                    if self._is_cdn_url(default_image_url):
-                                        # 已经是CDN链接，获取真实尺寸
-                                        logger.info(f"【{self.cookie_id}】默认回复使用CDN图片: {default_image_url}")
-                                        width, height = await self._get_image_size_from_url(default_image_url)
-                                        if width and height:
-                                            image_width, image_height = width, height
-                                    elif default_image_url.startswith('/static/uploads/') or default_image_url.startswith('static/uploads/'):
-                                        # 本地图片，需要上传到闲鱼CDN
-                                        local_image_path = default_image_url.replace('/static/uploads/', 'static/uploads/')
-                                        if os.path.exists(local_image_path):
-                                            logger.info(f"【{self.cookie_id}】准备上传默认回复本地图片到闲鱼CDN: {local_image_path}")
-                                            
-                                            from utils.image_uploader import ImageUploader
-                                            uploader = ImageUploader(self.cookies_str)
-                                            
-                                            async with uploader:
-                                                cdn_url = await uploader.upload_image(local_image_path)
-                                                if cdn_url:
-                                                    logger.info(f"【{self.cookie_id}】默认回复图片上传成功，CDN URL: {cdn_url}")
-                                                    final_image_url = cdn_url
-                                                    
-                                                    # 更新数据库中的图片URL为CDN URL
-                                                    await self._update_default_reply_image_url(cdn_url)
-                                                    
-                                                    # 获取实际图片尺寸
-                                                    from utils.image_utils import image_manager
-                                                    try:
-                                                        actual_width, actual_height = image_manager.get_image_size(local_image_path)
-                                                        if actual_width and actual_height:
-                                                            image_width, image_height = actual_width, actual_height
-                                                    except Exception as e:
-                                                        logger.warning(f"【{self.cookie_id}】获取图片尺寸失败，使用默认尺寸: {e}")
-                                                else:
-                                                    logger.error(f"【{self.cookie_id}】默认回复图片上传失败: {local_image_path}")
-                                                    final_image_url = None
-                                        else:
-                                            logger.error(f"【{self.cookie_id}】默认回复本地图片文件不存在: {local_image_path}")
-                                            final_image_url = None
-                                    else:
-                                        # 其他类型的URL，获取真实尺寸
-                                        width, height = await self._get_image_size_from_url(default_image_url)
-                                        if width and height:
-                                            image_width, image_height = width, height
-                                    
-                                    # 发送图片
-                                    if final_image_url:
-                                        await self.send_image_msg(websocket, chat_id, send_user_id, final_image_url, image_width, image_height)
-                                        msg_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-                                        logger.info(f"[{msg_time}] 【{reply_source}图片发出】用户: {send_user_name} (ID: {send_user_id}), 商品({item_id}): 图片 {final_image_url}")
-                                except Exception as e:
-                                    logger.error(f"【{self.cookie_id}】默认回复图片发送失败: {self._safe_str(e)}")
-                            
-                            # 然后发送文字（如果有）
-                            if default_text and default_text.strip():
-                                reply = default_text
-                            else:
-                                # 只有图片没有文字，已经发送完毕
-                                if default_image_url:
-                                    return
-                                reply = None
+                        reply = self._build_buyer_side_safe_fallback(send_message)
+                        reply_source = '买家兜底'
+                else:
+                    # 1. 首先尝试关键词匹配（传入商品ID）
+                    reply = await self.get_keyword_reply(send_user_name, send_user_id, send_message, item_id)
+                    if reply == "EMPTY_REPLY":
+                        # 匹配到关键词但回复内容为空，不进行任何回复
+                        logger.info(f"[{msg_time}] 【{self.cookie_id}】匹配到空回复关键词，跳过自动回复")
+                        return
+                    elif reply:
+                        reply_source = '关键词'  # 标记为关键词回复
+                    else:
+                        # 2. 关键词匹配失败，如果AI开关打开，尝试AI回复
+                        reply = await self.get_ai_reply(
+                            send_user_name,
+                            send_user_id,
+                            send_message,
+                            item_id,
+                            chat_id,
+                            msg_time,
+                            conversation_profile=conversation_profile,
+                        )
+                        if reply:
+                            reply_source = 'AI'  # 标记为AI回复
                         else:
-                            reply = None
+                            # 3. 最后使用默认回复
+                            default_reply_result = await self.get_default_reply(send_user_name, send_user_id, send_message, chat_id, item_id)
+                            if default_reply_result == "EMPTY_REPLY":
+                                # 默认回复内容为空，不进行任何回复
+                                logger.info(f"[{msg_time}] 【{self.cookie_id}】默认回复内容为空，跳过自动回复")
+                                return
+                            
+                            # 处理默认回复（可能包含图片和文字）
+                            if default_reply_result and isinstance(default_reply_result, dict):
+                                reply_source = '默认'  # 标记为默认回复
+                                default_image_url = default_reply_result.get('image_url')
+                                default_text = default_reply_result.get('text')
+                                
+                                # 如果存在图片，先发送图片
+                                if default_image_url:
+                                    try:
+                                        # 处理图片URL（上传到CDN如果需要）
+                                        final_image_url = default_image_url
+                                        image_width, image_height = 800, 600  # 默认尺寸
+                                        
+                                        if self._is_cdn_url(default_image_url):
+                                            # 已经是CDN链接，获取真实尺寸
+                                            logger.info(f"【{self.cookie_id}】默认回复使用CDN图片: {default_image_url}")
+                                            width, height = await self._get_image_size_from_url(default_image_url)
+                                            if width and height:
+                                                image_width, image_height = width, height
+                                        elif default_image_url.startswith('/static/uploads/') or default_image_url.startswith('static/uploads/'):
+                                            # 本地图片，需要上传到鱼鱼CDN
+                                            local_image_path = default_image_url.replace('/static/uploads/', 'static/uploads/')
+                                            if os.path.exists(local_image_path):
+                                                logger.info(f"【{self.cookie_id}】准备上传默认回复本地图片到鱼鱼CDN: {local_image_path}")
+                                                
+                                                from utils.image_uploader import ImageUploader
+                                                uploader = ImageUploader(self.cookies_str)
+                                                
+                                                async with uploader:
+                                                    cdn_url = await uploader.upload_image(local_image_path)
+                                                    if cdn_url:
+                                                        logger.info(f"【{self.cookie_id}】默认回复图片上传成功，CDN URL: {cdn_url}")
+                                                        final_image_url = cdn_url
+                                                        
+                                                        # 更新数据库中的图片URL为CDN URL
+                                                        await self._update_default_reply_image_url(cdn_url)
+                                                        
+                                                        # 获取实际图片尺寸
+                                                        from utils.image_utils import image_manager
+                                                        try:
+                                                            actual_width, actual_height = image_manager.get_image_size(local_image_path)
+                                                            if actual_width and actual_height:
+                                                                image_width, image_height = actual_width, actual_height
+                                                        except Exception as e:
+                                                            logger.warning(f"【{self.cookie_id}】获取图片尺寸失败，使用默认尺寸: {e}")
+                                                    else:
+                                                        logger.error(f"【{self.cookie_id}】默认回复图片上传失败: {local_image_path}")
+                                                        final_image_url = None
+                                            else:
+                                                logger.error(f"【{self.cookie_id}】默认回复本地图片文件不存在: {local_image_path}")
+                                                final_image_url = None
+                                        else:
+                                            # 其他类型的URL，获取真实尺寸
+                                            width, height = await self._get_image_size_from_url(default_image_url)
+                                            if width and height:
+                                                image_width, image_height = width, height
+                                        
+                                        # 发送图片
+                                        if final_image_url:
+                                            await self.send_image_msg(websocket, chat_id, send_user_id, final_image_url, image_width, image_height)
+                                            msg_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                                            self._record_conversation_message(chat_id, send_user_id, item_id, 'assistant', f"[图片] {final_image_url}", msg_time, user_name=send_user_name)
+                                            logger.info(f"[{msg_time}] 【{reply_source}图片发出】用户: {send_user_name} (ID: {send_user_id}), 商品({item_id}): 图片 {final_image_url}")
+                                    except Exception as e:
+                                        logger.error(f"【{self.cookie_id}】默认回复图片发送失败: {self._safe_str(e)}")
+                                
+                                # 然后发送文字（如果有）
+                                if default_text and default_text.strip():
+                                    reply = default_text
+                                else:
+                                    # 只有图片没有文字，已经发送完毕
+                                    if default_image_url:
+                                        return
+                                    reply = None
+                            else:
+                                reply = None
 
             # 注意：这里只有商品ID，没有标题和详情，根据新的规则不保存到数据库
             # 商品信息会在其他有完整信息的地方保存（如发货规则匹配时）
@@ -7467,18 +8683,22 @@ class XianyuLive:
                         await self.send_image_msg(websocket, chat_id, send_user_id, image_url)
                         # 记录发出的图片消息
                         msg_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                        self._record_conversation_message(chat_id, send_user_id, item_id, 'assistant', f"[图片] {image_url}", msg_time, user_name=send_user_name)
                         logger.info(f"[{msg_time}] 【{reply_source}图片发出】用户: {send_user_name} (ID: {send_user_id}), 商品({item_id}): 图片 {image_url}")
                     except Exception as e:
                         # 图片发送失败，发送错误提示
                         logger.error(f"图片发送失败: {self._safe_str(e)}")
-                        await self.send_msg(websocket, chat_id, send_user_id, "抱歉，图片发送失败，请稍后重试。")
+                        error_reply = "抱歉，图片发送失败，请稍后重试。"
+                        await self.send_msg(websocket, chat_id, send_user_id, error_reply)
                         msg_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                        self._record_conversation_message(chat_id, send_user_id, item_id, 'assistant', error_reply, msg_time, user_name=send_user_name)
                         logger.error(f"[{msg_time}] 【{reply_source}图片发送失败】用户: {send_user_name} (ID: {send_user_id}), 商品({item_id})")
                 else:
                     # 普通文本消息
                     await self.send_msg(websocket, chat_id, send_user_id, reply)
                     # 记录发出的消息
                     msg_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                    self._record_conversation_message(chat_id, send_user_id, item_id, 'assistant', reply, msg_time, user_name=send_user_name)
                     logger.info(f"[{msg_time}] 【{reply_source}发出】用户: {send_user_name} (ID: {send_user_id}), 商品({item_id}): {reply}")
             else:
                 msg_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -7515,6 +8735,8 @@ class XianyuLive:
             except Exception as e:
                 pass
 
+            await self._resolve_pending_ws_request(message_data)
+
             # 如果不是同步包消息，直接返回
             if not self.is_sync_package(message_data):
                 # 添加调试日志，记录非同步包消息
@@ -7543,7 +8765,7 @@ class XianyuLive:
                             content = parsed_data['operation']['content']
                             if 'sessionArouse' in content:
                                 # 处理系统引导消息
-                                logger.info(f"[{msg_time}] 【{self.cookie_id}】【系统】小闲鱼智能提示:")
+                                logger.info(f"[{msg_time}] 【{self.cookie_id}】【系统】鱼鱼智能提示:")
                                 if 'arouseChatScriptInfo' in content['sessionArouse']:
                                     for qa in content['sessionArouse']['arouseChatScriptInfo']:
                                         logger.info(f"  - {qa['chatScrip']}")
@@ -7734,9 +8956,21 @@ class XianyuLive:
 
                 create_time = int(message_1.get("5", 0))
                 message_10 = message_1["10"]
-                send_user_name = message_10.get("senderNick", message_10.get("reminderTitle", "未知用户"))
-                send_user_id = message_10.get("senderUserId", "unknown")
+                send_user_name, send_user_id = self._extract_sender_identity(message_1, message_10)
                 send_message = message_10.get("reminderContent", "")
+                if not send_message:
+                    message_11 = message_1.get("11")
+                    if isinstance(message_11, str):
+                        send_message = message_11
+                    elif isinstance(message_11, dict):
+                        send_message = (
+                            message_11.get("content")
+                            or message_11.get("text")
+                            or message_11.get("message")
+                            or ""
+                        )
+                reply_message = send_message
+                skip_auto_reply_reason = self._get_auto_reply_skip_reason(message_1, message_10)
                 
                 # 检查是否有图片消息
                 content_type = 1  # 默认文本
@@ -7748,7 +8982,20 @@ class XianyuLive:
                     pic_url = pic_info.get("picUrl") or pic_info.get("pic_url")
                     if pic_url:
                         send_message = f"[图片] {pic_url}"
+                        reply_message = send_message
                     logger.info(f"[{msg_time}] 【收到图片】用户: {send_user_name}, 图片URL: {pic_url}")
+                else:
+                    voice_transcript = await self._resolve_voice_message_text(message_10, message_1)
+                    if voice_transcript is not None:
+                        content_type = 3
+                        if voice_transcript:
+                            send_message = f"[语音转文字] {voice_transcript}"
+                            reply_message = voice_transcript
+                            logger.info(f"[{msg_time}] 【收到语音】用户: {send_user_name}, 转写: {voice_transcript}")
+                        else:
+                            send_message = "[语音消息]"
+                            reply_message = "__VOICE_TRANSCRIPT_FAILED__"
+                            logger.warning(f"[{msg_time}] 【收到语音】用户: {send_user_name}, 暂未转写成功")
 
                 chat_id_raw = message_1.get("2", "")
                 chat_id = chat_id_raw.split('@')[0] if '@' in str(chat_id_raw) else str(chat_id_raw)
@@ -7762,9 +9009,12 @@ class XianyuLive:
 
 
 
+            conversation_profile = None
+
             # 判断消息方向
             if send_user_id == self.myid:
                 logger.info(f"[{msg_time}] 【手动发出】 商品({item_id}): {send_message}")
+                self._record_conversation_message(chat_id, send_user_id, item_id, 'assistant', send_message, msg_time, user_name=send_user_name)
 
                 # 暂停该chat_id的自动回复10分钟
                 pause_manager.pause_chat(chat_id, self.cookie_id)
@@ -7772,6 +9022,7 @@ class XianyuLive:
                 return
             else:
                 logger.info(f"[{msg_time}] 【收到】用户: {send_user_name} (ID: {send_user_id}), 商品({item_id}): {send_message}")
+                conversation_profile = self._resolve_conversation_profile(chat_id, send_user_id, send_user_name, item_id)
 
                 # 🔗 OpenClaw Bridge 模式：将买家消息发布到 Bridge 消息队列
                 if BRIDGE_ENABLED and bridge_queue:
@@ -7807,6 +9058,10 @@ class XianyuLive:
                             # 如果是图片消息，添加图片URL
                             if pic_url:
                                 msg_data["imageUrl"] = pic_url
+                            if content_type == 3:
+                                msg_data["originalContentType"] = "voice"
+                                if reply_message and reply_message != "__VOICE_TRANSCRIPT_FAILED__":
+                                    msg_data["voiceTranscript"] = reply_message
                             await bridge_queue.publish(self.cookie_id, msg_data)
                             logger.debug(f"[Bridge] 消息已发布到队列: item_id={item_id}, sender={send_user_name}")
                     except Exception as e:
@@ -7891,7 +9146,7 @@ class XianyuLive:
             elif send_message == '快给ta一个评价吧~' or send_message == '快给ta一个评价吧～':
                 logger.info(f'[{msg_time}] 【{self.cookie_id}】评价提醒消息不处理')
                 return
-            elif send_message == '卖家人不错？送Ta闲鱼小红花':
+            elif send_message == '卖家人不错？送Ta鱼鱼小红花':
                 logger.info(f'[{msg_time}] 【{self.cookie_id}】小红花提醒消息不处理')
                 return
             elif send_message == '[你已确认收货，交易成功]':
@@ -7903,15 +9158,18 @@ class XianyuLive:
             elif send_message == '已发货':
                 logger.info(f'[{msg_time}] 【{self.cookie_id}】发货确认消息不处理')
                 return
+
+            self._record_conversation_message(chat_id, send_user_id, item_id, 'user', send_message, msg_time, user_name=send_user_name)
+
             # 【重要】检查是否为自动发货触发消息 - 即使在人工接入暂停期间也要处理
-            elif self._is_auto_delivery_trigger(send_message):
+            if self._is_auto_delivery_trigger(send_message):
                 logger.info(f'[{msg_time}] 【{self.cookie_id}】检测到自动发货触发消息，即使在暂停期间也继续处理: {send_message}')
                 # 使用统一的自动发货处理方法
                 await self._handle_auto_delivery(websocket, message, send_user_name, send_user_id,
                                                item_id, chat_id, msg_time)
                 return
             # 【重要】检查是否为"我已小刀，待刀成"卡片消息 - 即使在人工接入暂停期间也要处理
-            elif send_message == '[卡片消息]':
+            if send_message == '[卡片消息]':
                 # 检查是否为"我已小刀，待刀成"的卡片消息
                 try:
                     # 从消息中提取卡片内容
@@ -7992,6 +9250,12 @@ class XianyuLive:
                     logger.error(f"处理卡片消息异常: {self._safe_str(e)}")
                     # 如果处理异常，继续正常处理流程（会受到暂停影响）
 
+            if skip_auto_reply_reason:
+                logger.info(
+                    f'[{msg_time}] 【{self.cookie_id}】检测到{skip_auto_reply_reason}，仅记录消息不自动回复: {send_message}'
+                )
+                return
+
             # 使用防抖机制处理聊天消息回复
             # 如果用户连续发送消息，等待用户停止发送后再回复最后一条消息
             await self._schedule_debounced_reply(
@@ -8000,9 +9264,10 @@ class XianyuLive:
                 websocket=websocket,
                 send_user_name=send_user_name,
                 send_user_id=send_user_id,
-                send_message=send_message,
+                send_message=reply_message,
                 item_id=item_id,
-                msg_time=msg_time
+                msg_time=msg_time,
+                conversation_profile=conversation_profile,
             )
 
         except Exception as e:
@@ -8633,12 +9898,12 @@ class XianyuLive:
                 # 已经是CDN链接，直接使用
                 logger.info(f"【{self.cookie_id}】使用已有的CDN图片链接: {image_url}")
             elif image_url.startswith('/static/uploads/') or image_url.startswith('static/uploads/'):
-                # 本地图片，需要上传到闲鱼CDN
+                # 本地图片，需要上传到鱼鱼CDN
                 local_image_path = image_url.replace('/static/uploads/', 'static/uploads/')
                 if os.path.exists(local_image_path):
-                    logger.info(f"【{self.cookie_id}】准备上传本地图片到闲鱼CDN: {local_image_path}")
+                    logger.info(f"【{self.cookie_id}】准备上传本地图片到鱼鱼CDN: {local_image_path}")
 
-                    # 使用图片上传器上传到闲鱼CDN
+                    # 使用图片上传器上传到鱼鱼CDN
                     from utils.image_uploader import ImageUploader
                     uploader = ImageUploader(self.cookies_str)
 
@@ -8679,7 +9944,7 @@ class XianyuLive:
             logger.info(f"  - 聊天ID: {cid}")
             logger.info(f"  - 接收者ID: {toid}")
 
-            # 构造图片消息内容 - 使用正确的闲鱼格式
+            # 构造图片消息内容 - 使用正确的鱼鱼格式
             image_content = {
                 "contentType": 2,  # 图片消息类型
                 "image": {
@@ -8749,7 +10014,7 @@ class XianyuLive:
     async def send_image_from_file(self, ws, cid, toid, image_path):
         """从本地文件发送图片"""
         try:
-            # 上传图片到闲鱼CDN
+            # 上传图片到鱼鱼CDN
             logger.info(f"【{self.cookie_id}】开始上传图片: {image_path}")
 
             from utils.image_uploader import ImageUploader

@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BarChart3, Download, ExternalLink, Loader2, RefreshCw, Search, ShieldAlert, TimerReset } from 'lucide-react';
-import { getAccountDetails, getMarketResearch, resumeMarketResearch } from '../services/api';
-import { AccountDetail, MarketResearchItem, MarketResearchResponse } from '../types';
+import { contactMarketSellers, getAccountDetails, getMarketResearch, getMarketSellerContactJob, resumeMarketResearch } from '../services/api';
+import { AccountDetail, MarketResearchItem, MarketResearchResponse, MarketSellerContactResponse } from '../types';
+import { buildItemPlaceholderDataUrl, normalizeImageUrl } from '../utils/image';
 
 const formatCurrency = (value?: number | null) => {
   if (value === null || value === undefined || Number.isNaN(value)) return '-';
@@ -20,29 +21,88 @@ const downloadTextFile = (filename: string, content: string, type: string) => {
   URL.revokeObjectURL(url);
 };
 
+const getMarketItemImage = (item: MarketResearchItem) =>
+  normalizeImageUrl(item.main_image) || buildItemPlaceholderDataUrl(item.title, item.price_display || item.price_text);
+
+const getQualityBadgeClass = (level?: string) => {
+  if (level === 'S') return 'bg-emerald-100 text-emerald-700';
+  if (level === 'A') return 'bg-green-100 text-green-700';
+  if (level === 'B') return 'bg-blue-100 text-blue-700';
+  if (level === 'C') return 'bg-amber-100 text-amber-700';
+  return 'bg-gray-100 text-gray-600';
+};
+
+const MARKET_RESEARCH_CACHE_KEY = 'yuyu:market-research:cache:v2';
+
+const defaultResearchForm = {
+  cookie_id: '',
+  keyword: 'iPhone 17',
+  max_pages: 3,
+  include_terms: '',
+  exclude_terms: '手机壳,贴膜,配件,壳',
+  min_price: '',
+  max_price: '',
+  sort: 'price_asc' as 'price_asc' | 'price_desc' | 'want_desc' | 'latest' | 'quality_desc',
+  interval_seconds: 180,
+};
+
+const defaultQualityForm = {
+  min_score: 70,
+  max_contact: 3,
+  delay_seconds: 2,
+  message_template: '你好，看到你这台${item_title}还在，请问真实成色和电池情况方便再发我确认下吗？',
+};
+
+type MarketResearchCacheShape = {
+  form?: typeof defaultResearchForm;
+  qualityForm?: typeof defaultQualityForm;
+  result?: MarketResearchResponse | null;
+  lastUpdated?: string;
+  contactResult?: MarketSellerContactResponse | null;
+  contactJobId?: string;
+};
+
+const normalizeCachedResearchResult = (value: MarketResearchResponse | null | undefined): MarketResearchResponse | null => {
+  if (!value) return null;
+  return {
+    ...value,
+    items: (value.items || []).map((item) => ({
+      ...item,
+      main_image: normalizeImageUrl(item.main_image),
+    })),
+  };
+};
+
+const loadMarketResearchCache = (): MarketResearchCacheShape | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(MARKET_RESEARCH_CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as MarketResearchCacheShape;
+  } catch (error) {
+    console.warn('读取市场调研缓存失败', error);
+    return null;
+  }
+};
+
 const MarketResearch: React.FC = () => {
+  const cachedState = loadMarketResearchCache();
   const [accounts, setAccounts] = useState<AccountDetail[]>([]);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [error, setError] = useState('');
-  const [result, setResult] = useState<MarketResearchResponse | null>(null);
-  const [lastUpdated, setLastUpdated] = useState('');
+  const [result, setResult] = useState<MarketResearchResponse | null>(() => normalizeCachedResearchResult(cachedState?.result));
+  const [lastUpdated, setLastUpdated] = useState(() => cachedState?.lastUpdated || '');
   const [captchaResolved, setCaptchaResolved] = useState(false);
   const [captchaCapturedCount, setCaptchaCapturedCount] = useState(0);
   const [resuming, setResuming] = useState(false);
   const autoResumedSessionRef = useRef<string | null>(null);
-  const [form, setForm] = useState({
-    cookie_id: '',
-    keyword: 'iPhone 17',
-    max_pages: 3,
-    include_terms: '',
-    exclude_terms: '手机壳,贴膜,配件,壳',
-    min_price: '',
-    max_price: '',
-    sort: 'price_asc' as 'price_asc' | 'price_desc' | 'want_desc' | 'latest',
-    interval_seconds: 180,
-  });
+  const [contacting, setContacting] = useState(false);
+  const [contactResult, setContactResult] = useState<MarketSellerContactResponse | null>(() => cachedState?.contactResult || null);
+  const [contactJobId, setContactJobId] = useState(() => cachedState?.contactJobId || '');
+  const [form, setForm] = useState(() => ({ ...defaultResearchForm, ...(cachedState?.form || {}) }));
+  const [qualityForm, setQualityForm] = useState(() => ({ ...defaultQualityForm, ...(cachedState?.qualityForm || {}) }));
 
   useEffect(() => {
     const loadAccounts = async () => {
@@ -51,7 +111,8 @@ const MarketResearch: React.FC = () => {
         const data = await getAccountDetails();
         const enabledAccounts = data.filter((item) => item.enabled);
         setAccounts(enabledAccounts);
-        if (!form.cookie_id && enabledAccounts.length > 0) {
+        const hasCurrent = enabledAccounts.some((account) => account.id === form.cookie_id);
+        if ((!form.cookie_id || !hasCurrent) && enabledAccounts.length > 0) {
           setForm((prev) => ({ ...prev, cookie_id: enabledAccounts[0].id }));
         }
       } catch (loadError) {
@@ -62,6 +123,53 @@ const MarketResearch: React.FC = () => {
     };
     loadAccounts();
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const payload: MarketResearchCacheShape = {
+      form,
+      qualityForm,
+      result,
+      lastUpdated,
+      contactResult,
+      contactJobId,
+    };
+    window.localStorage.setItem(MARKET_RESEARCH_CACHE_KEY, JSON.stringify(payload));
+  }, [form, qualityForm, result, lastUpdated, contactResult, contactJobId]);
+
+  useEffect(() => {
+    if (!contactJobId) return;
+    let cancelled = false;
+    let timer: number | undefined;
+
+    const poll = async () => {
+      try {
+        const response = await getMarketSellerContactJob(contactJobId);
+        if (cancelled) return;
+        setContactResult(response);
+        const running = response.status === 'queued' || response.status === 'running';
+        setContacting(running);
+        if (running) {
+          timer = window.setTimeout(() => {
+            void poll();
+          }, 900);
+        }
+      } catch (pollError: any) {
+        if (cancelled) return;
+        console.error('查询自动沟通进度失败', pollError);
+        setError((prev) => prev || pollError.message || '查询自动沟通进度失败');
+        timer = window.setTimeout(() => {
+          void poll();
+        }, 1500);
+      }
+    };
+
+    void poll();
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [contactJobId]);
 
   const submitResearch = async () => {
     if (!form.keyword.trim()) {
@@ -89,6 +197,9 @@ const MarketResearch: React.FC = () => {
       });
 
       setResult(response);
+      setContactResult(null);
+      setContactJobId('');
+      setContacting(false);
       setCaptchaResolved(false);
       setCaptchaCapturedCount(0);
       setLastUpdated(new Date().toLocaleString('zh-CN'));
@@ -186,6 +297,18 @@ const MarketResearch: React.FC = () => {
   const summary = result?.summary;
   const topConditions = useMemo(() => summary?.condition_breakdown?.slice(0, 4) || [], [summary]);
   const topStorages = useMemo(() => summary?.storage_breakdown?.slice(0, 4) || [], [summary]);
+  const qualityItems = useMemo(
+    () => (result?.items || []).filter((item) => (item.quality_score || 0) >= Number(qualityForm.min_score || 0)),
+    [result?.items, qualityForm.min_score],
+  );
+  const contactableQualityItems = useMemo(
+    () => qualityItems.filter((item) => item.contact_ready && item.seller_user_id),
+    [qualityItems],
+  );
+  const previewContactItems = useMemo(
+    () => contactableQualityItems.slice(0, Math.max(1, Number(qualityForm.max_contact) || 1)),
+    [contactableQualityItems, qualityForm.max_contact],
+  );
 
   const exportJson = () => {
     if (!result) return;
@@ -195,11 +318,12 @@ const MarketResearch: React.FC = () => {
 
   const exportCsv = () => {
     if (!result?.items?.length) return;
-    const header = ['标题', '价格文本', '价格数值', '成色', '容量', '电池健康', '想要人数', '地区', '卖家', '发布时间', '链接'];
+    const header = ['标题', '价格文本', '价格数值', '主图', '成色', '容量', '电池健康', '想要人数', '地区', '卖家', '发布时间', '链接'];
     const rows = result.items.map((item) => [
       item.title,
       item.price_text,
       item.price_value ?? '',
+      item.main_image || '',
       item.condition,
       item.storage,
       item.battery_health ?? '',
@@ -216,12 +340,82 @@ const MarketResearch: React.FC = () => {
     downloadTextFile(filename, csvContent, 'text/csv;charset=utf-8');
   };
 
+  const contactTopQualitySellers = async () => {
+    if (!previewContactItems.length) {
+      setError('当前没有可自动沟通的优质商家，请先放宽筛选条件或重新调研。');
+      return;
+    }
+
+    const confirmed = window.confirm(`确认自动沟通前 ${previewContactItems.length} 位优质商家吗？系统会按顺序逐个发消息。`);
+    if (!confirmed) return;
+
+    setContacting(true);
+    setError('');
+    try {
+      const response = await contactMarketSellers({
+        cookie_id: form.cookie_id,
+        items: previewContactItems.map((item) => ({
+          item_id: item.item_id,
+          title: item.title,
+          seller_name: item.seller_name,
+          seller_user_id: item.seller_user_id || '',
+          price_text: item.price_text,
+          price_display: item.price_display,
+          condition: item.condition,
+          storage: item.storage,
+          battery_health: item.battery_health,
+          area: item.area,
+          quality_score: item.quality_score,
+          quality_level: item.quality_level,
+          item_url: item.item_url,
+        })),
+        message_template: qualityForm.message_template,
+        min_quality_score: qualityForm.min_score,
+        max_count: qualityForm.max_contact,
+        delay_seconds: qualityForm.delay_seconds,
+        dry_run: false,
+        async_mode: true,
+      });
+      setContactResult(response);
+      setContactJobId(response.job_id || '');
+      if (!response.ok && response.error) {
+        setError(response.error);
+      }
+    } catch (contactError: any) {
+      console.error('自动沟通失败', contactError);
+      setError(contactError.message || '自动沟通失败');
+      setContacting(false);
+    }
+  };
+
+  const contactProgressPercent = useMemo(() => {
+    const total = Number(contactResult?.total_count || contactResult?.count || 0);
+    const processed = Number(contactResult?.processed_count || 0);
+    if (!total) return 0;
+    return Math.max(0, Math.min(100, Math.round((processed / total) * 100)));
+  }, [contactResult]);
+
+  const clearCachedState = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(MARKET_RESEARCH_CACHE_KEY);
+    }
+    setResult(null);
+    setLastUpdated('');
+    setContactResult(null);
+    setContactJobId('');
+    setContacting(false);
+    setCaptchaResolved(false);
+    setCaptchaCapturedCount(0);
+    setForm((prev) => ({ ...defaultResearchForm, cookie_id: prev.cookie_id || '' }));
+    setQualityForm(defaultQualityForm);
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">市场调研</h2>
-          <p className="text-gray-500 mt-2 font-medium">实时抓取闲鱼搜索结果，分析同行报价、成色、容量与热度。</p>
+          <p className="text-gray-500 mt-2 font-medium">实时抓取鱼鱼搜索结果，分析同行报价、成色、容量与热度。</p>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <BarChart3 className="w-4 h-4 text-[#F59E0B]" />
@@ -324,6 +518,7 @@ const MarketResearch: React.FC = () => {
               <option value="price_desc">价格降序</option>
               <option value="want_desc">想要人数</option>
               <option value="latest">最新发布时间</option>
+              <option value="quality_desc">优质商家优先</option>
             </select>
           </div>
 
@@ -364,6 +559,9 @@ const MarketResearch: React.FC = () => {
           <button type="button" onClick={exportCsv} disabled={!result?.items?.length} className="px-5 py-3 rounded-2xl bg-gray-100 text-gray-700 font-bold">
             <Download className="w-4 h-4 inline mr-2" />
             导出 CSV
+          </button>
+          <button type="button" onClick={clearCachedState} className="px-5 py-3 rounded-2xl bg-gray-100 text-gray-700 font-bold">
+            清空缓存
           </button>
         </div>
 
@@ -416,6 +614,8 @@ const MarketResearch: React.FC = () => {
             { label: '中位价', value: formatCurrency(summary.median_price) },
             { label: '均价', value: formatCurrency(summary.avg_price) },
             { label: '价格区间', value: `${formatCurrency(summary.min_price)} ~ ${formatCurrency(summary.max_price)}` },
+            { label: '优质商家', value: summary.quality_count ?? 0 },
+            { label: '可沟通商家', value: summary.contactable_count ?? 0 },
           ].map((card) => (
             <div key={card.label} className="ios-card rounded-[2rem] p-6">
               <div className="text-sm font-bold text-gray-500">{card.label}</div>
@@ -459,6 +659,192 @@ const MarketResearch: React.FC = () => {
         </div>
       )}
 
+      <div className="ios-card rounded-[2rem] p-6 space-y-5">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-xl font-extrabold text-gray-900">优质商家筛选与自动沟通</h3>
+            <p className="text-sm text-gray-500 mt-1">按成色、价格、瑕疵、资料完整度评分，只会联系你确认后的前几位卖家。</p>
+          </div>
+          <div className="text-sm text-gray-500">
+            当前命中 {qualityItems.length} 位，能自动沟通 {contactableQualityItems.length} 位
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">最低评分</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={qualityForm.min_score}
+              onChange={(e) => setQualityForm((prev) => ({ ...prev, min_score: Number(e.target.value) || 0 }))}
+              className="w-full ios-input px-4 py-3 rounded-xl"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">最多联系</label>
+            <input
+              type="number"
+              min={1}
+              max={10}
+              value={qualityForm.max_contact}
+              onChange={(e) => setQualityForm((prev) => ({ ...prev, max_contact: Number(e.target.value) || 1 }))}
+              className="w-full ios-input px-4 py-3 rounded-xl"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">联系间隔（秒）</label>
+            <input
+              type="number"
+              min={1}
+              max={10}
+              value={qualityForm.delay_seconds}
+              onChange={(e) => setQualityForm((prev) => ({ ...prev, delay_seconds: Number(e.target.value) || 2 }))}
+              className="w-full ios-input px-4 py-3 rounded-xl"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-bold text-gray-700 mb-2">沟通模板</label>
+          <textarea
+            value={qualityForm.message_template}
+            onChange={(e) => setQualityForm((prev) => ({ ...prev, message_template: e.target.value }))}
+            className="w-full ios-input px-4 py-3 rounded-xl min-h-[96px]"
+            placeholder="支持变量：${seller_name} ${item_title} ${price} ${condition} ${storage} ${battery_health}"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4">
+          <button
+            type="button"
+            onClick={contactTopQualitySellers}
+            disabled={contacting || !previewContactItems.length}
+            className="ios-btn-primary px-6 py-3 rounded-2xl font-bold flex items-center gap-2 disabled:opacity-50"
+          >
+            {contacting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+            自动沟通前 {Math.max(1, Number(qualityForm.max_contact) || 1)} 位
+          </button>
+          <div className="text-sm text-gray-500">
+            仅联系有卖家ID且商品ID真实的结果，避免误发。
+          </div>
+        </div>
+
+        {contactResult && (
+          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="font-bold text-gray-900">
+                  发送进度：{contactResult.processed_count || 0} / {contactResult.total_count || contactResult.count || 0}
+                </div>
+                <div className="text-sm text-gray-500 mt-1">
+                  {contactResult.status === 'queued' && '任务已创建，准备开始发送'}
+                  {contactResult.status === 'running' && `正在联系：${contactResult.current_seller_name || '卖家'} · ${contactResult.current_title || '商品'}`}
+                  {contactResult.status === 'completed' && `已完成，成功 ${contactResult.success_count || 0} / 失败 ${contactResult.failed_count || 0}`}
+                  {contactResult.status === 'failed' && (contactResult.error || '任务执行失败')}
+                </div>
+              </div>
+              {contactResult.job_id && (
+                <div className="text-xs text-gray-400">
+                  任务ID：{contactResult.job_id}
+                </div>
+              )}
+            </div>
+            <div className="h-2.5 rounded-full bg-white overflow-hidden border border-gray-100">
+              <div
+                className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 transition-all duration-300"
+                style={{ width: `${contactProgressPercent}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="text-left text-gray-500 border-b border-gray-100">
+                <th className="py-3 pr-4">卖家</th>
+                <th className="py-3 pr-4">商品</th>
+                <th className="py-3 pr-4">评分</th>
+                <th className="py-3 pr-4">理由</th>
+                <th className="py-3 pr-4">状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              {qualityItems.slice(0, 12).map((item, index) => (
+                <tr key={`${item.item_id}-${item.seller_user_id || index}`} className="border-b border-gray-50 align-top">
+                  <td className="py-4 pr-4 whitespace-nowrap">
+                    <div className="font-semibold text-gray-900">{item.seller_name || '匿名卖家'}</div>
+                    <div className="text-xs text-gray-500">{item.area || '地区未知'}</div>
+                  </td>
+                  <td className="py-4 pr-4 min-w-[280px]">
+                    <div className="font-medium text-gray-900 line-clamp-2">{item.title}</div>
+                    <div className="text-xs text-gray-500 mt-1">{item.price_display || item.price_text} · {item.condition} · {item.storage}</div>
+                  </td>
+                  <td className="py-4 pr-4 whitespace-nowrap">
+                    <span className={`px-2.5 py-1 rounded-xl text-xs font-bold ${getQualityBadgeClass(item.quality_level)}`}>
+                      {item.quality_level || 'D'} / {item.quality_score || 0}
+                    </span>
+                  </td>
+                  <td className="py-4 pr-4 text-gray-600">
+                    {(item.quality_reasons || []).join('，') || '暂无'}
+                  </td>
+                  <td className="py-4 pr-4 whitespace-nowrap">
+                    {item.contact_ready ? (
+                      <span className="text-green-600 font-semibold">可自动沟通</span>
+                    ) : (
+                      <span className="text-gray-400">{item.contact_block_reason || '暂不可联系'}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {!qualityItems.length && (
+                <tr>
+                  <td colSpan={5} className="py-10 text-center text-gray-400">
+                    先完成调研，或把最低评分调低一些。
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {contactResult && (
+          <div className="rounded-2xl bg-gray-50 px-4 py-4">
+            <div className="font-bold text-gray-900">
+              沟通结果：成功 {contactResult.success_count || 0} / 失败 {contactResult.failed_count || 0}
+            </div>
+            <div className="mt-3 space-y-2 text-sm">
+              {contactResult.results.map((entry, index) => (
+                <div key={`${entry.item_id}-${entry.seller_user_id}-${index}`} className="flex items-start justify-between gap-4 rounded-xl bg-white px-4 py-3 border border-gray-100">
+                  <div>
+                    <div className="font-semibold text-gray-900">{entry.seller_name} · {entry.title}</div>
+                    <div className="text-gray-500 mt-1">{entry.message}</div>
+                    {entry.chat_id && (
+                      <div className="text-xs text-gray-400 mt-1">会话 {entry.chat_id}</div>
+                    )}
+                  </div>
+                  <div className={`font-bold whitespace-nowrap ${
+                    entry.status === 'sent'
+                      ? 'text-green-600'
+                      : entry.status === 'failed'
+                        ? 'text-red-500'
+                        : 'text-amber-600'
+                  }`}>
+                    {entry.status === 'queued' && '排队中'}
+                    {entry.status === 'sending' && '发送中'}
+                    {entry.status === 'sent' && '已发送'}
+                    {entry.status === 'failed' && (entry.error || '失败')}
+                    {!entry.status && (entry.ok ? '已发送' : entry.error || '处理中')}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="ios-card rounded-[2rem] p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -487,6 +873,7 @@ const MarketResearch: React.FC = () => {
                 <th className="py-3 pr-4">想要</th>
                 <th className="py-3 pr-4">地区</th>
                 <th className="py-3 pr-4">时间</th>
+                <th className="py-3 pr-4">评分</th>
                 <th className="py-3 pr-4">操作</th>
               </tr>
             </thead>
@@ -494,8 +881,23 @@ const MarketResearch: React.FC = () => {
               {(result?.items || []).map((item: MarketResearchItem, index) => (
                 <tr key={`${item.item_id}-${index}`} className="border-b border-gray-50 align-top">
                   <td className="py-4 pr-4 min-w-[320px]">
-                    <div className="font-semibold text-gray-900">{item.title}</div>
-                    <div className="text-xs text-gray-500 mt-1">{item.defects_text || item.tags_text || '无额外标签'}</div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 flex-shrink-0">
+                        <img
+                          src={getMarketItemImage(item)}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={(event) => {
+                            event.currentTarget.src = buildItemPlaceholderDataUrl(item.title, item.price_display || item.price_text);
+                          }}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-semibold text-gray-900 line-clamp-2">{item.title}</div>
+                        <div className="text-xs text-gray-500 mt-1">{item.seller_name || '匿名卖家'} · {item.area || '地区未知'}</div>
+                        <div className="text-xs text-gray-500 mt-1">{item.defects_text || item.tags_text || '无额外标签'}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="py-4 pr-4 font-bold text-black">{item.price_display || item.price_text}</td>
                   <td className="py-4 pr-4">{item.condition}</td>
@@ -504,6 +906,11 @@ const MarketResearch: React.FC = () => {
                   <td className="py-4 pr-4">{item.want_count}</td>
                   <td className="py-4 pr-4">{item.area}</td>
                   <td className="py-4 pr-4 whitespace-nowrap">{item.publish_time || '-'}</td>
+                  <td className="py-4 pr-4 whitespace-nowrap">
+                    <span className={`px-2.5 py-1 rounded-xl text-xs font-bold ${getQualityBadgeClass(item.quality_level)}`}>
+                      {item.quality_level || 'D'} / {item.quality_score || 0}
+                    </span>
+                  </td>
                   <td className="py-4 pr-4 whitespace-nowrap">
                     {item.item_url ? (
                       <a href={item.item_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-blue-600 font-semibold">
@@ -516,7 +923,7 @@ const MarketResearch: React.FC = () => {
               ))}
               {!loading && !(result?.items?.length) && (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-gray-400">
+                  <td colSpan={10} className="py-12 text-center text-gray-400">
                     还没有调研结果，输入关键词后开始搜索。
                   </td>
                 </tr>

@@ -7,8 +7,11 @@ Bridge API — FastAPI Router
 import asyncio
 import json
 import os
+import threading
 import time
-from typing import Optional
+import uuid
+from string import Template
+from typing import Any, Optional
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -59,15 +62,6 @@ class SendMediaRequest(BaseModel):
 class ConfirmDeliveryRequest(BaseModel):
     orderId: str
     accountId: Optional[str] = "default"
-
-
-class OutreachLeadRequest(BaseModel):
-    accountId: Optional[str] = "default"
-    targetUrl: str = Field(..., description="目标视频/帖子 URL")
-    intentKeywords: list[str] = Field(default_factory=list, description="意向关键词")
-    messageTemplate: str = Field(..., description="私信模板")
-    maxLeads: int = Field(default=20, ge=1, le=200)
-    dryRun: bool = Field(default=True, description="是否只抓取不发信")
 
 
 # ---------------------------------------------------------------------------
@@ -271,30 +265,6 @@ async def confirm_delivery(body: ConfirmDeliveryRequest):
         return {"ok": False, "error": str(e)}
 
 
-@bridge_router.post("/outreach-leads")
-async def outreach_leads(body: OutreachLeadRequest):
-    """引流雏形接口：抓取评论意向用户，后续可扩展主页访问与私信发送"""
-    try:
-        from outreach_pipeline import run_outreach_pipeline
-
-        result = await run_outreach_pipeline(
-            account_id=body.accountId or "default",
-            target_url=body.targetUrl,
-            intent_keywords=body.intentKeywords,
-            message_template=body.messageTemplate,
-            max_leads=body.maxLeads,
-            dry_run=body.dryRun,
-        )
-        return {"ok": True, "result": result}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"[Bridge] 引流任务失败: {e}")
-        return {"ok": False, "error": str(e)}
-        logger.error(f"[Bridge] 确认发货失败: {e}")
-        return {"ok": False, "error": str(e)}
-
-
 # ----------------------------------------------------------------------------
 # 刷新Cookie  POST /api/bridge/refresh-cookie
 # ----------------------------------------------------------------------------
@@ -317,7 +287,12 @@ async def refresh_cookie(body: RefreshCookieRequest):
         if not account_info:
             raise HTTPException(status_code=404, detail=f"Cookie not found for account '{body.accountId}'")
         
-        db_cookie_value = account_info.get('cookie_value', '')
+        db_cookie_value = (
+            account_info.get('cookie_value')
+            or account_info.get('cookies_str')
+            or account_info.get('value')
+            or ''
+        )
         if db_cookie_value and db_cookie_value != instance.cookies_str:
             instance.cookies_str = db_cookie_value
             from utils.trans_cookies import trans_cookies
@@ -1017,6 +992,328 @@ class MarketResearchResumeRequest(BaseModel):
     sort: str = "price_asc"
 
 
+class MarketSellerContactItem(BaseModel):
+    item_id: str
+    title: str = ""
+    seller_name: str = ""
+    seller_user_id: str = ""
+    price_text: str = ""
+    price_display: str = ""
+    condition: str = ""
+    storage: str = ""
+    battery_health: Optional[int] = None
+    area: str = ""
+    quality_score: int = 0
+    quality_level: str = ""
+    item_url: str = ""
+
+
+class MarketSellerContactRequest(BaseModel):
+    cookie_id: str
+    items: list[MarketSellerContactItem]
+    message_template: str = "你好，看到你这台${item_title}还在，请问真实成色和电池情况方便再发我确认下吗？"
+    min_quality_score: int = 60
+    max_count: int = 3
+    delay_seconds: float = 2.0
+    dry_run: bool = False
+    async_mode: bool = False
+
+
+def _render_market_contact_message(template_text: str, item: MarketSellerContactItem) -> str:
+    template = Template(template_text or "")
+    battery_text = f"{item.battery_health}%" if item.battery_health is not None else "未写明"
+    return template.safe_substitute(
+        seller_name=item.seller_name or "老板",
+        item_title=item.title or item.item_id,
+        price=item.price_display or item.price_text or "未标价",
+        condition=item.condition or "未写明",
+        storage=item.storage or "未写明",
+        battery_health=battery_text,
+        quality_score=item.quality_score,
+        quality_level=item.quality_level or "",
+        area=item.area or "",
+        item_id=item.item_id,
+    ).strip()
+
+
+def _build_market_contact_candidates(body: MarketSellerContactRequest) -> tuple[list[MarketSellerContactItem], list[dict[str, Any]]]:
+    selected_items: list[MarketSellerContactItem] = []
+    seen_keys: set[str] = set()
+
+    for item in body.items:
+        seller_user_id = str(item.seller_user_id or "").strip()
+        item_id = str(item.item_id or "").strip()
+        dedupe_key = f"{seller_user_id}:{item_id}"
+        if not seller_user_id or not item_id or dedupe_key in seen_keys:
+            continue
+        if int(item.quality_score or 0) < max(0, min(100, int(body.min_quality_score or 0))):
+            continue
+        seen_keys.add(dedupe_key)
+        selected_items.append(item)
+
+    selected_items = selected_items[: max(1, min(int(body.max_count or 1), 10))]
+
+    planned_results: list[dict[str, Any]] = []
+    for item in selected_items:
+        message_text = _render_market_contact_message(body.message_template, item)
+        planned_results.append({
+            "item_id": item.item_id,
+            "title": item.title,
+            "seller_name": item.seller_name,
+            "seller_user_id": item.seller_user_id,
+            "quality_score": item.quality_score,
+            "message": message_text,
+            "status": "queued",
+            "chat_id": "",
+            "scene_type": "market_research",
+            "our_role": "buyer",
+            "counterpart_role": "seller",
+        })
+
+    return selected_items, planned_results
+
+
+def _persist_market_contact_context(
+    cookie_id: str,
+    item: MarketSellerContactItem,
+    message_text: str,
+    chat_id: str = "",
+    resolved_user_id: str = "",
+) -> None:
+    try:
+        from db_manager import db_manager
+
+        item_price = str(item.price_display or item.price_text or "").strip()
+        counterpart_user_id = str(resolved_user_id or item.seller_user_id or "").strip()
+        db_manager.upsert_conversation_profile(
+            cookie_id=str(cookie_id or "").strip(),
+            chat_id=str(chat_id or "").strip(),
+            counterpart_user_id=counterpart_user_id,
+            counterpart_name=str(item.seller_name or "").strip(),
+            item_id=str(item.item_id or "").strip(),
+            item_title=str(item.title or "").strip(),
+            item_price=item_price,
+            scene_type="market_research",
+            our_role="buyer",
+            counterpart_role="seller",
+            source="market_research",
+            status="active",
+        )
+        if chat_id:
+            db_manager.save_conversation(
+                cookie_id=str(cookie_id or "").strip(),
+                chat_id=str(chat_id or "").strip(),
+                user_id=counterpart_user_id,
+                user_name=str(item.seller_name or "").strip(),
+                item_id=str(item.item_id or "").strip(),
+                role="assistant",
+                content=str(message_text or "").strip(),
+            )
+    except Exception as exc:
+        logger.warning(f"[Bridge] 持久化调研沟通上下文失败: cookie={cookie_id}, seller={item.seller_user_id}, item={item.item_id}, error={exc}")
+
+
+class MarketContactJobStore:
+    def __init__(self):
+        self._jobs: dict[str, dict[str, Any]] = {}
+        self._lock = threading.Lock()
+
+    def create(self, cookie_id: str, planned_results: list[dict[str, Any]], dry_run: bool) -> dict[str, Any]:
+        job_id = uuid.uuid4().hex
+        now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        job = {
+            "job_id": job_id,
+            "ok": True,
+            "cookie_id": cookie_id,
+            "dry_run": dry_run,
+            "status": "queued",
+            "count": len(planned_results),
+            "total_count": len(planned_results),
+            "processed_count": 0,
+            "success_count": 0,
+            "failed_count": 0,
+            "current_index": 0,
+            "current_seller_name": "",
+            "current_title": "",
+            "started_at": now,
+            "finished_at": "",
+            "results": [dict(item) for item in planned_results],
+            "error": "",
+        }
+        with self._lock:
+            self._jobs[job_id] = job
+        return dict(job)
+
+    def get(self, job_id: str) -> Optional[dict[str, Any]]:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            return dict(job) if job else None
+
+    def update(self, job_id: str, **fields: Any) -> Optional[dict[str, Any]]:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if not job:
+                return None
+            job.update(fields)
+            return dict(job)
+
+    def update_result(self, job_id: str, index: int, **fields: Any) -> Optional[dict[str, Any]]:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if not job:
+                return None
+            results = job.get("results") or []
+            if 0 <= index < len(results):
+                results[index].update(fields)
+            return dict(job)
+
+
+market_contact_job_store = MarketContactJobStore()
+
+
+def _is_transient_market_contact_error(error: Exception | str) -> bool:
+    message = str(error or "").strip()
+    if not message:
+        return False
+
+    transient_markers = (
+        "闲鱼走神了",
+        "稍后再试",
+        "系统繁忙",
+        "RGV587",
+        "EXCEPTION",
+        "当前聊天连接未就绪",
+    )
+    return any(marker in message for marker in transient_markers)
+
+
+async def _send_market_contact_message(instance, item: MarketSellerContactItem, message_text: str) -> tuple[str, str]:
+    max_attempts = 2
+    last_error: Exception | None = None
+    resolved_user_id = str(
+        await instance.resolve_chat_peer_user_id(item.item_id, item.seller_user_id) or item.seller_user_id or ""
+    ).strip()
+    if not resolved_user_id:
+        raise RuntimeError("未能解析到卖家的真实聊天ID")
+
+    if resolved_user_id != str(item.seller_user_id or "").strip():
+        logger.info(
+            f"[Bridge] 已解析真实聊天ID: item={item.item_id}, "
+            f"search_seller_id={item.seller_user_id}, peer_user_id={resolved_user_id}"
+        )
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            chat_id = await instance.send_msg_once(resolved_user_id, item.item_id, message_text) or ""
+            return str(chat_id or "").strip(), resolved_user_id
+        except Exception as exc:
+            last_error = exc
+            if attempt >= max_attempts or not _is_transient_market_contact_error(exc):
+                raise
+
+            wait_seconds = 1.2 * attempt
+            logger.warning(
+                f"[Bridge] 自动沟通卖家遇到瞬时异常，准备重试: "
+                f"seller={item.seller_user_id}, peer={resolved_user_id}, item={item.item_id}, attempt={attempt}, "
+                f"wait={wait_seconds:.1f}s, error={exc}"
+            )
+            await asyncio.sleep(wait_seconds)
+
+    if last_error is not None:
+        raise last_error
+    return "", resolved_user_id
+
+
+async def _run_market_contact_job(
+    job_id: str,
+    cookie_id: str,
+    selected_items: list[MarketSellerContactItem],
+    planned_results: list[dict[str, Any]],
+    delay_seconds: float,
+) -> None:
+    finished_at = ""
+    try:
+        instance = _get_instance(cookie_id)
+        market_contact_job_store.update(job_id, status="running")
+
+        for index, item in enumerate(selected_items):
+            message_text = planned_results[index]["message"]
+            market_contact_job_store.update(
+                job_id,
+                current_index=index + 1,
+                current_seller_name=item.seller_name,
+                current_title=item.title,
+            )
+            market_contact_job_store.update_result(job_id, index, status="sending")
+
+            try:
+                chat_id, resolved_user_id = await _send_market_contact_message(instance, item, message_text)
+                _persist_market_contact_context(
+                    cookie_id,
+                    item,
+                    message_text,
+                    chat_id=chat_id,
+                    resolved_user_id=resolved_user_id,
+                )
+                market_contact_job_store.update_result(
+                    job_id,
+                    index,
+                    ok=True,
+                    status="sent",
+                    chat_id=str(chat_id or "").strip(),
+                    contact_user_id=str(resolved_user_id or "").strip(),
+                )
+            except Exception as exc:
+                logger.error(f"[Bridge] 自动沟通卖家失败: seller={item.seller_user_id}, item={item.item_id}, error={exc}")
+                market_contact_job_store.update_result(
+                    job_id,
+                    index,
+                    ok=False,
+                    status="failed",
+                    error=str(exc),
+                )
+
+            current_job = market_contact_job_store.get(job_id) or {}
+            results = current_job.get("results") or []
+            success_count = sum(1 for row in results if row.get("ok") is True)
+            failed_count = sum(1 for row in results if row.get("status") == "failed")
+            processed_count = sum(1 for row in results if row.get("status") in {"sent", "failed"})
+            market_contact_job_store.update(
+                job_id,
+                processed_count=processed_count,
+                success_count=success_count,
+                failed_count=failed_count,
+            )
+
+            if index < len(selected_items) - 1:
+                await asyncio.sleep(delay_seconds)
+
+        finished_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        final_job = market_contact_job_store.get(job_id) or {}
+        success_count = int(final_job.get("success_count") or 0)
+        failed_count = int(final_job.get("failed_count") or 0)
+        market_contact_job_store.update(
+            job_id,
+            ok=success_count > 0 or failed_count == 0,
+            status="completed",
+            finished_at=finished_at,
+            current_seller_name="",
+            current_title="",
+        )
+    except Exception as exc:
+        finished_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        logger.error(f"[Bridge] 自动沟通任务异常结束: job={job_id}, error={exc}")
+        market_contact_job_store.update(
+            job_id,
+            ok=False,
+            status="failed",
+            error=str(exc),
+            finished_at=finished_at,
+            current_seller_name="",
+            current_title="",
+        )
+
+
 def _get_link_unique_key(link: str) -> str:
     parts = link.split('&', 1)
     if len(parts) >= 2:
@@ -1230,7 +1527,7 @@ async def market_research(body: MarketResearchRequest):
             search_xianyu_items_with_cookie,
         )
 
-        sort_value = body.sort if body.sort in {"price_asc", "price_desc", "want_desc", "latest"} else "price_asc"
+        sort_value = body.sort if body.sort in {"price_asc", "price_desc", "want_desc", "latest", "quality_desc"} else "price_asc"
 
         cookie_info = db_manager.get_cookie_by_id(body.cookie_id)
         cookie_value = str((cookie_info or {}).get("cookies_str") or "").strip()
@@ -1322,7 +1619,7 @@ async def resume_market_research(body: MarketResearchResumeRequest):
         from market_research import build_market_analysis, serialize_market_item
         from utils.item_search import resume_market_research_session
 
-        sort_value = body.sort if body.sort in {"price_asc", "price_desc", "want_desc", "latest"} else "price_asc"
+        sort_value = body.sort if body.sort in {"price_asc", "price_desc", "want_desc", "latest", "quality_desc"} else "price_asc"
 
         result = await resume_market_research_session(
             session_id=body.session_id,
@@ -1377,6 +1674,107 @@ async def resume_market_research(body: MarketResearchResumeRequest):
         import traceback
         logger.error(f"[Bridge] 错误堆栈:\n{traceback.format_exc()}")
         return {"ok": False, "error": str(e)}
+
+
+@bridge_router.post("/market-research/contact-sellers")
+async def contact_quality_sellers(body: MarketSellerContactRequest):
+    """对市场调研筛出的优质卖家发起自动沟通。"""
+    try:
+        selected_items, planned_results = _build_market_contact_candidates(body)
+        if not selected_items:
+            return {
+                "ok": False,
+                "error": "没有可联系的优质卖家，请先检查卖家ID、商品ID和评分阈值",
+                "results": [],
+            }
+
+        if not body.dry_run:
+            _get_instance(body.cookie_id)
+
+        if body.dry_run:
+            return {
+                "ok": True,
+                "dry_run": True,
+                "count": len(planned_results),
+                "total_count": len(planned_results),
+                "processed_count": len(planned_results),
+                "status": "completed",
+                "results": planned_results,
+            }
+
+        if body.async_mode:
+            job = market_contact_job_store.create(body.cookie_id, planned_results, dry_run=False)
+            delay_seconds = max(0.5, min(float(body.delay_seconds or 2.0), 10.0))
+            asyncio.create_task(
+                _run_market_contact_job(
+                    job_id=job["job_id"],
+                    cookie_id=body.cookie_id,
+                    selected_items=selected_items,
+                    planned_results=planned_results,
+                    delay_seconds=delay_seconds,
+                )
+            )
+            return job
+
+        instance = _get_instance(body.cookie_id)
+        results = []
+        delay_seconds = max(0.5, min(float(body.delay_seconds or 2.0), 10.0))
+        for index, item in enumerate(selected_items):
+            message_text = planned_results[index]["message"]
+            try:
+                chat_id, resolved_user_id = await _send_market_contact_message(instance, item, message_text)
+                _persist_market_contact_context(
+                    body.cookie_id,
+                    item,
+                    message_text,
+                    chat_id=chat_id,
+                    resolved_user_id=resolved_user_id,
+                )
+                results.append({
+                    **planned_results[index],
+                    "ok": True,
+                    "status": "sent",
+                    "chat_id": str(chat_id or "").strip(),
+                    "contact_user_id": str(resolved_user_id or "").strip(),
+                })
+                if index < len(selected_items) - 1:
+                    await asyncio.sleep(delay_seconds)
+            except Exception as exc:
+                logger.error(f"[Bridge] 自动沟通卖家失败: seller={item.seller_user_id}, item={item.item_id}, error={exc}")
+                results.append({
+                    **planned_results[index],
+                    "ok": False,
+                    "status": "failed",
+                    "error": str(exc),
+                })
+
+        success_count = sum(1 for item in results if item.get("ok"))
+        return {
+            "ok": success_count > 0,
+            "dry_run": False,
+            "count": len(results),
+            "total_count": len(results),
+            "processed_count": len(results),
+            "success_count": success_count,
+            "failed_count": len(results) - success_count,
+            "status": "completed",
+            "results": results,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Bridge] 自动沟通优质卖家失败: {e}")
+        import traceback
+        logger.error(f"[Bridge] 错误堆栈:\n{traceback.format_exc()}")
+        return {"ok": False, "error": str(e), "results": []}
+
+
+@bridge_router.get("/market-research/contact-sellers/{job_id}")
+async def get_market_contact_job(job_id: str):
+    job = market_contact_job_store.get(str(job_id or "").strip())
+    if not job:
+        raise HTTPException(status_code=404, detail=f"未找到自动沟通任务: {job_id}")
+    return job
 
 
 @bridge_router.get("/spider/products")

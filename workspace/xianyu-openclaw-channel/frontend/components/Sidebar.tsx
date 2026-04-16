@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { LayoutDashboard, Users, ShoppingBag, CreditCard, Settings, LogOut, Box, Sparkles, MessageSquare, Upload, Layers, SearchCheck } from 'lucide-react';
 
 interface SidebarProps {
@@ -27,9 +27,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout }) 
       <div className="p-6">
         <div className="flex items-center gap-3 mb-12 px-2">
           <div className="w-10 h-10 bg-[#FFE815] rounded-xl flex items-center justify-center shadow-lg shadow-yellow-200 transform rotate-[-3deg]">
-            <span className="text-black font-extrabold text-xl">闲</span>
+            <span className="text-black font-extrabold text-xl">鱼</span>
           </div>
-          <h1 className="text-xl font-extrabold tracking-tight text-gray-900">闲鱼智控 <span className="text-xs bg-black text-[#FFE815] px-1.5 py-0.5 rounded ml-1">PRO</span></h1>
+          <h1 className="text-xl font-extrabold tracking-tight text-gray-900">鱼鱼 <span className="text-xs bg-black text-[#FFE815] px-1.5 py-0.5 rounded ml-1">PRO</span></h1>
         </div>
 
         <nav className="space-y-2">

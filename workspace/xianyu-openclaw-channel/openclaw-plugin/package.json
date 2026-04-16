@@ -1,14 +1,14 @@
 {
   "name": "xianyu",
   "version": "0.1.0",
-  "description": "Xianyu (闲鱼) channel plugin for OpenClaw (Bridge Mode)",
+  "description": "YUYU（鱼鱼） channel plugin for OpenClaw (Bridge Mode)",
   "keywords": [
     "bot",
     "channel",
     "openclaw",
     "xianyu",
     "goofish",
-    "闲鱼",
+    "鱼鱼",
     "bridge"
   ],
   "license": "MIT",
@@ -46,9 +46,9 @@
     "installDependencies": true,
     "channel": {
       "id": "xianyu",
-      "label": "Xianyu",
-      "selectionLabel": "Xianyu (闲鱼)",
-      "blurb": "闲鱼二手交易平台消息频道（桥接模式）",
+      "label": "YUYU",
+      "selectionLabel": "YUYU（鱼鱼）",
+      "blurb": "鱼鱼二手交易平台消息频道（桥接模式）",
       "order": 80,
       "aliases": [
         "xy",

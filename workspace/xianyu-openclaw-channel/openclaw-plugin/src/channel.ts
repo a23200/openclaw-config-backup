@@ -1,8 +1,8 @@
 /**
- * Xianyu (闲鱼) Channel Plugin — Bridge Mode
+ * YUYU（鱼鱼） Channel Plugin — Bridge Mode
  *
  * 核心频道定义文件，实现 OpenClaw ChannelPlugin 接口。
- * 通过 Python Bridge_API 桥接闲鱼消息，支持 SSE 实时推送。
+ * 通过 Python Bridge_API 桥接鱼鱼消息，支持 SSE 实时推送。
  *
  * 📦 模式来源：openclaw-channel-dingtalk-repo/src/channel.ts
  * 📝 简化为桥接模式（无 DWClient，无群聊，无 AI Card）
@@ -31,10 +31,10 @@ export const xianyuPlugin: XianyuChannelPlugin = {
   id: "xianyu",
   meta: {
     id: "xianyu",
-    label: "Xianyu",
-    selectionLabel: "Xianyu (闲鱼)",
+    label: "YUYU",
+    selectionLabel: "YUYU（鱼鱼）",
     docsPath: "/channels/xianyu",
-    blurb: "闲鱼二手交易平台消息频道（桥接模式）",
+    blurb: "鱼鱼二手交易平台消息频道（桥接模式）",
     aliases: ["xy", "goofish"],
   },
   configSchema: buildChannelConfigSchema(XianyuConfigSchema),
@@ -55,7 +55,7 @@ export const xianyuPlugin: XianyuChannelPlugin = {
     isConfigured: (account: ResolvedXianyuAccount): boolean => account.configured,
     describeAccount: (account: ResolvedXianyuAccount) => ({
       accountId: account.accountId,
-      name: account.name || "Xianyu",
+      name: account.name || "YUYU",
       enabled: account.enabled,
       configured: account.configured,
     }),
@@ -67,7 +67,7 @@ export const xianyuPlugin: XianyuChannelPlugin = {
       if (!trimmed) {
         return {
           ok: false as const,
-          error: new Error("Xianyu message requires --to <conversationId>"),
+          error: new Error("YUYU message requires --to <conversationId>"),
         };
       }
       const targetId = trimmed.replace(/^(xianyu|xy|goofish):/i, "");
@@ -115,10 +115,10 @@ export const xianyuPlugin: XianyuChannelPlugin = {
     startAccount: async (ctx: GatewayStartContext) => {
       const { account, cfg, abortSignal } = ctx;
       if (!account.apiUrl) {
-        throw new Error("Xianyu apiUrl is required");
+        throw new Error("YUYU apiUrl is required");
       }
 
-      ctx.log?.info?.(`[${account.accountId}] Initializing Xianyu Bridge client...`);
+      ctx.log?.info?.(`[${account.accountId}] Initializing YUYU Bridge client...`);
 
       const bridgeClient = new BridgeClient(account.apiUrl);
 

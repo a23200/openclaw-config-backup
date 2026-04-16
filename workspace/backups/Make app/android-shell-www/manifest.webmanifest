@@ -1,0 +1,21 @@
+{
+  "name": "轻约到店",
+  "short_name": "轻约到店",
+  "description": "围绕时间与服务资源编排，适合到店、咨询、医疗、美业等业务。",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f9d71",
+  "icons": [
+    {
+      "src": "./icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "./icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
