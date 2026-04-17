@@ -1582,5 +1582,29 @@
     "completion_used": false,
     "completion_steps": 0,
     "success": true
+  },
+  {
+    "timestamp": 1776382432.4427478,
+    "user_id": "3083424450",
+    "distance": 257.51269902926833,
+    "total_steps": 22,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 22,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
   }
 ]
