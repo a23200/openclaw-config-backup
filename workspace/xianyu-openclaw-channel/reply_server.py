@@ -4600,9 +4600,9 @@ class BatchDeleteRequest(BaseModel):
 
 class AIReplySettings(BaseModel):
     ai_enabled: bool
-    model_name: str = "qwen-plus"
-    api_key: str = ""
-    base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    model_name: Optional[str] = None
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
     max_discount_percent: int = 10
     max_discount_amount: int = 100
     max_bargain_rounds: int = 3
@@ -4672,8 +4672,20 @@ def update_ai_reply_settings(cookie_id: str, settings: AIReplySettings, current_
         if cookie_manager.manager is None:
             raise HTTPException(status_code=500, detail='CookieManager 未就绪')
 
-        # 保存设置
-        settings_dict = settings.dict()
+        existing_settings = db_manager.get_ai_reply_settings_raw(cookie_id)
+        if hasattr(settings, "model_dump"):
+            incoming_settings = settings.model_dump(exclude_unset=True)
+        else:
+            incoming_settings = settings.dict(exclude_unset=True)
+
+        settings_dict = {**existing_settings, **incoming_settings}
+
+        for field in ("model_name", "api_key", "base_url"):
+            value = settings_dict.get(field)
+            if isinstance(value, str):
+                normalized = value.strip()
+                settings_dict[field] = normalized or None
+
         success = db_manager.save_ai_reply_settings(cookie_id, settings_dict)
 
         if success:
@@ -8316,13 +8328,13 @@ def get_conversation_sessions(
     cookie_id: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    sync_mode: Optional[str] = Query('auto'),
+    sync_mode: Optional[str] = Query('none'),
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """按会话维度获取聊天列表。"""
     try:
         user_id = current_user['user_id']
-        normalized_sync_mode = _normalize_conversation_sync_mode(sync_mode, default='auto')
+        normalized_sync_mode = _normalize_conversation_sync_mode(sync_mode, default='none')
         log_with_user('info', f"查询聊天会话列表: cookie_id={cookie_id}, page={page}, sync_mode={normalized_sync_mode}", current_user)
 
         conversation_context = _get_accessible_conversation_context(user_id)

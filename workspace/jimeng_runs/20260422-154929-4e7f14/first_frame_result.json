@@ -1,0 +1,14 @@
+{
+  "submit_id": "28d1521c879231cf",
+  "logid": "2026042215492919216800121749297D3",
+  "gen_status": "fail",
+  "fail_reason": "generation failed: final generation failed",
+  "credit_count": 3,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Finish",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":true,\"dreamina_matrix_queue_name\":\"\",\"dreamina_matrix_req_key\":\"\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":false,\"queue_name\":\"high_aes_general_v50\",\"matrix_req_key\":\"MImageGen:high_aes_general_v50\",\"matrix_second_req_key\":\"\"}"
+  }
+}

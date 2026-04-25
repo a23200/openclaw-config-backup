@@ -1,0 +1,101 @@
+{
+  "id": "20260425-005045-2fc1dd",
+  "title": "黑洞为什么看不见？其实它一直在暴露自己",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260425-005045-2fc1dd/final_mastered.mp4",
+  "created_at": 1777049445.1941178,
+  "updated_at": 1777049454.353036,
+  "post": {
+    "mode": "auto",
+    "title_card_text": "黑洞为什么看不见背后的原理",
+    "enable_natural_voiceover": true,
+    "material_category": "science",
+    "narration_tone": "清晰、可信、循序渐进，先用现象引入，再用通俗比喻解释原理",
+    "voice_profile": "clear_male",
+    "narration_style": "documentary",
+    "subtitle_style": "douyin_bold",
+    "selection_engine": "cc-gpt-5.4",
+    "narration_text": "黑洞之所以看不见，不是因为它不存在。而是因为它的引力太强，连光进去都很难再，出来。我们平时之所以能看见东西。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "clear_male",
+      "voice": "fable",
+      "speed": 0.94,
+      "gain": 1.07,
+      "pause_bias": 0.32,
+      "bgm_volume": 0.2,
+      "style": "documentary",
+      "category": "science"
+    },
+    "tts_voice": "fable",
+    "tts_speed": 0.94,
+    "voice_gain": 1.07,
+    "pause_bias": 0.32,
+    "bgm_volume": 0.2,
+    "tts_engine": "openai_tts",
+    "tts_detail": "openai tts ok",
+    "mix_params": {
+      "voice_gain": 1.07,
+      "bgm_volume": 0.2,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260425-005045-2fc1dd/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "黑洞为什么看不见？其实它一直在暴露自己",
+    "description": "黑洞不是隐身了，而是连光都逃不出来。我们看不见它本身，却能通过周围物质和引力效应发现它。#黑洞 #科普 #宇宙奥秘",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "黑洞为什么看不见",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "用冷静深空画面做现象引入，建立宇宙尺度与未知感",
+        "order": 1
+      },
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "以漩涡式视觉联想到黑洞周围物质运动，承接核心解释",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "用神秘氛围收尾，强化看不见但能被间接发现的认知",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "science",
+    "narration_tone": "清晰、可信、循序渐进，先用现象引入，再用通俗比喻解释原理",
+    "voice_profile": "clear_male",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "cc-gpt-5.4",
+    "suggested_tags": [
+      "黑洞",
+      "科普",
+      "宇宙",
+      "天文",
+      "科学解释"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

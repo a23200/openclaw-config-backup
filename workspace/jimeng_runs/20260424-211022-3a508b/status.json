@@ -1,0 +1,96 @@
+{
+  "id": "20260424-211022-3a508b",
+  "title": "把宇宙讲清楚",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-211022-3a508b/final_mastered.mp4",
+  "created_at": 1777036222.4125319,
+  "updated_at": 1777036232.936181,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "关于把宇宙讲清楚的一段观察",
+    "enable_natural_voiceover": true,
+    "material_category": "auto",
+    "narration_tone": "冷静、清晰、克制，用通俗语言把抽象宇宙结构讲明白",
+    "voice_profile": "calm_female",
+    "narration_style": "explain",
+    "subtitle_style": "douyin_bold",
+    "selection_engine": "manual",
+    "narration_text": "宇宙并不是一开始就有星球。先有弥散的星云，在引力下聚拢成恒星和尘埃盘。再慢慢形成行星系统。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "calm_female",
+      "voice": "nova",
+      "speed": 1.02,
+      "gain": 1.02,
+      "pause_bias": 0.12,
+      "style": "explain",
+      "category": "auto"
+    },
+    "tts_voice": "nova",
+    "tts_speed": 1.02,
+    "voice_gain": 1.02,
+    "pause_bias": 0.12,
+    "tts_engine": "edge_tts",
+    "mix_params": {
+      "voice_gain": 1.02,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 12.021,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-211022-3a508b/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "12秒把宇宙从星云到银河讲清楚",
+    "description": "从一团星云，到行星系统，再到整片银河，宇宙其实可以这样理解。#宇宙科普 #银河 #天文知识",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "示例-宇宙",
+    "stitch_mode": "concat",
+    "topic": "把宇宙讲清楚",
+    "clips": [
+      {
+        "file": "01-nebula.mp4",
+        "relpath": "01-nebula.mp4",
+        "duration_sec": 4.0,
+        "reason": "以星云作为开场，先建立宇宙诞生与物质来源的宏大感",
+        "order": 1
+      },
+      {
+        "file": "02-ring.mp4",
+        "relpath": "02-ring.mp4",
+        "duration_sec": 3.0,
+        "reason": "用行星环承接到天体系统形成，旋转动势让节奏自然推进",
+        "order": 2
+      },
+      {
+        "file": "03-galaxy.mp4",
+        "relpath": "03-galaxy.mp4",
+        "duration_sec": 5.0,
+        "reason": "以银河全景收束，完成从局部物质到宏观宇宙结构的解释",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "冷静、清晰、克制，用通俗语言把抽象宇宙结构讲明白",
+    "voice_profile": "calm_female",
+    "narration_style": "explain"
+  },
+  "selection": {
+    "engine": "manual",
+    "suggested_tags": [
+      "示例-宇宙",
+      "ClawLink",
+      "素材库短片"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

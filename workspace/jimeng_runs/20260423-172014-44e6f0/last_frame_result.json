@@ -1,0 +1,14 @@
+{
+  "submit_id": "f54c5a0dc443cc48",
+  "prompt": "9:16竖屏，同一人物穿好整套千禧年虚拟换装风造型，站在青春歌会场馆外的人群边缘，霓虹灯牌与入口散射光映在脸上，手里攥着票根，眼神发亮却克制，夜风吹动发丝和裙摆，背景是朦胧排队人潮与远处舞台光束，色彩从卧室暖光递进到现场冷艳霓虹，情绪从自我打量变成即将奔赴，电影感，强光影反差，空间纵深明显，高细节",
+  "logid": "20260423172058192168000218645016B",
+  "gen_status": "querying",
+  "credit_count": 3,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Generating",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":true,\"dreamina_matrix_queue_name\":\"\",\"dreamina_matrix_req_key\":\"\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":false,\"queue_name\":\"high_aes_general_v50\",\"matrix_req_key\":\"MImageGen:high_aes_general_v50\",\"matrix_second_req_key\":\"\"}"
+  }
+}

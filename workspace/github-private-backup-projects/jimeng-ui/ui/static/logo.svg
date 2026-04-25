@@ -1,0 +1,45 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Claw Link">
+  <defs>
+    <linearGradient id="logoGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd98e"/>
+      <stop offset="0.55" stop-color="#d89a5a"/>
+      <stop offset="1" stop-color="#7a4a2b"/>
+    </linearGradient>
+    <linearGradient id="logoGoldSoft" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe4a8" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#b07046" stop-opacity="0.6"/>
+    </linearGradient>
+    <radialGradient id="logoGlow" cx="0.5" cy="0.5" r="0.6">
+      <stop offset="0" stop-color="#ffd98e" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#ffd98e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="logoBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="0.35"/>
+    </filter>
+  </defs>
+
+  <circle cx="32" cy="32" r="30" fill="url(#logoGlow)"/>
+
+  <polygon points="32,5 55,18.5 55,45.5 32,59 9,45.5 9,18.5"
+           fill="none"
+           stroke="url(#logoGold)"
+           stroke-width="2.2"
+           stroke-linejoin="round"/>
+
+  <polygon points="32,13 48,22.5 48,41.5 32,51 16,41.5 16,22.5"
+           fill="none"
+           stroke="url(#logoGoldSoft)"
+           stroke-width="0.8"
+           stroke-opacity="0.55"
+           stroke-linejoin="round"/>
+
+  <path d="M 38.5 19.5 A 13.5 13.5 0 1 0 38.5 44.5 A 10 10 0 1 1 38.5 19.5 Z"
+        fill="url(#logoGold)"
+        filter="url(#logoBlur)"/>
+
+  <g fill="#ffe4a8">
+    <path d="M 45 16 L 46 18.3 L 48.3 19 L 46 19.7 L 45 22 L 44 19.7 L 41.7 19 L 44 18.3 Z" opacity="0.95"/>
+    <circle cx="23" cy="44" r="1.1" opacity="0.75"/>
+    <circle cx="48" cy="38" r="0.8" opacity="0.6"/>
+  </g>
+</svg>

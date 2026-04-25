@@ -93,3 +93,30 @@ Use HTTPS for this backup workflow (or configure a GitHub SSH key on this machin
 - Related Files: /Users/mac/.openclaw/workspace/.learnings/ERRORS.md
 
 ---
+## [ERR-20260422-001] zsh_reserved_status_variable
+
+**Logged**: 2026-04-22T00:00:00+08:00
+**Priority**: low
+**Status**: pending
+**Area**: infra
+
+### Summary
+A verification shell snippet assigned to zsh readonly variable `status`.
+
+### Error
+```text
+zsh: read-only variable: status
+```
+
+### Context
+- Command/operation attempted: local HTTP residue check after frontend rebuild
+- Environment details: zsh shell
+
+### Suggested Fix
+Avoid assigning to `status` in zsh; use names like `curl_exit` or split the check into simpler commands.
+
+### Metadata
+- Reproducible: yes
+- Related Files: none
+
+---

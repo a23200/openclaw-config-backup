@@ -1,0 +1,23 @@
+{
+  "submit_id": "22b937cfdd04b3f4",
+  "prompt": "同一座城市的清晨已被金色晨光点亮，车辆从加满油的加油站缓缓驶出，电子价牌与油枪退到背景，前景是后视镜里掠过的光斑与更从容的驾驶姿态，油表状态更充实，街道开始有生活气息，整体色温由冷转暖，情绪从谨慎计算过渡到轻微松弛与希望，电影感写实画面，层次分明，高光柔和，竖屏9:16，2K",
+  "gen_status": "success",
+  "result_json": {
+    "images": [
+      {
+        "image_url": "https://p11-dreamina-sign.byteimg.com/tos-cn-i-tb4s082cfz/8d0e0622a4e94013847ea37625cfea8a~tplv-tb4s082cfz-aigc_resize:0:0.png?lk3s=7c3bb0db&x-expires=1776772800&x-signature=GSjncWcFbdkv6K8m%2BtwZUMO6ymE%3D&format=.png",
+        "width": 2560,
+        "height": 1440
+      }
+    ],
+    "videos": []
+  },
+  "credit_count": 3,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Finish",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":true,\"dreamina_matrix_queue_name\":\"\",\"dreamina_matrix_req_key\":\"\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":false,\"queue_name\":\"high_aes_general_v50\",\"matrix_req_key\":\"MImageGen:high_aes_general_v50\",\"matrix_second_req_key\":\"\"}"
+  }
+}

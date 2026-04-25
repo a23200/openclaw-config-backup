@@ -1,0 +1,20 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,PingFang SC,74,&H00FFFFFF,&H000000FF,&H14000000,&H69000000,-1,0,0,0,100,100,0,0,1,4,1,2,80,80,165,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+
+Dialogue: 0,00:00:00.000,00:00:01.600,Default,,0,0,0,,黑洞之所以看不见
+Dialogue: 0,00:00:01.600,00:00:04.200,Default,,0,0,0,,不是因为他躲在黑暗里
+Dialogue: 0,00:00:04.200,00:00:05.760,Default,,0,0,0,,而是因为他的引力
+Dialogue: 0,00:00:05.760,00:00:08.520,Default,,0,0,0,,强盗联光都逃不出来
+Dialogue: 0,00:00:08.520,00:00:11.400,Default,,0,0,0,,既然没有光进入我们的眼睛
+Dialogue: 0,00:00:11.400,00:00:13.640,Default,,0,0,0,,我们当然就直接看不见他

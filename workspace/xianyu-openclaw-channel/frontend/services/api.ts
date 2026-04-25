@@ -311,6 +311,7 @@ export const getMarketResearch = async (data: {
   max_price?: number;
   sort?: 'price_asc' | 'price_desc' | 'want_desc' | 'latest' | 'quality_desc';
   captcha_mode?: 'local_browser' | 'remote_control';
+  allow_local_browser_handoff?: boolean;
 }): Promise<MarketResearchResponse> => {
   const response = await post<MarketResearchResponse>('/api/bridge/market-research', data);
   return {
@@ -528,16 +529,26 @@ export const getAccountAISettings = async (cookieId: string): Promise<AIReplySet
 }
 
 export const updateAccountAISettings = async (cookieId: string, settings: Partial<AIReplySettings>): Promise<ApiResponse> => {
-  const payload = {
+  const payload: Partial<AIReplySettings> = {
     ai_enabled: settings.ai_enabled ?? false,
-    model_name: settings.model_name ?? 'qwen-plus',
-    api_key: settings.api_key ?? '',
-    base_url: settings.base_url ?? 'https://dashscope.aliyuncs.com/compatible-mode/v1',
     max_discount_percent: settings.max_discount_percent ?? 10,
     max_discount_amount: settings.max_discount_amount ?? 100,
     max_bargain_rounds: settings.max_bargain_rounds ?? 3,
     custom_prompts: settings.custom_prompts ?? ''
   };
+
+  if (settings.model_name !== undefined) {
+    payload.model_name = settings.model_name;
+  }
+
+  if (settings.api_key !== undefined) {
+    payload.api_key = settings.api_key;
+  }
+
+  if (settings.base_url !== undefined) {
+    payload.base_url = settings.base_url;
+  }
+
   return put(`/ai-reply-settings/${cookieId}`, payload);
 }
 

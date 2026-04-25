@@ -1,0 +1,42 @@
+[
+  {
+    "page": 1,
+    "title": "make-ppt",
+    "bullets": [
+      "独立的本地 PPT 生成项目目录",
+      "这个目录只保留了 PPT 相关能力"
+    ],
+    "contextTitle": "make-ppt",
+    "contextPoints": [
+      "独立的本地 PPT 生成项目目录",
+      "这个目录只保留了 PPT 相关能力"
+    ],
+    "scenePrompt": "editorial comic cover scene for a Chinese business PowerPoint about make-ppt, with layered abstract modules, flowing arrows, key themes and a strong management-deck feel",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese business comic PowerPoint.\n        The first reference image defines the target visual language.\n        If a second reference image is provided, use it only for composition rhythm, text integration style and page density.\n\n        Visual style requirements:\n        - premium editorial comic infographic, not childish anime, not photorealistic, not 3D\n        - white background, large clean negative space, crisp black outlines\n        - deep blue accents, orange accents, light blue and light orange blocks\n        - business storyboard feeling, designed for management presentation instead of entertainment poster\n        - text must feel embedded inside the design, not pasted on top later\n        - prefer diagrams, cards, dashboards, arrows and abstract symbols over detailed people\n        - avoid cute mascots and avoid malformed human figures\n\n        Narrative context:\n        - page focus: make-ppt\n        - key facts:\n        - 独立的本地 PPT 生成项目目录\n- 这个目录只保留了 PPT 相关能力\n\n        Main scene to generate:\n        editorial comic cover scene for a Chinese business PowerPoint about make-ppt, with layered abstract modules, flowing arrows, key themes and a strong management-deck feel\n\n        You must render these exact Chinese lines directly inside the image, with clean readable typography and correct spelling:\n        make-ppt\n• 独立的本地 PPT 生成项目目录\n• 这个目录只保留了 PPT 相关能力\n\n        Text layout rules:\n        - place all required text in one natural editorial zone near the upper-left or upper-middle area\n        - the text zone must feel like part of the illustration, such as a designed information card or embedded panel\n        - title larger, bullets smaller, all text crisp and aligned\n        - do not add any extra text beyond the exact lines above\n        - keep the text short, balanced and visually fused with the illustration\n\n        Hard constraints:\n        - no wrong characters, no garbled Chinese, no fake text, no pseudo text\n        - no watermark, no logo, no extra labels\n        - no giant disconnected title banner across the whole page\n        - no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png",
+    "layoutReference": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-223849-项目核心竞争力分析-gemini原生出字生图6页样张/P2-第一层护城河：闭环自进化系统vs线性工具.png",
+    "rawBackdrop": "/Users/mac/Desktop/make-ppt/runtime/app-factory/comic-actual-smoke/gemini-backdrops/P1-gemini-backdrop.png",
+    "mode": "gemini-api"
+  },
+  {
+    "page": 2,
+    "title": "make-ppt",
+    "bullets": [
+      "独立的本地 PPT 生成项目目录",
+      "这个目录只保留了 PPT 相关能力"
+    ],
+    "contextTitle": "make-ppt",
+    "contextPoints": [
+      "独立的本地 PPT 生成项目目录",
+      "这个目录只保留了 PPT 相关能力",
+      "scripts/app-factory-preview.cjs：本地 Word/PDF/Markdown -> PPT 网页入口",
+      "scripts/build_comic_manga_ppt.py：漫画风 PPT 专用 Gemini 真生图脚本"
+    ],
+    "scenePrompt": "premium business comic infographic for 《make-ppt》, using editorial cards, arrows, dashboards and abstract symbols to explain 独立的本地 PPT 生成项目目录；这个目录只保留了 PPT 相关能力；scripts/app-factory-preview.cjs：本地 Word/PDF/Markdown -> PPT 网页入口",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese business comic PowerPoint.\n        The first reference image defines the target visual language.\n        If a second reference image is provided, use it only for composition rhythm, text integration style and page density.\n\n        Visual style requirements:\n        - premium editorial comic infographic, not childish anime, not photorealistic, not 3D\n        - white background, large clean negative space, crisp black outlines\n        - deep blue accents, orange accents, light blue and light orange blocks\n        - business storyboard feeling, designed for management presentation instead of entertainment poster\n        - text must feel embedded inside the design, not pasted on top later\n        - prefer diagrams, cards, dashboards, arrows and abstract symbols over detailed people\n        - avoid cute mascots and avoid malformed human figures\n\n        Narrative context:\n        - page focus: make-ppt\n        - key facts:\n        - 独立的本地 PPT 生成项目目录\n- 这个目录只保留了 PPT 相关能力\n- scripts/app-factory-preview.cjs：本地 Word/PDF/Markdown -> PPT 网页入口\n- scripts/build_comic_manga_ppt.py：漫画风 PPT 专用 Gemini 真生图脚本\n\n        Main scene to generate:\n        premium business comic infographic for 《make-ppt》, using editorial cards, arrows, dashboards and abstract symbols to explain 独立的本地 PPT 生成项目目录；这个目录只保留了 PPT 相关能力；scripts/app-factory-preview.cjs：本地 Word/PDF/Markdown -> PPT 网页入口\n\n        You must render these exact Chinese lines directly inside the image, with clean readable typography and correct spelling:\n        make-ppt\n• 独立的本地 PPT 生成项目目录\n• 这个目录只保留了 PPT 相关能力\n\n        Text layout rules:\n        - place all required text in one natural editorial zone near the upper-left or upper-middle area\n        - the text zone must feel like part of the illustration, such as a designed information card or embedded panel\n        - title larger, bullets smaller, all text crisp and aligned\n        - do not add any extra text beyond the exact lines above\n        - keep the text short, balanced and visually fused with the illustration\n\n        Hard constraints:\n        - no wrong characters, no garbled Chinese, no fake text, no pseudo text\n        - no watermark, no logo, no extra labels\n        - no giant disconnected title banner across the whole page\n        - no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png",
+    "layoutReference": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-223849-项目核心竞争力分析-gemini原生出字生图6页样张/P2-第一层护城河：闭环自进化系统vs线性工具.png",
+    "rawBackdrop": "/Users/mac/Desktop/make-ppt/runtime/app-factory/comic-actual-smoke/gemini-backdrops/P2-gemini-backdrop.png",
+    "mode": "gemini-api"
+  }
+]

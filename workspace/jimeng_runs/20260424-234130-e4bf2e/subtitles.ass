@@ -1,0 +1,18 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,PingFang SC,74,&H00FFFFFF,&H000000FF,&H14000000,&H69000000,-1,0,0,0,100,100,0,0,1,4,1,2,80,80,165,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+
+Dialogue: 0,00:00:00.000,00:00:01.540,Default,,0,0,0,,黑洞为什么看不见
+Dialogue: 0,00:00:02.040,00:00:03.840,Default,,0,0,0,,不是因为他表面太黑
+Dialogue: 0,00:00:04.360,00:00:08.200,Default,,0,0,0,,而是因为他的引力强盗联光都逃 不出来
+Dialogue: 0,00:00:08.700,00:00:10.760,Default,,0,0,0,,我们之所以能看见一个东西

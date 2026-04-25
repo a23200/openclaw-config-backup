@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>视频工作流 · 校园叙事风格复刻</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --navy: #243d78;
+      --navy-deep: #1b2f63;
+      --navy-soft: #5069a6;
+      --gold: #b68c57;
+      --gold-soft: #d8c3a0;
+      --mist: #f4f6fb;
+      --text: #2a2f3b;
+      --muted: #6e768b;
+      --line: rgba(44, 67, 121, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
+      background:
+        radial-gradient(circle at 50% 34%, rgba(255,255,255,.96), rgba(245,247,252,.98) 46%, #eef2f8 100%),
+        linear-gradient(180deg, #f5f7fb 0%, #eef1f7 100%);
+    }
+    .hero {
+      position: relative;
+      min-height: 520px;
+      background:
+        linear-gradient(180deg, rgba(18,38,82,.22), rgba(18,38,82,.52)),
+        linear-gradient(120deg, rgba(33,64,126,.25), rgba(182,140,87,.1)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='700' viewBox='0 0 1600 700'%3E%3Cdefs%3E%3ClinearGradient id='sky' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%23406ea4'/%3E%3Cstop offset='100%25' stop-color='%238bb0d1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1600' height='700' fill='url(%23sky)'/%3E%3Cpath d='M0 315 C120 300 170 268 290 276 C455 287 488 219 657 232 C852 247 900 164 1044 181 C1217 201 1313 153 1600 198 L1600 700 L0 700 Z' fill='%23667f62' opacity='.9'/%3E%3Cpath d='M0 375 C166 350 254 333 398 348 C523 361 654 301 797 314 C946 328 1040 286 1182 303 C1348 324 1455 302 1600 279 L1600 700 L0 700 Z' fill='%23728f58' opacity='.96'/%3E%3Cpath d='M0 440 C120 404 201 418 332 401 C463 384 562 430 720 389 C864 352 960 389 1111 362 C1243 338 1405 381 1600 340 L1600 700 L0 700 Z' fill='%235d6d3e' opacity='.94'/%3E%3Cpath d='M450 224 h232 v160 h-232 z' fill='%23c8b28e'/%3E%3Cpath d='M432 242 h268 v16 h-268 z' fill='%23efe6d4'/%3E%3Cpath d='M445 258 h242 v126 h-242 z' fill='%23b1604f'/%3E%3Cpath d='M548 194 h38 l25 30 h-88 z' fill='%23f2ead9'/%3E%3Cpath d='M640 242 h28 v144 h-28 z M585 242 h20 v144 h-20 z M528 242 h20 v144 h-20 z' fill='%23efe5d2' opacity='.9'/%3E%3Cpath d='M1250 210 h38 v220 h-38 z' fill='%23b56f51'/%3E%3Cpath d='M1239 200 h60 v18 h-60 z' fill='%23f1e3cf'/%3E%3C/svg%3E") center/cover no-repeat;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 160px;
+      background: linear-gradient(180deg, rgba(255,255,255,0), rgba(244,246,251,1));
+    }
+    .top-overlay {
+      background: linear-gradient(180deg, rgba(17,32,68,.48), rgba(17,32,68,.08));
+      backdrop-filter: blur(2px);
+    }
+    .chip-rail {
+      background: linear-gradient(90deg, rgba(54,82,151,.95), rgba(231,236,248,.92));
+      box-shadow: 0 16px 44px rgba(31, 52, 104, 0.14);
+      border-radius: 999px;
+    }
+    .chip-active {
+      background: linear-gradient(180deg, #4768b1, #324a87);
+      color: white;
+      box-shadow: 0 10px 22px rgba(38, 63, 123, 0.35);
+    }
+    .article-wrap {
+      position: relative;
+      background:
+        radial-gradient(circle at 78% 70%, rgba(57, 87, 148, 0.06), transparent 18%),
+        linear-gradient(180deg, rgba(255,255,255,.96), rgba(252,252,253,.96));
+      border: 1px solid rgba(255,255,255,.65);
+      box-shadow: 0 18px 50px rgba(32, 47, 84, 0.07);
+    }
+    .article-wrap::after {
+      content: "";
+      position: absolute;
+      right: 2rem;
+      bottom: 1rem;
+      width: 340px;
+      height: 180px;
+      opacity: .06;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='180' viewBox='0 0 360 180'%3E%3Cg fill='none' stroke='%23243d78' stroke-width='4'%3E%3Cpath d='M34 136 h292'/%3E%3Cpath d='M55 136 v-58 h250 v58'/%3E%3Cpath d='M88 136 v-42 M120 136 v-42 M152 136 v-42 M184 136 v-42 M216 136 v-42 M248 136 v-42 M280 136 v-42'/%3E%3Cpath d='M42 78 h276'/%3E%3Cpath d='M150 48 h60 l18 30 h-96 z'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;
+    }
+    .article-wrap p {
+      font-size: 15px;
+      line-height: 2.18;
+      margin: 0 0 1.15rem;
+      text-align: justify;
+      color: #3a4050;
+      text-indent: 2em;
+    }
+    .wave-footer {
+      position: relative;
+      background: linear-gradient(180deg, #253b79 0%, #1d2f60 100%);
+      overflow: hidden;
+    }
+    .wave-footer::before,
+    .wave-footer::after {
+      content: "";
+      position: absolute;
+      left: -10%;
+      right: -10%;
+      border-radius: 50% 50% 0 0;
+    }
+    .wave-footer::before {
+      top: -82px;
+      height: 150px;
+      background: rgba(189, 147, 91, 0.7);
+      transform: rotate(-2deg);
+      opacity: .9;
+    }
+    .wave-footer::after {
+      top: -115px;
+      height: 190px;
+      background: rgba(88, 112, 173, 0.78);
+      transform: rotate(2deg);
+    }
+    .gridline {
+      border-color: var(--line);
+    }
+    @media (max-width: 900px) {
+      .hero { min-height: 440px; }
+      .article-wrap p { font-size: 14px; line-height: 2; }
+    }
+  </style>
+</head>
+<body>
+  <section class="hero text-white">
+    <div class="top-overlay">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <div class="flex items-center justify-between py-4 text-[12px] tracking-[0.08em] text-white/80">
+          <div class="flex items-center gap-3">
+            <div class="h-12 w-12 rounded-full border border-white/40 flex items-center justify-center text-lg font-semibold">校</div>
+            <div>
+              <div class="text-2xl tracking-[0.18em] font-semibold">云岭学府</div>
+              <div class="text-[11px] uppercase tracking-[0.28em] text-white/70">Campus Narrative Portal</div>
+            </div>
+          </div>
+          <div class="hidden md:flex items-center gap-4 text-white/70">
+            <span>融合门户</span>
+            <span>人才招聘</span>
+            <span>OA</span>
+            <span>邮箱</span>
+            <span>图书馆</span>
+          </div>
+        </div>
+        <div class="pb-16 pt-6 md:pt-10">
+          <div class="flex flex-wrap items-center gap-7 text-[15px] md:text-[16px] text-white/92">
+            <span>首页</span>
+            <span>学校概况</span>
+            <span>百年文脉</span>
+            <span>机构设置</span>
+            <span>人才培养</span>
+            <span>科学研究</span>
+            <span>合作交流</span>
+          </div>
+          <div class="mt-20 md:mt-28 max-w-3xl">
+            <div class="text-white/70 text-sm tracking-[0.16em] uppercase">About the University</div>
+            <h1 class="mt-4 text-4xl md:text-6xl font-semibold tracking-[0.08em]">学校概况</h1>
+            <div class="mt-5 text-sm md:text-base text-white/86">首页 · 学校概况 · 学校简介</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="-mt-8 md:-mt-10 relative z-10">
+    <div class="max-w-6xl mx-auto px-4 md:px-6">
+      <div class="chip-rail p-2 md:p-2.5 flex flex-wrap gap-2 text-[14px] md:text-[15px] text-[#334770]">
+        <div class="chip-active rounded-full px-6 py-3">学校简介</div>
+        <div class="rounded-full px-6 py-3">历史沿革</div>
+        <div class="rounded-full px-6 py-3">现任领导</div>
+        <div class="rounded-full px-6 py-3">大学章程</div>
+        <div class="rounded-full px-6 py-3">校园识别</div>
+      </div>
+    </div>
+
+    <section class="max-w-6xl mx-auto px-4 md:px-6 pt-10 md:pt-14 pb-16">
+      <div class="article-wrap rounded-[30px] px-6 md:px-12 lg:px-16 py-10 md:py-14">
+        <div class="max-w-5xl mx-auto">
+          <div class="mb-8 text-center">
+            <div class="text-[13px] tracking-[0.34em] text-[#8a7b65] uppercase">Institutional Profile</div>
+            <h2 class="mt-3 text-3xl md:text-[40px] text-[#253b79] tracking-[0.14em] font-semibold">厚重文脉与边疆气象</h2>
+            <div class="mt-4 mx-auto h-px w-24 bg-gradient-to-r from-transparent via-[#b68c57] to-transparent"></div>
+          </div>
+
+          <p>这是一所具有百年文脉气质的综合性大学风格页复刻示例。整体视觉取法于典型的高校门户叙事：以深蓝作为主导色建立庄重秩序，以金棕作为辅助色点出校史与学术底蕴，再用大面积留白与低饱和背景组织出沉静、可信赖的阅读节奏。</p>
+          <p>页面上部采用通栏横幅与校园建筑剪影式插画结合的处理，让信息入口与形象展示自然叠合。导航置于深色半透明层上，字距略放大、字号偏小，以呈现机构网站特有的正式感与纪念性。主标题不做夸张装饰，而是通过尺度、留白和层级关系建立中心视觉。</p>
+          <p>中段内容区延续了原站最显著的特征：一条圆角胶囊式的二级栏目带，从冷蓝渐变平滑过渡到浅雾白，既像功能导航，又像仪式感极强的章节目录。选中项使用更深的蓝色和轻微阴影压住视觉重心，其余项则保持克制，避免抢夺正文注意力。</p>
+          <p>正文区采用接近纸面的浅暖白色背景，并维持较高行高与较窄单行宽度，让长篇介绍文本依然有舒展的呼吸感。段落之间不采用过强分隔，而是通过字距、行距和连续缩进来形成学术文本的阅读语境。右下角的低透明度建筑线稿，则为整页添加了隐性的校园身份感。</p>
+          <p>配色上，深蓝承担全部框架职责：导航、页脚、标题与结构线索都围绕蓝色系展开；金棕色只在少量强调点、横线、装饰语和波形层次中出现，像是一种带有历史温度的印章色。这种“蓝为骨、金为神”的策略，使页面既不失机构权威，也不会显得冷硬无情。</p>
+          <p>组件风格上，按钮和标签并非互联网产品常见的锐利卡片，而更接近典雅的曲线实体：大圆角、柔和阴影、轻描边与低对比渐变，共同塑造出一种兼具传统与现代的高校官网审美。即便是页脚，也通过层叠波浪与校区信息块形成带有仪式收束感的结束段落。</p>
+          <p>如果继续扩展这套视觉语言，可以很自然地延伸到学校历史、学科建设、人才培养、科研平台、合作交流等栏目页。只需保持深蓝与金棕的主辅关系、庄重的字体节奏、宽松的纵向留白以及偏纪念册式的图文组织方式，就能持续维持同一位设计师的系统感。</p>
+
+          <div class="mt-10 grid md:grid-cols-3 gap-4 text-sm">
+            <div class="rounded-2xl border gridline bg-white/60 px-5 py-4">
+              <div class="text-[#8a7b65] tracking-[0.18em] uppercase text-[12px]">主色</div>
+              <div class="mt-2 text-[#253b79] text-lg font-semibold">深蓝 · 学术与秩序</div>
+            </div>
+            <div class="rounded-2xl border gridline bg-white/60 px-5 py-4">
+              <div class="text-[#8a7b65] tracking-[0.18em] uppercase text-[12px]">辅色</div>
+              <div class="mt-2 text-[#7e5d34] text-lg font-semibold">金棕 · 历史与仪式</div>
+            </div>
+            <div class="rounded-2xl border gridline bg-white/60 px-5 py-4">
+              <div class="text-[#8a7b65] tracking-[0.18em] uppercase text-[12px]">节奏</div>
+              <div class="mt-2 text-[#31415f] text-lg font-semibold">宽留白 · 长段落 · 大圆角</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wave-footer text-white pt-28 pb-10">
+    <div class="relative max-w-6xl mx-auto px-6 md:px-8">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-10">
+        <div>
+          <div class="flex items-center gap-3">
+            <div class="h-12 w-12 rounded-full border border-white/45 flex items-center justify-center">校</div>
+            <div>
+              <div class="text-2xl tracking-[0.18em] font-semibold">云岭学府</div>
+              <div class="text-white/65 text-xs tracking-[0.25em] uppercase">Campus Narrative Portal</div>
+            </div>
+          </div>
+          <div class="mt-4 text-white/65 text-sm">校历信息 · 多语种入口 · 学术资源</div>
+        </div>
+        <div class="text-[#d8c3a0] text-xl md:text-3xl tracking-[0.28em]">自尊 致知 正义 力行</div>
+      </div>
+
+      <div class="mt-10 grid md:grid-cols-2 gap-6 text-sm">
+        <div class="border-t border-white/15 pt-5">
+          <div class="text-white/75 text-base mb-2">东陆校区</div>
+          <div class="text-white/60">地址：昆明市五华区翠湖北路 2 号</div>
+          <div class="text-white/60">邮编：650091</div>
+        </div>
+        <div class="border-t border-white/15 pt-5">
+          <div class="text-white/75 text-base mb-2">呈贡校区</div>
+          <div class="text-white/60">地址：昆明市呈贡区大学城片区</div>
+          <div class="text-white/60">邮编：650500</div>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-5 border-t border-white/10 text-xs text-white/45 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+        <span>Copyright © 2026 · 校园叙事风格复刻页面</span>
+        <span>仅复刻视觉语言，不引用原站资源</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

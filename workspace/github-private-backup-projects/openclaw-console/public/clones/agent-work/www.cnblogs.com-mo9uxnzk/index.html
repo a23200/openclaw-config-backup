@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeYard - 开发者社区首页</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --line: #e7ecf2;
+      --line-soft: #eef3f8;
+      --text: #1f2937;
+      --muted: #667085;
+      --faint: #98a2b3;
+      --brand: #0b7adf;
+      --brand-soft: #edf5ff;
+      --orange: #ff8a1d;
+      --red: #ef4444;
+      --teal: #0ea5a4;
+      --shadow: 0 1px 2px rgba(15, 23, 42, .05), 0 10px 28px rgba(15, 23, 42, .04);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1320px; margin: 0 auto; padding: 0 16px; }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    .soft-panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+    .hover-link:hover { color: var(--brand); }
+    .menu-link {
+      display: block;
+      padding: 11px 16px;
+      font-size: 14px;
+      color: #4b5563;
+      border-left: 3px solid transparent;
+    }
+    .menu-link:hover {
+      color: var(--brand);
+      background: #f8fafc;
+    }
+    .menu-link.active {
+      color: var(--brand);
+      background: var(--brand-soft);
+      border-left-color: var(--brand);
+      font-weight: 600;
+    }
+    .article-row:hover { background: #fbfdff; }
+    .article-title:hover { color: var(--brand); }
+    .meta { color: var(--faint); font-size: 12px; }
+    .rank-no {
+      width: 18px;
+      flex: 0 0 18px;
+      color: var(--faint);
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    @media (max-width: 1120px) {
+      .grid-shell { grid-template-columns: 1fr; }
+      .left-col, .right-col { display: none; }
+    }
+    @media (max-width: 760px) {
+      .nav-links, .search-box { display: none !important; }
+      .container { padding: 0 12px; }
+      .article-meta { flex-wrap: wrap; gap: 8px 14px; }
+      .headline-item { align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="container h-14 flex items-center justify-between gap-5">
+      <div class="flex items-center gap-6 min-w-0">
+        <a href="#" class="flex items-center gap-3 shrink-0">
+          <div class="w-9 h-9 rounded-lg text-white flex items-center justify-center font-bold text-lg" style="background: linear-gradient(135deg, #1290ff, #0b69c8);">C</div>
+          <div>
+            <div class="text-[18px] font-bold tracking-tight">CodeYard</div>
+            <div class="text-[11px] text-slate-400 -mt-0.5">开发者的网上家园</div>
+          </div>
+        </a>
+        <nav class="nav-links hidden md:flex items-center gap-5 text-[14px] text-slate-600 whitespace-nowrap">
+          <a class="hover-link" href="#">会员</a>
+          <a class="hover-link" href="#">新闻</a>
+          <a class="hover-link" href="#">博问</a>
+          <a class="hover-link" href="#">闪存</a>
+          <a class="hover-link" href="#">班级</a>
+          <a class="hover-link" href="#">专题</a>
+        </nav>
+      </div>
+      <div class="flex items-center gap-4 shrink-0">
+        <div class="search-box hidden lg:flex items-center w-64 h-10 px-4 rounded-full border border-slate-200 bg-slate-50 text-sm text-slate-500">
+          <span class="mr-2">⌕</span>
+          <span>代码改变世界</span>
+        </div>
+        <a class="text-[14px] text-slate-600 hover-link" href="#">注册</a>
+        <a class="text-[14px] text-slate-600 hover-link" href="#">登录</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container py-5">
+    <div class="grid-shell grid grid-cols-[200px_minmax(0,1fr)_300px] gap-5 items-start">
+      <aside class="left-col space-y-4">
+        <section class="panel overflow-hidden">
+          <div class="px-4 py-3 border-b border-slate-100 text-[13px] font-semibold">站点导航</div>
+          <nav class="py-2">
+            <a class="menu-link active" href="#">首页</a>
+            <a class="menu-link" href="#">精华</a>
+            <a class="menu-link" href="#">候选</a>
+            <a class="menu-link" href="#">订阅</a>
+            <a class="menu-link" href="#">关注</a>
+            <a class="menu-link" href="#">我评</a>
+            <a class="menu-link" href="#">我赞</a>
+            <a class="menu-link" href="#">足迹</a>
+          </nav>
+        </section>
+
+        <section class="soft-panel p-4">
+          <div class="text-[12px] text-slate-400 mb-3">社区话题</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="pill bg-blue-50 text-blue-600">AI 工具</span>
+            <span class="pill bg-orange-50 text-orange-600">工程实践</span>
+            <span class="pill bg-emerald-50 text-emerald-600">数据库</span>
+            <span class="pill bg-violet-50 text-violet-600">系统架构</span>
+          </div>
+        </section>
+      </aside>
+
+      <main class="space-y-4 min-w-0">
+        <section class="panel p-4">
+          <div class="headline-item flex text-[14px] leading-6 min-w-0">
+            <span class="font-bold text-blue-600 mr-2 shrink-0">【编辑推荐】</span>
+            <a href="#" class="hover-link truncate">C# 15 类型系统改进：Union Types</a>
+          </div>
+          <div class="headline-item flex text-[14px] leading-6 min-w-0 mt-2.5">
+            <span class="font-bold mr-2 shrink-0" style="color: var(--orange);">【最多推荐】</span>
+            <a href="#" class="hover-link truncate">零基础想要系统学习 Agent，千万别错过这两个开源项目！</a>
+          </div>
+          <div class="headline-item flex text-[14px] leading-6 min-w-0 mt-2.5">
+            <span class="font-bold text-red-500 mr-2 shrink-0">【新闻头条】</span>
+            <a href="#" class="hover-link truncate">买断 FSD 变“电子废铁”？陪马斯克造梦的老粉，为何成了最愤怒的原告</a>
+          </div>
+          <div class="headline-item flex text-[14px] leading-6 min-w-0 mt-2.5">
+            <span class="font-bold mr-2 shrink-0" style="color: var(--teal);">【推荐新闻】</span>
+            <a href="#" class="hover-link truncate">库克谢幕，特努斯挂帅苹果 4 万亿帝国！ASI 时代第一刀砸碎“龙虾壳”</a>
+          </div>
+        </section>
+
+        <section class="panel overflow-hidden">
+          <article class="article-row px-5 py-5 border-b border-slate-100 transition-colors">
+            <h2 class="text-[21px] leading-8 font-bold tracking-tight mb-2.5">
+              <a href="#" class="article-title transition-colors">零代码经验，我用 Claude Code 搓出的生产力工具</a>
+            </h2>
+            <p class="text-[14px] leading-7 text-slate-500 line-clamp-3 mb-4">这是一篇非常典型的技术社区首页爆文：标题抓人，内容围绕真实生产力工具、AI 编码协作与个人实践展开。摘要信息量高，但依然保持了工程师读者习惯的简洁表达方式。</p>
+            <div class="article-meta flex items-center gap-4 meta">
+              <a href="#" class="text-slate-600 hover-link font-medium">暮色之狐</a>
+              <span>2026-04-22 15:59</span>
+              <span>评论 0</span>
+              <span>推荐 0</span>
+              <span>阅读 141</span>
+            </div>
+          </article>
+
+          <article class="article-row px-5 py-5 border-b border-slate-100 transition-colors">
+            <h2 class="text-[21px] leading-8 font-bold tracking-tight mb-2.5">
+              <a href="#" class="article-title transition-colors">FastAPI 订单防超卖实战：从数据库锁到 Saga 分布式事务，这一篇给你理清了</a>
+            </h2>
+            <p class="text-[14px] leading-7 text-slate-500 line-clamp-3 mb-4">用典型业务场景切入，把数据库事务、一致性和分布式事务这些稍显“硬核”的概念讲得具体可落地，是技术博客首页非常常见、也非常受欢迎的一类内容形态。</p>
+            <div class="article-meta flex items-center gap-4 meta">
+              <a href="#" class="text-slate-600 hover-link font-medium">一名程序媛呀</a>
+              <span>2026-04-22 14:11</span>
+              <span>评论 0</span>
+              <span>推荐 1</span>
+              <span>阅读 128</span>
+            </div>
+          </article>
+
+          <article class="article-row px-5 py-5 border-b border-slate-100 transition-colors">
+            <h2 class="text-[21px] leading-8 font-bold tracking-tight mb-2.5">
+              <a href="#" class="article-title transition-colors">Kimi Code CLI 系统指令的摸索，以及开发实战经验分享</a>
+            </h2>
+            <p class="text-[14px] leading-7 text-slate-500 line-clamp-3 mb-4">这类内容更偏“经验复盘 + 方法沉淀”，适合技术社区的信息流节奏：标题明确、摘要易扫读、面向真实问题。它和门户首页的阅读习惯天然契合。</p>
+            <div class="article-meta flex items-center gap-4 meta">
+              <a href="#" class="text-slate-600 hover-link font-medium">SHARP-EYE</a>
+              <span>2026-04-22 14:06</span>
+              <span>评论 0</span>
+              <span>推荐 0</span>
+              <span>阅读 110</span>
+            </div>
+          </article>
+
+          <article class="article-row px-5 py-5 border-b border-slate-100 transition-colors">
+            <h2 class="text-[21px] leading-8 font-bold tracking-tight mb-2.5">
+              <a href="#" class="article-title transition-colors">当 AIR 只支持 Mac，我开始重新思考操作系统这件事</a>
+            </h2>
+            <p class="text-[14px] leading-7 text-slate-500 line-clamp-3 mb-4">观点型文章通常会穿插在纯教程内容之间，给首页带来节奏变化。这里延续博客园那种“内容优先，不卖弄视觉”的排版方式，让标题自己承担吸引注意力的任务。</p>
+            <div class="article-meta flex items-center gap-4 meta">
+              <a href="#" class="text-slate-600 hover-link font-medium">程序员小崔日记</a>
+              <span>2026-04-22 12:52</span>
+              <span>评论 1</span>
+              <span>推荐 0</span>
+              <span>阅读 171</span>
+            </div>
+          </article>
+
+          <article class="article-row px-5 py-5 transition-colors">
+            <h2 class="text-[21px] leading-8 font-bold tracking-tight mb-2.5">
+              <a href="#" class="article-title transition-colors">如何写一个好的 Skill 让你的效率加倍</a>
+            </h2>
+            <p class="text-[14px] leading-7 text-slate-500 line-clamp-3 mb-4">方法论型内容在技术门户里很常见。它不是靠夸张视觉吸睛，而是靠标题清晰、摘要准确、阅读路径稳定来建立点击意愿，这也是博客园式设计的精髓之一。</p>
+            <div class="article-meta flex items-center gap-4 meta">
+              <a href="#" class="text-slate-600 hover-link font-medium">自律即自由-</a>
+              <span>2026-04-22 10:23</span>
+              <span>评论 0</span>
+              <span>推荐 1</span>
+              <span>阅读 292</span>
+            </div>
+          </article>
+        </section>
+
+        <div class="flex items-center justify-center gap-2 py-2">
+          <a href="#" class="h-9 px-3 rounded-lg border border-slate-200 bg-white text-[13px] text-slate-500 flex items-center">上一页</a>
+          <a href="#" class="h-9 min-w-9 px-3 rounded-lg text-[13px] text-white flex items-center justify-center" style="background: var(--brand);">1</a>
+          <a href="#" class="h-9 min-w-9 px-3 rounded-lg border border-slate-200 bg-white text-[13px] text-slate-600 flex items-center justify-center">2</a>
+          <a href="#" class="h-9 min-w-9 px-3 rounded-lg border border-slate-200 bg-white text-[13px] text-slate-600 flex items-center justify-center">3</a>
+          <span class="px-1 text-slate-400">···</span>
+          <a href="#" class="h-9 px-3 rounded-lg border border-slate-200 bg-white text-[13px] text-slate-600 flex items-center">100</a>
+          <a href="#" class="h-9 px-3 rounded-lg border border-slate-200 bg-white text-[13px] text-slate-500 flex items-center">下一页</a>
+        </div>
+      </main>
+
+      <aside class="right-col space-y-4">
+        <section class="panel p-4">
+          <h3 class="text-[15px] font-semibold mb-3 pb-2 border-b border-slate-100">48小时阅读排行</h3>
+          <div class="space-y-3 text-[13px] leading-6">
+            <div class="flex"><span class="rank-no">1</span><a href="#" class="hover-link">为什么越来越多的大厂抛弃 MCP，转向 CLI？</a></div>
+            <div class="flex"><span class="rank-no">2</span><a href="#" class="hover-link">Codex 学习路线图</a></div>
+            <div class="flex"><span class="rank-no">3</span><a href="#" class="hover-link">AI 周报｜算力涨价近半、融资 965 亿、AI 开始像真人员工</a></div>
+            <div class="flex"><span class="rank-no">4</span><a href="#" class="hover-link">一个零基础计算机学生决定开始写博客的原因</a></div>
+            <div class="flex"><span class="rank-no">5</span><a href="#" class="hover-link">使用 C# 提取 Word 文档中的表格数据</a></div>
+            <div class="flex"><span class="rank-no">6</span><a href="#" class="hover-link">电子小白的枕边书：电子学</a></div>
+          </div>
+        </section>
+
+        <section class="panel p-4">
+          <h3 class="text-[15px] font-semibold mb-3 pb-2 border-b border-slate-100">10天推荐排行</h3>
+          <div class="space-y-3 text-[13px] leading-6">
+            <div class="flex"><span class="rank-no">1</span><a href="#" class="hover-link">C# 如何减少代码运行时间：7 个实战技巧</a></div>
+            <div class="flex"><span class="rank-no">2</span><a href="#" class="hover-link">.NET 官方团队发布的 .NET Agent Skills</a></div>
+            <div class="flex"><span class="rank-no">3</span><a href="#" class="hover-link">C# 15 类型系统改进：Union Types</a></div>
+            <div class="flex"><span class="rank-no">4</span><a href="#" class="hover-link">.NET 高级开发｜动态代码、反射与表达式树</a></div>
+            <div class="flex"><span class="rank-no">5</span><a href="#" class="hover-link">那些喊着 AI 要淘汰你的人，正在靠你的焦虑赚大钱！</a></div>
+          </div>
+        </section>
+
+        <section class="panel p-4">
+          <h3 class="text-[15px] font-semibold mb-3 pb-2 border-b border-slate-100">热门新闻</h3>
+          <div class="space-y-3 text-[13px] leading-6">
+            <div class="flex"><span class="rank-no">1</span><a href="#" class="hover-link">梁文锋的电话，被投资人打爆了</a></div>
+            <div class="flex"><span class="rank-no">2</span><a href="#" class="hover-link">库克谢幕，特努斯挂帅苹果 4 万亿帝国</a></div>
+            <div class="flex"><span class="rank-no">3</span><a href="#" class="hover-link">多吃“草”，能长脑：这种关键营养素，能保护你的脑力</a></div>
+            <div class="flex"><span class="rank-no">4</span><a href="#" class="hover-link">买断 FSD 变“电子废铁”？陪马斯克造梦的老粉，为何成了最愤怒的原告</a></div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <footer class="mt-8 bg-white border-t border-slate-200">
+    <div class="container py-8 text-center text-[12px] text-slate-500 leading-7">
+      <div class="flex flex-wrap justify-center gap-x-4 gap-y-1 mb-2">
+        <a href="#" class="hover-link">关于我们</a>
+        <a href="#" class="hover-link">联系我们</a>
+        <a href="#" class="hover-link">商务合作</a>
+        <a href="#" class="hover-link">企业博客</a>
+        <a href="#" class="hover-link">友情链接</a>
+      </div>
+      <div>Powered by .NET 10.0 on Kubernetes</div>
+      <div>Copyright © 2004-2026 CodeYard 版权所有</div>
+    </div>
+  </footer>
+</body>
+</html>

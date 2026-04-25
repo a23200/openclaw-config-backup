@@ -1,0 +1,96 @@
+{
+  "id": "20260424-211815-917b8c",
+  "title": "宇宙 · 15.2s",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-211815-917b8c/final_mastered.mp4",
+  "created_at": 1777036695.424247,
+  "updated_at": 1777036723.258014,
+  "post": {
+    "mode": "auto",
+    "title_card_text": "用宇宙素材做一条科教讲解背后的原理",
+    "enable_natural_voiceover": true,
+    "material_category": "science",
+    "narration_tone": "清晰、可信、循序渐进，用一句现象引入，再给出直观解释",
+    "voice_profile": "calm_female",
+    "narration_style": "documentary",
+    "subtitle_style": "douyin_bold",
+    "selection_engine": "fallback",
+    "narration_text": "用宇宙素材做一条科教讲解，看起来很遥远。其实只要抓住一个关键点就能理解。画面里的变化，不是在展示结果。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "calm_female",
+      "voice": "nova",
+      "speed": 0.96,
+      "gain": 1.0,
+      "pause_bias": 0.18,
+      "style": "documentary",
+      "category": "science"
+    },
+    "tts_voice": "nova",
+    "tts_speed": 0.96,
+    "voice_gain": 1.0,
+    "pause_bias": 0.18,
+    "tts_engine": "system_say",
+    "mix_params": {
+      "voice_gain": 1.0,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-211815-917b8c/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "宇宙 · 15.2s",
+    "description": "宇宙 精选片段合集 #宇宙 #ClawLink #AI短片",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "用宇宙素材做一条科教讲解",
+    "clips": [
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 1
+      },
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 12.0,
+    "material_category": "science",
+    "narration_tone": "清晰、可信、循序渐进，用一句现象引入，再给出直观解释",
+    "voice_profile": "calm_female",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "fallback",
+    "suggested_tags": [
+      "宇宙",
+      "ClawLink",
+      "AI短片"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

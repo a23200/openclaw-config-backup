@@ -1,0 +1,52 @@
+{
+  "id": "20260422-200152-6ff31d",
+  "title": "宇宙",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260422-200152-6ff31d/final_mastered.mp4",
+  "created_at": 1776859312.410337,
+  "updated_at": 1776877483.846377,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "",
+    "resolved_mode": "narrated"
+  },
+  "publish": {
+    "title": "15秒坠入宇宙深处，感受星云与星空的静谧",
+    "description": "从深蓝星空到神秘星云，15秒一起坠入宇宙的静谧与浩瀚。#宇宙 #星空 #星云 #治愈视觉",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "宇宙",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "作为开场建立冷蓝深空氛围，节奏平稳，先把观众带入宇宙的寂静感。",
+        "order": 1
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "中段切入更梦幻神秘的星云层次，强化主题表现并提升视觉变化。",
+        "order": 2
+      },
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "结尾用漩涡感画面收束，情绪更集中，形成宇宙深处被吸引的余韵。",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay"
+}

@@ -1,0 +1,22 @@
+{
+  "submit_id": "3108415a3875dcbb",
+  "gen_status": "success",
+  "result_json": {
+    "images": [
+      {
+        "image_url": "https://p11-dreamina-sign.byteimg.com/tos-cn-i-tb4s082cfz/125b5d6081fc4d1dbe5952850c219708~tplv-tb4s082cfz-aigc_resize:0:0.png?lk3s=7c3bb0db&x-expires=1776942000&x-signature=RJy2IhBQfJRVIRlSAMzl4rg1kjg%3D&format=.png",
+        "width": 1440,
+        "height": 2560
+      }
+    ],
+    "videos": []
+  },
+  "credit_count": 3,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Finish",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":true,\"dreamina_matrix_queue_name\":\"\",\"dreamina_matrix_req_key\":\"\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":false,\"queue_name\":\"high_aes_general_v50\",\"matrix_req_key\":\"MImageGen:high_aes_general_v50\",\"matrix_second_req_key\":\"\"}"
+  }
+}

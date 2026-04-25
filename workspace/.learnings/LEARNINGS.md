@@ -55,3 +55,47 @@ This is a best practice to improve efficiency and reduce costs. Instead of re-de
 - Tags: efficiency, token_reduction, best_practice, workflow_caching
 
 ---
+## [LRN-20260422-001] correction
+
+**Logged**: 2026-04-22T00:00:00+08:00
+**Priority**: high
+**Status**: pending
+**Area**: frontend
+
+### Summary
+Generated frontend output must be rebuilt after source branding cleanup.
+
+### Details
+The user reported leftover visible branding/developer attribution after a prior cleanup. The correct workflow is to search source plus generated output, patch source/config/docs, then rebuild generated frontend assets before final verification.
+
+### Suggested Action
+For branding cleanup tasks, always rebuild served frontend output and rerun residue searches across source and generated assets before handing off.
+
+### Metadata
+- Source: user_feedback
+- Related Files: frontend/src/views/Home.vue
+- Tags: branding, rebuild, verification
+
+---
+## [LRN-20260422-002] correction
+
+**Logged**: 2026-04-22T00:00:00+08:00
+**Priority**: high
+**Status**: pending
+**Area**: docs
+
+### Summary
+Architecture document cleanup must include page title, headings, metadata, and generated/public copies, not just footer text.
+
+### Details
+The user pointed out the architecture documentation still had old or generic branding after a branding cleanup. A complete pass needs to inspect all architecture documents and public/dist copies for title, headings, captions, footer, comments, and visible text.
+
+### Suggested Action
+For brand cleanup, search both explicit old names and adjacent generic names such as `AI Text`, `aitext`, contact/author traces, and document titles; verify rendered static copies after build.
+
+### Metadata
+- Source: user_feedback
+- Related Files: docs/system-architecture.html, frontend/public/architecture.html
+- Tags: branding, architecture-docs, verification
+
+---

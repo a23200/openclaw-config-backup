@@ -1,0 +1,50 @@
+{
+  "id": "20260422-023128-1b1522",
+  "title": "太空",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260422-023128-1b1522/final_mastered.mp4",
+  "created_at": 1776796288.1206348,
+  "updated_at": 1776796288.2441878,
+  "post": {
+    "mode": "auto",
+    "title_card_text": "",
+    "resolved_mode": "visual_only"
+  },
+  "publish": {
+    "title": "黑色太空里星星一闪一闪像宇宙在低声呼吸",
+    "description": "黑色深空静静铺开，星星微微闪烁，像宇宙在夜里缓慢呼吸。#星空 #宇宙 #治愈系 #太空",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "黑色的太空，星星闪烁",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5,
+        "reason": "作为开场建立黑色太空与星星闪烁的主基调，画面纯净、情绪安静",
+        "order": 1
+      },
+      {
+        "file": "05-银河旋臂.mp4",
+        "relpath": "05-银河旋臂.mp4",
+        "duration_sec": 5,
+        "reason": "承接星空后扩展宇宙纵深，让星点分布更丰富，节奏自然推进",
+        "order": 2
+      },
+      {
+        "file": "04-黑洞吸积盘.mp4",
+        "relpath": "04-黑洞吸积盘.mp4",
+        "duration_sec": 3,
+        "reason": "结尾加入更深邃的黑暗核心，强化神秘感并收住整体氛围",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0
+  }
+}

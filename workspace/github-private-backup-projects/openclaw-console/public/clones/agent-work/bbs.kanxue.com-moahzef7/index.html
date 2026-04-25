@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>安全技术社区风格练习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --line: #e7edf5;
+      --line-strong: #d8e3f1;
+      --text: #243042;
+      --muted: #6f7d90;
+      --soft: #97a5b8;
+      --brand: #22a6df;
+      --brand-deep: #168bc0;
+      --accent: #ff9b3d;
+      --navy: #1e2a38;
+      --success: #2fb884;
+      --shadow: 0 10px 30px rgba(31, 56, 88, 0.06);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    a { color: inherit; text-decoration: none; }
+    .shell { max-width: 1280px; margin: 0 auto; padding: 0 18px; }
+    .topbar { background: rgba(255,255,255,0.96); border-bottom: 1px solid var(--line); backdrop-filter: blur(8px); }
+    .brand-chip { color: var(--brand); font-weight: 800; letter-spacing: .08em; }
+    .nav-link { color: #5f6e81; font-size: 14px; }
+    .nav-link.active, .nav-link:hover { color: var(--brand-deep); }
+    .btn { display:inline-flex; align-items:center; justify-content:center; height: 34px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+    .btn-ghost { border:1px solid var(--line-strong); color:#58708a; background:#fff; }
+    .btn-brand { background: linear-gradient(180deg, #34b7eb, #1594ca); color:#fff; box-shadow: 0 8px 20px rgba(34,166,223,.22); }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+    .subtle-card { background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(252,253,255,1)); border: 1px solid var(--line); border-radius: 14px; }
+    .section-title { font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+    .section-kicker { font-size: 12px; color: var(--brand); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .feed-item:hover { background: #f8fbfe; }
+    .forum-item:hover { border-color: #cfe6f2; box-shadow: 0 10px 24px rgba(34,166,223,.07); }
+    .icon-badge { width: 46px; height: 46px; border-radius: 12px; display:flex; align-items:center; justify-content:center; background: linear-gradient(180deg, #ecf9ff, #f6fbff); border:1px solid #d5eef9; color: var(--brand-deep); font-weight: 800; }
+    .metric-number { font-size: 24px; font-weight: 800; color: var(--navy); }
+    .metric-label { font-size: 12px; color: var(--soft); }
+    .muted { color: var(--muted); }
+    .tiny { font-size: 12px; }
+    .divider { height: 1px; background: var(--line); }
+    .tag { display:inline-flex; align-items:center; gap:6px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .tag-blue { color: var(--brand-deep); background:#eef8fd; }
+    .tag-orange { color: #cf7b24; background:#fff4e9; }
+    .rank-index { width: 20px; color: #8a97ab; font-weight: 700; }
+    .footer { background: #2f3945; color: rgba(255,255,255,.72); }
+    @media (max-width: 1024px) {
+      .desktop-only { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar sticky top-0 z-20">
+    <div class="shell h-16 flex items-center gap-8">
+      <div class="brand-chip text-xl">安域社</div>
+      <nav class="hidden md:flex items-center gap-6">
+        <a class="nav-link" href="#">首页</a>
+        <a class="nav-link" href="#">课程</a>
+        <a class="nav-link" href="#">问答</a>
+        <a class="nav-link" href="#">赛事</a>
+        <a class="nav-link active" href="#">社区</a>
+        <a class="nav-link" href="#">招聘</a>
+        <a class="nav-link" href="#">峰会</a>
+      </nav>
+      <div class="ml-auto flex items-center gap-3">
+        <div class="hidden lg:flex items-center w-72 h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">
+          搜索技术主题、工具、版块
+        </div>
+        <a class="btn btn-ghost" href="#">登录</a>
+        <a class="btn btn-brand" href="#">注册</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell py-8">
+    <section class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-6">
+      <div class="space-y-6">
+        <div class="card p-5">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="font-semibold">最新动态</div>
+                <span class="tag tag-blue">实时更新</span>
+              </div>
+              <div class="space-y-1">
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[原创] 基于运行时插桩的轻量化检测框架设计</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[分析] 沙箱逃逸链路中的权限边界观察</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[实战] ARM64 Hook 链路调试笔记</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[工具] 自动化二进制差异对比工作流</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[翻译] 新版逆向辅助平台体验报告</div>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="font-semibold">热门话题</div>
+                <span class="tag tag-orange">热度榜</span>
+              </div>
+              <div class="space-y-1">
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[专题] AI 与安全分析协同的边界</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[原创] 高强度混淆样本的自动拆解</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[复盘] 某移动端协议逆向全过程</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[题解] 竞赛终局样本的取证思路</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[经验] 企业侧威胁研判流水线搭建</div>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="font-semibold">精选文章</div>
+                <span class="tag tag-blue">编辑推荐</span>
+              </div>
+              <div class="space-y-1">
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[原创] 通用 Payload 装载器编译策略</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[深度] 二进制漏洞利用的落地路径</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[研究] 模型工作流的安全隔离设计</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[实践] 内核调试与日志关联方法</div>
+                <div class="feed-item rounded-lg px-3 py-2 text-sm border border-transparent">[观察] 安全社区的知识沉淀机制</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section class="space-y-5">
+          <div>
+            <div class="section-kicker">Areas</div>
+            <div class="section-title mt-1">AI 与智能系统</div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <article class="subtle-card forum-item p-5 flex gap-4">
+              <div class="icon-badge">AI</div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">AI 助力安全</h3><span class="tiny text-orange-500">主题 18</span></div>
+                <p class="muted tiny mt-2 leading-6">聚焦漏洞分析、代码审计、逆向研究和威胁研判中的智能辅助方法与落地经验。</p>
+              </div>
+            </article>
+            <article class="subtle-card forum-item p-5 flex gap-4">
+              <div class="icon-badge">盾</div>
+              <div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">AI 自身安全</h3><span class="tiny text-orange-500">主题 9</span></div><p class="muted tiny mt-2 leading-6">关注越狱绕过、注入攻击、权限滥用、数据投毒与模型评测的安全议题。</p></div>
+            </article>
+            <article class="subtle-card forum-item p-5 flex gap-4">
+              <div class="icon-badge">流</div>
+              <div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">AI 工具与工作流</h3><span class="tiny text-orange-500">主题 31</span></div><p class="muted tiny mt-2 leading-6">适合讨论 Agent、插件、技能、自动化编排与本地工作流实践。</p></div>
+            </article>
+            <article class="subtle-card forum-item p-5 flex gap-4">
+              <div class="icon-badge">数</div>
+              <div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">AI 平台与数据安全</h3><span class="tiny text-orange-500">主题 12</span></div><p class="muted tiny mt-2 leading-6">围绕部署、知识库、权限控制、供应链、隐私治理和企业侧落地风险展开。</p></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="space-y-5">
+          <div class="section-title">移动安全</div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">安</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">Android 安全</h3><span class="tiny text-orange-500">主题 8692</span></div><p class="muted tiny mt-2 leading-6">系统逆向、对抗、加固、动态分析与漏洞利用讨论区。</p></div></article>
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">IOT</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">IoT 安全</h3><span class="tiny text-orange-500">主题 1505</span></div><p class="muted tiny mt-2 leading-6">固件分析、硬件生态、设备威胁建模与嵌入式攻防实践。</p></div></article>
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">iOS</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">iOS 安全</h3><span class="tiny text-orange-500">主题 1454</span></div><p class="muted tiny mt-2 leading-6">移动平台逆向、保护绕过、调试技巧与实战经验分享。</p></div></article>
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">鸿</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">HarmonyOS</h3><span class="tiny text-orange-500">主题 245</span></div><p class="muted tiny mt-2 leading-6">跨平台系统安全、应用分析与生态适配相关研究。</p></div></article>
+          </div>
+        </section>
+
+        <section class="space-y-5">
+          <div class="section-title">PC 安全</div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">RE</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">逆向工程</h3><span class="tiny text-orange-500">主题 35199</span></div><p class="muted tiny mt-2 leading-6">Windows / UNIX 平台二进制调试、静动态分析与研究心得。</p></div></article>
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">DEV</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">编程技术</h3><span class="tiny text-orange-500">主题 19171</span></div><p class="muted tiny mt-2 leading-6">底层机制、安全开发、系统扩展与工程实现相关讨论。</p></div></article>
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">壳</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">加壳脱壳</h3><span class="tiny text-orange-500">主题 13491</span></div><p class="muted tiny mt-2 leading-6">保护方案、特征定位、样本拆解与辅助分析方法。</p></div></article>
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">PWN</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">二进制漏洞</h3><span class="tiny text-orange-500">主题 2428</span></div><p class="muted tiny mt-2 leading-6">漏洞分析、利用链设计与防护绕过研究分享。</p></div></article>
+          </div>
+        </section>
+
+        <section class="space-y-5">
+          <div class="section-title">工具与资源</div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">Tool</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">安全工具</h3><span class="tiny text-orange-500">主题 17511</span></div><p class="muted tiny mt-2 leading-6">工具发布、资料分享、研究辅助脚本和实践经验集合。</p></div></article>
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">OSS</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">开源项目</h3><span class="tiny text-orange-500">主题 64</span></div><p class="muted tiny mt-2 leading-6">面向安全领域的开源项目展示、版本迭代和落地说明。</p></div></article>
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">APP</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">原创软件</h3><span class="tiny text-orange-500">主题 172</span></div><p class="muted tiny mt-2 leading-6">原创工具的功能介绍、使用心得与迭代更新记录。</p></div></article>
+            <article class="subtle-card forum-item p-5 flex gap-4"><div class="icon-badge">文</div><div><div class="flex items-center gap-2 flex-wrap"><h3 class="font-semibold">外文翻译</h3><span class="tiny text-orange-500">主题 2015</span></div><p class="muted tiny mt-2 leading-6">国外优质技术资料译介与方法论整理。</p></div></article>
+          </div>
+        </section>
+      </div>
+
+      <aside class="space-y-5">
+        <div class="card p-5">
+          <div class="grid grid-cols-3 gap-3 text-center">
+            <div><div class="metric-number">233k</div><div class="metric-label">主题</div></div>
+            <div><div class="metric-number">1.50m</div><div class="metric-label">回帖</div></div>
+            <div><div class="metric-number">22.5k</div><div class="metric-label">精华</div></div>
+          </div>
+          <div class="divider my-4"></div>
+          <div class="grid grid-cols-2 gap-3">
+            <a class="btn btn-ghost w-full" href="#">写文章</a>
+            <a class="btn btn-brand w-full" href="#">发布主题</a>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <div class="font-semibold mb-3">社区播报</div>
+          <div class="space-y-3 tiny muted leading-6">
+            <div>• 本周专题：AI 在安全工程中的实用化路径</div>
+            <div>• 讲师与版主招募持续开放中</div>
+            <div>• 新增工作流与平台安全分区，欢迎投稿</div>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-3"><div class="font-semibold">RANK 增量排行</div><a class="tiny muted" href="#">更多</a></div>
+          <div class="space-y-3 tiny">
+            <div class="flex items-center"><span class="rank-index">1</span><span class="flex-1">Elenia</span><span class="text-rose-500 font-semibold">90</span></div>
+            <div class="flex items-center"><span class="rank-index">2</span><span class="flex-1">xi@0ji233</span><span>80</span></div>
+            <div class="flex items-center"><span class="rank-index">3</span><span class="flex-1">易之生生</span><span>80</span></div>
+            <div class="flex items-center"><span class="rank-index">4</span><span class="flex-1">Saileaxh</span><span>80</span></div>
+            <div class="flex items-center"><span class="rank-index">5</span><span class="flex-1">LeoChen..</span><span>80</span></div>
+            <div class="flex items-center"><span class="rank-index">6</span><span class="flex-1">fyrlove</span><span>50</span></div>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-3"><div class="font-semibold">月活跃排行</div><a class="tiny muted" href="#">更多</a></div>
+          <div class="space-y-3 tiny">
+            <div class="flex items-center"><span class="rank-index">1</span><span class="flex-1">东方玻璃</span><span class="text-rose-500 font-semibold">518</span></div>
+            <div class="flex items-center"><span class="rank-index">2</span><span class="flex-1">fyrlove</span><span>402</span></div>
+            <div class="flex items-center"><span class="rank-index">3</span><span class="flex-1">the_hs</span><span>400</span></div>
+            <div class="flex items-center"><span class="rank-index">4</span><span class="flex-1">Saileaxh</span><span>398</span></div>
+            <div class="flex items-center"><span class="rank-index">5</span><span class="flex-1">gal2xy</span><span>356</span></div>
+            <div class="flex items-center"><span class="rank-index">6</span><span class="flex-1">Editor</span><span>335</span></div>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <div class="font-semibold mb-3">活跃成员</div>
+          <div class="flex flex-wrap gap-2 tiny">
+            <span class="tag tag-blue">日暮归途</span>
+            <span class="tag tag-blue">Harpe</span>
+            <span class="tag tag-blue">王li</span>
+            <span class="tag tag-blue">千屈</span>
+            <span class="tag tag-blue">mb_xbrckhlc</span>
+            <span class="tag tag-blue">jyotidwi</span>
+          </div>
+          <div class="mt-4 tiny muted">今日在线 7294 人</div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="footer mt-10">
+    <div class="shell py-10 text-sm">
+      <div class="flex flex-wrap gap-4 opacity-90">
+        <span>© 2026 安域社</span>
+        <span>技术社区风格练习页</span>
+        <span>本页为原创结构与样式实现</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

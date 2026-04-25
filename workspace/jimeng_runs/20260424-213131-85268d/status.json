@@ -1,0 +1,91 @@
+{
+  "id": "20260424-213131-85268d",
+  "title": "星云为什么像在旋转？10秒看懂宇宙气体运动",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-213131-85268d/final_mastered.mp4",
+  "created_at": 1777037491.005706,
+  "updated_at": 1777037504.0256681,
+  "post": {
+    "mode": "auto",
+    "title_card_text": "用宇宙素材做一条科教讲解背后的原理",
+    "enable_natural_voiceover": true,
+    "material_category": "science",
+    "narration_tone": "清晰、可信、循序渐进，先用画面现象引入，再用通俗解释讲清形成原因",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary",
+    "subtitle_style": "douyin_bold",
+    "selection_engine": "cc-gpt-5.4",
+    "narration_text": "你看到的星云，像在宇宙里缓慢旋转。其实它不是一整团东西在打转，而是大量气体和尘埃。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "steady_male",
+      "voice": "echo",
+      "speed": 0.96,
+      "gain": 1.0,
+      "pause_bias": 0.18,
+      "style": "documentary",
+      "category": "science"
+    },
+    "tts_voice": "echo",
+    "tts_speed": 0.96,
+    "voice_gain": 1.0,
+    "pause_bias": 0.18,
+    "tts_engine": "edge_tts",
+    "mix_params": {
+      "voice_gain": 1.0,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 10.17,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-213131-85268d/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "星云为什么像在旋转？10秒看懂宇宙气体运动",
+    "description": "看起来像海浪和烟雾，其实是引力、气体与恒星辐射共同塑造的宇宙结构。#科普 #宇宙 #星云 #天文",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "用宇宙素材做一条科教讲解",
+    "clips": [
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "用旋涡状星云做现象引入，先建立宇宙尺度感和神秘感，适合开场抛出问题",
+        "order": 1
+      },
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "画面更稳定开阔，方便承接解释内容，把视线从局部星云过渡到整体宇宙背景",
+        "order": 2
+      }
+    ],
+    "target_duration_sec": 12.0,
+    "material_category": "science",
+    "narration_tone": "清晰、可信、循序渐进，先用画面现象引入，再用通俗解释讲清形成原因",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "cc-gpt-5.4",
+    "suggested_tags": [
+      "宇宙科普",
+      "星云",
+      "天文知识",
+      "深空",
+      "科学解释"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

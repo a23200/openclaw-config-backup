@@ -1,0 +1,84 @@
+{
+  "id": "20260424-112132-ff387e",
+  "title": "宇宙起源",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-112132-ff387e/final_mastered.mp4",
+  "created_at": 1777000892.301908,
+  "updated_at": 1777000907.3185978,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "关于宇宙起源的一段观察",
+    "enable_natural_voiceover": true,
+    "narration_style": "explain",
+    "material_category": "auto",
+    "narration_tone": "克制、沉稳、带一点敬畏感，像在用短时间讲清一个宏大的科学问题",
+    "voice_profile": "elder_male",
+    "subtitle_style": "douyin_bold",
+    "narration_text": "先看宇宙起源，通常被认为始于一次极热极密的膨胀。再看此后，空间被拉开，能量冷却，最早的粒子、恒星和星系。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "elder_male",
+      "voice": "onyx",
+      "speed": 1.02,
+      "gain": 1.02,
+      "pause_bias": 0.12,
+      "style": "explain",
+      "category": "auto"
+    },
+    "tts_voice": "onyx",
+    "tts_speed": 1.02,
+    "voice_gain": 1.02,
+    "pause_bias": 0.12,
+    "tts_engine": "edge_tts",
+    "mix_params": {
+      "voice_gain": 1.02,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-112132-ff387e/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "宇宙从哪里开始？15秒看懂起源想象",
+    "description": "从一片极热极密的状态开始，时间、空间与星辰才慢慢展开。#宇宙起源 #天文科普 #星云",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "宇宙起源",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "以冷静深邃的星空开场，先建立宇宙诞生前的无垠感",
+        "order": 1
+      },
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "用漩涡式星云承接主题，强化物质汇聚与演化的动态联想",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "以更梦幻神秘的星云收束，提升结尾余韵并呼应起源之谜",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "克制、沉稳、带一点敬畏感，像在用短时间讲清一个宏大的科学问题",
+    "voice_profile": "elder_male",
+    "narration_style": "explain"
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

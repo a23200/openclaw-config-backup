@@ -1,0 +1,23 @@
+{
+  "submit_id": "27f0a665060e0cc9",
+  "prompt": "傍晚微暗的城市街巷与便利生活场景延续同一人物，结束一天后在路边灯光下停步回望，身上的非遗元素与日常环境更自然地融为一体：衣角盘扣、布包纹样、手作配饰、竹编细节在暖黄路灯与蓝调暮色中被轻轻照亮，情绪从清晨的准备转为一天后的沉静与自洽，画面有呼吸感与时间流逝痕迹，不是同一机位复制，电影感强，低饱和蓝金色调，对比柔和，人物中景偏远景，留白充足，真实城市生活氛围，2K，9:16竖屏",
+  "gen_status": "success",
+  "result_json": {
+    "images": [
+      {
+        "image_url": "https://p26-dreamina-sign.byteimg.com/tos-cn-i-tb4s082cfz/5c476f418ddc491fb6630cc9ead900f3~tplv-tb4s082cfz-aigc_resize:0:0.png?lk3s=7c3bb0db&x-expires=1776852000&x-signature=WO4sMqxvF1cS9Xsih%2BT7nyaOHCA%3D&format=.png",
+        "width": 1440,
+        "height": 2560
+      }
+    ],
+    "videos": []
+  },
+  "credit_count": 3,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Finish",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":true,\"dreamina_matrix_queue_name\":\"\",\"dreamina_matrix_req_key\":\"\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":false,\"queue_name\":\"high_aes_general_v50\",\"matrix_req_key\":\"MImageGen:high_aes_general_v50\",\"matrix_second_req_key\":\"\"}"
+  }
+}

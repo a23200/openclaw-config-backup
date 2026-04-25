@@ -1,0 +1,14 @@
+{
+  "result": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-215601-项目核心竞争力分析-gemini真实生图七页样张/项目核心竞争力分析-Gemini真实生图-七页样张.pptx",
+  "outputDir": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-215601-项目核心竞争力分析-gemini真实生图七页样张",
+  "slideCount": 7,
+  "sourceDoc": "/Users/mac/Desktop/项目核心竞争力分析.md",
+  "styleReference": "/Users/mac/Desktop/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png",
+  "layoutReferenceRoot": "/Users/mac/Desktop/make-ppt/归档/2026-04-15-generated-assets/runtime-image-ppt-demo/20260415-021900-项目核心竞争力分析-gemini参考图风格七页样张",
+  "readme": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-215601-项目核心竞争力分析-gemini真实生图七页样张/README.txt",
+  "promptCatalog": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-215601-项目核心竞争力分析-gemini真实生图七页样张/gemini-prompts.json",
+  "contactSheet": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-215601-项目核心竞争力分析-gemini真实生图七页样张/contact-sheet.png",
+  "imageDirectory": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-215601-项目核心竞争力分析-gemini真实生图七页样张",
+  "geminiBackdropDirectory": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-215601-项目核心竞争力分析-gemini真实生图七页样张/gemini-backdrops",
+  "mode": "gemini-generated-per-page"
+}

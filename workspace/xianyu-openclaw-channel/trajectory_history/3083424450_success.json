@@ -1,1448 +1,8 @@
 [
   {
-    "timestamp": 1775080077.1244328,
+    "timestamp": 1776830069.963906,
     "user_id": "3083424450",
-    "distance": 257.7651397929255,
-    "total_steps": 17,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 17,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775082196.719096,
-    "user_id": "3083424450",
-    "distance": 258.45212602650224,
-    "total_steps": 18,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 18,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775084176.488519,
-    "user_id": "3083424450",
-    "distance": 258.25754292477984,
-    "total_steps": 17,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 17,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775086997.3759518,
-    "user_id": "3083424450",
-    "distance": 257.58950551199604,
-    "total_steps": 19,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 19,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775091873.0136461,
-    "user_id": "3083424450",
-    "distance": 257.7091671492499,
-    "total_steps": 22,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 22,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775097678.188411,
-    "user_id": "3083424450",
-    "distance": 257.8386083255858,
-    "total_steps": 25,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 25,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775101955.7062058,
-    "user_id": "3083424450",
-    "distance": 258.0597566318962,
-    "total_steps": 24,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 24,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775111694.444406,
-    "user_id": "3083424450",
-    "distance": 257.7089684158546,
-    "total_steps": 24,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 24,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775119347.912627,
-    "user_id": "3083424450",
-    "distance": 257.6081655445862,
-    "total_steps": 20,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 20,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775119353.560092,
-    "user_id": "3083424450",
-    "distance": 257.90149103175014,
-    "total_steps": 18,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 18,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775122347.868762,
-    "user_id": "3083424450",
-    "distance": 258.3261282036972,
-    "total_steps": 16,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 16,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775133505.610576,
-    "user_id": "3083424450",
-    "distance": 258.05365003862755,
-    "total_steps": 24,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 24,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775143583.740843,
-    "user_id": "3083424450",
-    "distance": 258.37354470700944,
-    "total_steps": 18,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 18,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775147222.864264,
-    "user_id": "3083424450",
-    "distance": 258.05767648477257,
-    "total_steps": 16,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 16,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775150849.0198,
-    "user_id": "3083424450",
-    "distance": 257.6430371017156,
-    "total_steps": 23,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 23,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775154472.907472,
-    "user_id": "3083424450",
-    "distance": 257.7488152262643,
-    "total_steps": 22,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 22,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775158098.624715,
-    "user_id": "3083424450",
-    "distance": 258.1497166370388,
-    "total_steps": 20,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 20,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775213438.725107,
-    "user_id": "3083424450",
-    "distance": 257.71388430228524,
-    "total_steps": 15,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 15,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775227882.531334,
-    "user_id": "3083424450",
-    "distance": 257.6366598203409,
-    "total_steps": 18,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 18,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775320092.3232,
-    "user_id": "3083424450",
-    "distance": 257.94121874903414,
-    "total_steps": 22,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 22,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775321892.4226089,
-    "user_id": "3083424450",
-    "distance": 257.85999747895397,
-    "total_steps": 22,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 22,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775323771.50078,
-    "user_id": "3083424450",
-    "distance": 257.9149449373817,
-    "total_steps": 21,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 21,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775325581.617223,
-    "user_id": "3083424450",
-    "distance": 258.10119991951865,
-    "total_steps": 24,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 24,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775327383.063082,
-    "user_id": "3083424450",
-    "distance": 258.16646163051894,
-    "total_steps": 20,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 20,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775329183.9571998,
-    "user_id": "3083424450",
-    "distance": 257.86557543332844,
-    "total_steps": 22,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 22,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775331023.478878,
-    "user_id": "3083424450",
-    "distance": 258.2351420316075,
-    "total_steps": 17,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 17,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775332932.9007192,
-    "user_id": "3083424450",
-    "distance": 257.7923499604977,
-    "total_steps": 24,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 24,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775335229.783713,
-    "user_id": "3083424450",
-    "distance": 258.1246724787345,
-    "total_steps": 15,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 15,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775350978.793798,
-    "user_id": "3083424450",
-    "distance": 258.49780427427856,
-    "total_steps": 15,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 15,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775353038.995144,
-    "user_id": "3083424450",
-    "distance": 258.2057532659993,
-    "total_steps": 20,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 20,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775378672.0833569,
-    "user_id": "3083424450",
-    "distance": 258.2714309134029,
-    "total_steps": 22,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 22,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775396720.751408,
-    "user_id": "3083424450",
-    "distance": 257.7294990468286,
-    "total_steps": 21,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 21,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775425850.181567,
-    "user_id": "3083424450",
-    "distance": 258.3705306127206,
-    "total_steps": 17,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 17,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775456732.648499,
-    "user_id": "3083424450",
-    "distance": 257.81899867261427,
-    "total_steps": 21,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 21,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775461029.502485,
-    "user_id": "3083424450",
-    "distance": 257.9809405851639,
-    "total_steps": 23,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 23,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775487920.183033,
-    "user_id": "3083424450",
-    "distance": 257.5775119214229,
-    "total_steps": 20,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 20,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775520145.101722,
-    "user_id": "3083424450",
-    "distance": 258.14066790273785,
-    "total_steps": 18,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 18,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775578568.8448598,
-    "user_id": "3083424450",
-    "distance": 257.7216638398154,
-    "total_steps": 23,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 23,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775653385.517118,
-    "user_id": "3083424450",
-    "distance": 257.5948305150651,
-    "total_steps": 24,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 24,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775665042.9275699,
-    "user_id": "3083424450",
-    "distance": 257.5886626408715,
-    "total_steps": 19,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 19,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775667149.115702,
-    "user_id": "3083424450",
-    "distance": 257.84338495436106,
-    "total_steps": 19,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 19,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775672521.5854871,
-    "user_id": "3083424450",
-    "distance": 258.2932085543399,
-    "total_steps": 24,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 24,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775697636.4603589,
-    "user_id": "3083424450",
-    "distance": 258.0251637628358,
-    "total_steps": 22,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 22,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775712087.32907,
-    "user_id": "3083424450",
-    "distance": 258.48816991961957,
-    "total_steps": 20,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 20,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775719317.909376,
-    "user_id": "3083424450",
-    "distance": 257.698803254482,
-    "total_steps": 19,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 19,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775766385.9696698,
-    "user_id": "3083424450",
-    "distance": 258.4889256625802,
-    "total_steps": 24,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 24,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775838929.3398342,
-    "user_id": "3083424450",
-    "distance": 258.02685204058236,
-    "total_steps": 25,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 25,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775843175.433523,
-    "user_id": "3083424450",
-    "distance": 258.17803614092344,
-    "total_steps": 25,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 25,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775857613.728844,
-    "user_id": "3083424450",
-    "distance": 257.5696388845648,
-    "total_steps": 15,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 15,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775890869.316841,
-    "user_id": "3083424450",
-    "distance": 257.96300350363856,
-    "total_steps": 24,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 24,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775895233.6589491,
-    "user_id": "3083424450",
-    "distance": 258.47744659813065,
-    "total_steps": 22,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 22,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775897330.007044,
-    "user_id": "3083424450",
-    "distance": 257.5972832118604,
-    "total_steps": 23,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 23,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775920195.646379,
-    "user_id": "3083424450",
-    "distance": 258.1506489518222,
-    "total_steps": 15,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 15,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775921207.2089012,
-    "user_id": "3083424450",
-    "distance": 258.07555495999037,
-    "total_steps": 20,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 20,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775921729.376893,
-    "user_id": "3083424450",
-    "distance": 257.563585592081,
-    "total_steps": 19,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 19,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775921765.626495,
-    "user_id": "3083424450",
-    "distance": 258.45380252640456,
-    "total_steps": 18,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 18,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775921817.8235679,
-    "user_id": "3083424450",
-    "distance": 257.77935006204655,
-    "total_steps": 15,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 15,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775921842.432174,
-    "user_id": "3083424450",
-    "distance": 258.3566958120467,
-    "total_steps": 19,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 19,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775958573.385566,
-    "user_id": "3083424450",
-    "distance": 257.8141362079638,
-    "total_steps": 23,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 23,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1775963460.845145,
-    "user_id": "3083424450",
-    "distance": 257.77784867710875,
-    "total_steps": 15,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 15,
-    "final_left_px": 258.0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1776200081.1511612,
-    "user_id": "3083424450",
-    "distance": 258.0093398625522,
+    "distance": 257.7705156138386,
     "total_steps": 16,
     "base_delay": 0,
     "jitter_x_range": [
@@ -1464,10 +24,10 @@
     "success": true
   },
   {
-    "timestamp": 1776207340.7885299,
+    "timestamp": 1776830097.683182,
     "user_id": "3083424450",
-    "distance": 257.8964733766203,
-    "total_steps": 18,
+    "distance": 258.3997736434777,
+    "total_steps": 16,
     "base_delay": 0,
     "jitter_x_range": [
       0,
@@ -1481,16 +41,208 @@
     "acceleration_phase": 0,
     "fast_phase": 0,
     "slow_start_ratio": 0,
-    "trajectory_point_count": 18,
-    "final_left_px": 258.0,
+    "trajectory_point_count": 16,
+    "final_left_px": 0,
     "completion_used": false,
     "completion_steps": 0,
     "success": true
   },
   {
-    "timestamp": 1776210975.9133718,
+    "timestamp": 1776830125.082026,
     "user_id": "3083424450",
-    "distance": 258.3893439231318,
+    "distance": 258.3726916853157,
+    "total_steps": 17,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 17,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830155.7653959,
+    "user_id": "3083424450",
+    "distance": 258.133215740548,
+    "total_steps": 23,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 23,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830183.733407,
+    "user_id": "3083424450",
+    "distance": 258.4397534249346,
+    "total_steps": 23,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 23,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830211.245004,
+    "user_id": "3083424450",
+    "distance": 258.44842429722473,
+    "total_steps": 17,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 17,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830286.0414789,
+    "user_id": "3083424450",
+    "distance": 257.700332062841,
+    "total_steps": 22,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 22,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830314.018073,
+    "user_id": "3083424450",
+    "distance": 258.3883499701379,
+    "total_steps": 25,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 25,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830352.807234,
+    "user_id": "3083424450",
+    "distance": 258.46324842694366,
+    "total_steps": 17,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 17,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830602.165097,
+    "user_id": "3083424450",
+    "distance": 257.54358326584503,
+    "total_steps": 20,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 20,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830621.827153,
+    "user_id": "3083424450",
+    "distance": 257.5753987658068,
     "total_steps": 15,
     "base_delay": 0,
     "jitter_x_range": [
@@ -1512,57 +264,9 @@
     "success": true
   },
   {
-    "timestamp": 1776214612.4743109,
+    "timestamp": 1776830649.146425,
     "user_id": "3083424450",
-    "distance": 258.27714442833405,
-    "total_steps": 22,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 22,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1776221857.0357099,
-    "user_id": "3083424450",
-    "distance": 257.89888736182206,
-    "total_steps": 19,
-    "base_delay": 0,
-    "jitter_x_range": [
-      0,
-      0
-    ],
-    "jitter_y_range": [
-      0,
-      0
-    ],
-    "slow_factor": 0,
-    "acceleration_phase": 0,
-    "fast_phase": 0,
-    "slow_start_ratio": 0,
-    "trajectory_point_count": 19,
-    "final_left_px": 0,
-    "completion_used": false,
-    "completion_steps": 0,
-    "success": true
-  },
-  {
-    "timestamp": 1776225492.7942889,
-    "user_id": "3083424450",
-    "distance": 258.44136250293076,
+    "distance": 257.6197676011326,
     "total_steps": 24,
     "base_delay": 0,
     "jitter_x_range": [
@@ -1584,9 +288,153 @@
     "success": true
   },
   {
-    "timestamp": 1776382432.4427478,
+    "timestamp": 1776830697.026058,
     "user_id": "3083424450",
-    "distance": 257.51269902926833,
+    "distance": 257.8132819393548,
+    "total_steps": 15,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 15,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830757.525249,
+    "user_id": "3083424450",
+    "distance": 257.9946349462249,
+    "total_steps": 20,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 20,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830797.282165,
+    "user_id": "3083424450",
+    "distance": 257.8426200459161,
+    "total_steps": 24,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 24,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830825.054847,
+    "user_id": "3083424450",
+    "distance": 258.39680264928825,
+    "total_steps": 25,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 25,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830858.1604989,
+    "user_id": "3083424450",
+    "distance": 258.0643838564453,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830885.527926,
+    "user_id": "3083424450",
+    "distance": 257.835430202331,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776830913.4099488,
+    "user_id": "3083424450",
+    "distance": 258.3751659692919,
     "total_steps": 22,
     "base_delay": 0,
     "jitter_x_range": [
@@ -1608,9 +456,273 @@
     "success": true
   },
   {
-    "timestamp": 1776396859.521259,
+    "timestamp": 1776830951.396918,
     "user_id": "3083424450",
-    "distance": 257.97194454329826,
+    "distance": 257.80125475927383,
+    "total_steps": 16,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 16,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831017.161471,
+    "user_id": "3083424450",
+    "distance": 258.2789059032205,
+    "total_steps": 15,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 15,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831056.6535108,
+    "user_id": "3083424450",
+    "distance": 257.7920320421797,
+    "total_steps": 24,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 24,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831076.7775161,
+    "user_id": "3083424450",
+    "distance": 257.9446164848323,
+    "total_steps": 23,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 23,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831158.273133,
+    "user_id": "3083424450",
+    "distance": 257.51867321771823,
+    "total_steps": 20,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 20,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831262.460473,
+    "user_id": "3083424450",
+    "distance": 258.25856066785576,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831290.1651661,
+    "user_id": "3083424450",
+    "distance": 257.70332402673137,
+    "total_steps": 23,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 23,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831318.1703439,
+    "user_id": "3083424450",
+    "distance": 258.13606984360945,
+    "total_steps": 25,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 25,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831361.1092858,
+    "user_id": "3083424450",
+    "distance": 257.92727430381683,
+    "total_steps": 22,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 22,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831389.2982001,
+    "user_id": "3083424450",
+    "distance": 257.7643932207978,
+    "total_steps": 24,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 24,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831479.172197,
+    "user_id": "3083424450",
+    "distance": 257.52837899848765,
+    "total_steps": 17,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 17,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831506.758541,
+    "user_id": "3083424450",
+    "distance": 257.72065107222164,
     "total_steps": 19,
     "base_delay": 0,
     "jitter_x_range": [
@@ -1626,6 +738,1662 @@
     "fast_phase": 0,
     "slow_start_ratio": 0,
     "trajectory_point_count": 19,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831534.380406,
+    "user_id": "3083424450",
+    "distance": 258.24588422982697,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831576.0363688,
+    "user_id": "3083424450",
+    "distance": 258.2166508471032,
+    "total_steps": 23,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 23,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831603.271994,
+    "user_id": "3083424450",
+    "distance": 257.97749898666734,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831630.810889,
+    "user_id": "3083424450",
+    "distance": 258.0338006732748,
+    "total_steps": 23,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 23,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831656.385483,
+    "user_id": "3083424450",
+    "distance": 257.82137470784994,
+    "total_steps": 20,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 20,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831684.2387252,
+    "user_id": "3083424450",
+    "distance": 257.7324767972382,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831712.269863,
+    "user_id": "3083424450",
+    "distance": 258.2250348508832,
+    "total_steps": 24,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 24,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831828.1785128,
+    "user_id": "3083424450",
+    "distance": 257.8305836903828,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776831906.5062678,
+    "user_id": "3083424450",
+    "distance": 257.70538638207586,
+    "total_steps": 24,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 24,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832002.7527318,
+    "user_id": "3083424450",
+    "distance": 257.76413746604265,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832030.934166,
+    "user_id": "3083424450",
+    "distance": 257.84261180747444,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832058.669759,
+    "user_id": "3083424450",
+    "distance": 258.3985048007089,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832096.659914,
+    "user_id": "3083424450",
+    "distance": 258.10495287863404,
+    "total_steps": 15,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 15,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832219.9508638,
+    "user_id": "3083424450",
+    "distance": 258.3391076422906,
+    "total_steps": 16,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 16,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832259.063835,
+    "user_id": "3083424450",
+    "distance": 257.6317368879476,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832330.259038,
+    "user_id": "3083424450",
+    "distance": 258.0412468520283,
+    "total_steps": 17,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 17,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832358.4580731,
+    "user_id": "3083424450",
+    "distance": 257.75418190775684,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832385.973932,
+    "user_id": "3083424450",
+    "distance": 257.83989060724053,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832419.072695,
+    "user_id": "3083424450",
+    "distance": 258.4846703615198,
+    "total_steps": 18,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 18,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832446.8531358,
+    "user_id": "3083424450",
+    "distance": 258.3767797992997,
+    "total_steps": 22,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 22,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832474.525405,
+    "user_id": "3083424450",
+    "distance": 257.5356413783091,
+    "total_steps": 24,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 24,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832512.929704,
+    "user_id": "3083424450",
+    "distance": 257.956271292206,
+    "total_steps": 22,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 22,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832541.3686929,
+    "user_id": "3083424450",
+    "distance": 257.58939830408224,
+    "total_steps": 20,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 20,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832568.9668438,
+    "user_id": "3083424450",
+    "distance": 258.22947171066204,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832623.915723,
+    "user_id": "3083424450",
+    "distance": 258.0082392206835,
+    "total_steps": 16,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 16,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832695.116874,
+    "user_id": "3083424450",
+    "distance": 257.7762554040391,
+    "total_steps": 15,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 15,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832714.843234,
+    "user_id": "3083424450",
+    "distance": 258.1734181125589,
+    "total_steps": 18,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 18,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832742.989763,
+    "user_id": "3083424450",
+    "distance": 257.67790970246557,
+    "total_steps": 22,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 22,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832784.3138812,
+    "user_id": "3083424450",
+    "distance": 257.8626481479274,
+    "total_steps": 23,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 23,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832811.902441,
+    "user_id": "3083424450",
+    "distance": 258.0237746529929,
+    "total_steps": 22,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 22,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832839.68357,
+    "user_id": "3083424450",
+    "distance": 257.6654472800138,
+    "total_steps": 18,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 18,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832876.882686,
+    "user_id": "3083424450",
+    "distance": 257.5109165563516,
+    "total_steps": 18,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 18,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832938.777567,
+    "user_id": "3083424450",
+    "distance": 257.5821286109698,
+    "total_steps": 24,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 24,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832966.417824,
+    "user_id": "3083424450",
+    "distance": 257.5713229690079,
+    "total_steps": 20,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 20,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776832994.0788748,
+    "user_id": "3083424450",
+    "distance": 258.00779998859235,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833037.402117,
+    "user_id": "3083424450",
+    "distance": 258.46840832921873,
+    "total_steps": 17,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 17,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833158.314518,
+    "user_id": "3083424450",
+    "distance": 257.604614104825,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833272.254324,
+    "user_id": "3083424450",
+    "distance": 258.3202831390066,
+    "total_steps": 25,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 25,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833300.504343,
+    "user_id": "3083424450",
+    "distance": 258.4760615709811,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833379.1579032,
+    "user_id": "3083424450",
+    "distance": 257.50592545054496,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833399.1358879,
+    "user_id": "3083424450",
+    "distance": 257.7550368153044,
+    "total_steps": 17,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 17,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833495.5096781,
+    "user_id": "3083424450",
+    "distance": 257.6059385587139,
+    "total_steps": 23,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 23,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833514.735855,
+    "user_id": "3083424450",
+    "distance": 258.25613208045127,
+    "total_steps": 15,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 15,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833535.208709,
+    "user_id": "3083424450",
+    "distance": 258.13780106871155,
+    "total_steps": 23,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 23,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833573.117696,
+    "user_id": "3083424450",
+    "distance": 258.39230629693384,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833611.904763,
+    "user_id": "3083424450",
+    "distance": 257.74227401386327,
+    "total_steps": 24,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 24,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833639.69145,
+    "user_id": "3083424450",
+    "distance": 258.4722133707173,
+    "total_steps": 15,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 15,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833724.693434,
+    "user_id": "3083424450",
+    "distance": 258.1204768024632,
+    "total_steps": 18,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 18,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833764.818722,
+    "user_id": "3083424450",
+    "distance": 257.6329496658399,
+    "total_steps": 15,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 15,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833792.219667,
+    "user_id": "3083424450",
+    "distance": 257.5128646705779,
+    "total_steps": 16,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 16,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833858.4237518,
+    "user_id": "3083424450",
+    "distance": 258.375939818605,
+    "total_steps": 20,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 20,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833886.7086132,
+    "user_id": "3083424450",
+    "distance": 258.34031111747623,
+    "total_steps": 24,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 24,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833954.862207,
+    "user_id": "3083424450",
+    "distance": 258.1954191256082,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776833983.360233,
+    "user_id": "3083424450",
+    "distance": 258.00230551936687,
+    "total_steps": 16,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 16,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834011.173398,
+    "user_id": "3083424450",
+    "distance": 258.1531074351711,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834053.820759,
+    "user_id": "3083424450",
+    "distance": 258.13205832424086,
+    "total_steps": 16,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 16,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834081.010419,
+    "user_id": "3083424450",
+    "distance": 257.8548187239264,
+    "total_steps": 17,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 17,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834111.216363,
+    "user_id": "3083424450",
+    "distance": 257.68318399022723,
+    "total_steps": 18,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 18,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834160.6321,
+    "user_id": "3083424450",
+    "distance": 257.8589624902153,
+    "total_steps": 16,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 16,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834187.899157,
+    "user_id": "3083424450",
+    "distance": 257.52019244236345,
+    "total_steps": 16,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 16,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834225.952422,
+    "user_id": "3083424450",
+    "distance": 257.6758767209134,
+    "total_steps": 22,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 22,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834255.755937,
+    "user_id": "3083424450",
+    "distance": 258.35730126353144,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834301.3311,
+    "user_id": "3083424450",
+    "distance": 257.8068537043246,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834329.059816,
+    "user_id": "3083424450",
+    "distance": 258.3670532286914,
+    "total_steps": 18,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 18,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834367.841621,
+    "user_id": "3083424450",
+    "distance": 258.2717486439502,
+    "total_steps": 21,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 21,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776834444.3237839,
+    "user_id": "3083424450",
+    "distance": 257.86390351498034,
+    "total_steps": 19,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 19,
+    "final_left_px": 258.0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776890378.742656,
+    "user_id": "3083424450",
+    "distance": 258.0095922590327,
+    "total_steps": 23,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 23,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776927631.783653,
+    "user_id": "3083424450",
+    "distance": 258.48951008000466,
+    "total_steps": 16,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 16,
+    "final_left_px": 0,
+    "completion_used": false,
+    "completion_steps": 0,
+    "success": true
+  },
+  {
+    "timestamp": 1776939543.0747032,
+    "user_id": "3083424450",
+    "distance": 258.16476011652037,
+    "total_steps": 24,
+    "base_delay": 0,
+    "jitter_x_range": [
+      0,
+      0
+    ],
+    "jitter_y_range": [
+      0,
+      0
+    ],
+    "slow_factor": 0,
+    "acceleration_phase": 0,
+    "fast_phase": 0,
+    "slow_start_ratio": 0,
+    "trajectory_point_count": 24,
     "final_left_px": 0,
     "completion_used": false,
     "completion_steps": 0,

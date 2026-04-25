@@ -1,0 +1,14 @@
+{
+  "submit_id": "573837cab112a84e",
+  "prompt": "\\u4e3b\\u89c2\\u89c6\\u89d2\\u955c\\u5934\\u7f13\\u6162\\u5411\\u524d\\u63a8\\u8fdb\\uff0c\\u8f66\\u7a97\\u5916\\u9ec4\\u706f\\u548c\\u96e8\\u6ef4\\u6301\\u7eed\\u540e\\u9000\\uff0c\\u753b\\u9762\\u4ece\\u5e7d\\u6697\\u96a7\\u9053\\u9010\\u6e10\\u8fc7\\u6e21\\u5230\\u5c3d\\u5934\\u6668\\u5149\\uff0c\\u60c5\\u7eea\\u4ece\\u538b\\u6291\\u8f6c\\u4e3a\\u5e0c\\u671b\\uff0c\\u4fdd\\u6301\\u7535\\u5f71\\u611f\\u4e0e\\u771f\\u5b9e\\u8d28\\u611f",
+  "logid": "20260419031236192168001203784E476",
+  "gen_status": "querying",
+  "credit_count": 75,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Generating",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":false,\"dreamina_matrix_queue_name\":\"dreamina_fusion_video40\",\"dreamina_matrix_req_key\":\"DreaminaFusion:Video40_end_frame_720p\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":true,\"queue_name\":\"\",\"matrix_req_key\":\"\",\"matrix_second_req_key\":\"\"}"
+  }
+}

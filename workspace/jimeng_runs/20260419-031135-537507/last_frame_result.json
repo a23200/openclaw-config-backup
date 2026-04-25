@@ -1,0 +1,23 @@
+{
+  "submit_id": "7a65cdcf8926d2a0",
+  "prompt": "\\u6781\\u5ea6\\u5199\\u5b9e\\uff0c\\u7535\\u5f71\\u611f\\uff0c\\u4e3b\\u89c2\\u89c6\\u89d2\\uff0c\\u96a7\\u9053\\u5c3d\\u5934\\u51fa\\u73b0\\u7b2c\\u4e00\\u7f15\\u6668\\u5149\\uff0c\\u8fdc\\u5904\\u5929\\u9645\\u7ebf\\u5fae\\u4eae\\uff0c\\u5e0c\\u671b\\u611f\\uff0c\\u540c\\u4e00\\u573a\\u666f\\uff0c\\u540c\\u4e00\\u955c\\u5934\\u8bed\\u8a00\\uff0c9:16\\u7ad6\\u5c4f\\uff0c\\u9ad8\\u5206\\u8fa8\\u7387",
+  "gen_status": "success",
+  "result_json": {
+    "images": [
+      {
+        "image_url": "https://p11-dreamina-sign.byteimg.com/tos-cn-i-tb4s082cfz/c304082a15654a6d8651cd8361713d56~tplv-tb4s082cfz-aigc_resize:0:0.png?lk3s=7c3bb0db&x-expires=1776546000&x-signature=rh50YTkikR7jU9r5%2BUlR2cEFBUE%3D&format=.png",
+        "width": 2560,
+        "height": 1440
+      }
+    ],
+    "videos": []
+  },
+  "credit_count": 3,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Finish",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":true,\"dreamina_matrix_queue_name\":\"\",\"dreamina_matrix_req_key\":\"\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":false,\"queue_name\":\"high_aes_general_v50\",\"matrix_req_key\":\"MImageGen:high_aes_general_v50\",\"matrix_second_req_key\":\"\"}"
+  }
+}

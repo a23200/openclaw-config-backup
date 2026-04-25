@@ -1,0 +1,14 @@
+{
+  "submit_id": "ab836e69d6a87094",
+  "prompt": "基于首尾帧生成一支15秒竖屏短片，主题始终围绕破次元壁联动的瞬间，开场用中近景缓慢推近背影与发光屏障，雨夜反光和霓虹轻微闪烁，空气微尘与雾气流动；第4秒开始镜头轻微环绕并小幅升起，屏障表面出现水波般能量纹理，现实街道与幻想街道的细节逐步互相渗透；第7秒做一次克制的变焦推进，人物抬手触碰屏障，光线由冷转暖，粒子沿触点扩散；第9秒进入穿越瞬间，画面有柔和时间拉伸感与轻微慢动作，空间边界像玻璃薄膜一样打开；第11秒后切到更开阔的中景，镜头继续向前滑行，现实与幻想完成融合，街道纵深被拉开；结尾在人物回头的一刻轻轻定住，情绪从克制、好奇到释放、心动，整体节奏先压后扬，电影感强，真实镜头语言，光影层次丰富，避免卡通感与杂乱元素",
+  "logid": "20260423042321192168000218758F977",
+  "gen_status": "querying",
+  "credit_count": 75,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Generating",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":false,\"dreamina_matrix_queue_name\":\"dreamina_fusion_video40\",\"dreamina_matrix_req_key\":\"DreaminaFusion:Video40_end_frame_720p\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":true,\"queue_name\":\"\",\"matrix_req_key\":\"\",\"matrix_second_req_key\":\"\"}"
+  }
+}

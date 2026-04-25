@@ -1,0 +1,23 @@
+{
+  "submit_id": "4b3079705ccce2d1",
+  "prompt": "9:16竖屏，电影感尾帧，那面发光屏障已经被穿越，年轻人站在幻想街道中央回头一瞥，现实与幻想在身后完成融合，街道两侧光影像波纹般延展，霓虹、微雨、漂浮碎光全部更饱满更开阔，画面从压抑走向释放，冷蓝暖紫金色三层光交叠，空间纵深强烈，情绪是终于抵达的心动与失真感，超细节，真实镜头质感，动态余韵，2K",
+  "gen_status": "success",
+  "result_json": {
+    "images": [
+      {
+        "image_url": "https://p11-dreamina-sign.byteimg.com/tos-cn-i-tb4s082cfz/dee027dcf3bc4376bd66fcf3c8af12e5~tplv-tb4s082cfz-aigc_resize:0:0.png?lk3s=7c3bb0db&x-expires=1776895200&x-signature=plVSIfCmea4yd3uGX0hiFc5K3I0%3D&format=.png",
+        "width": 1440,
+        "height": 2560
+      }
+    ],
+    "videos": []
+  },
+  "credit_count": 3,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Finish",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":true,\"dreamina_matrix_queue_name\":\"\",\"dreamina_matrix_req_key\":\"\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":false,\"queue_name\":\"high_aes_general_v50\",\"matrix_req_key\":\"MImageGen:high_aes_general_v50\",\"matrix_second_req_key\":\"\"}"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "20260422-162311-0f07a3",
+  "title": "非遗穿进日常的N种方式",
+  "task_type": "jimeng",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260422-162311-0f07a3/final_with_external_subtitles.mp4",
+  "created_at": 1776846191.5109189,
+  "updated_at": 1776851131.902546,
+  "post": {
+    "mode": "title_card",
+    "title_card_text": "真正留下来的东西 都会悄悄回到生活里",
+    "resolved_mode": "title_card"
+  },
+  "publish": {
+    "title": "原来非遗早就穿进了我们的日常",
+    "description": "不是把传统供起来，而是让它自然地陪我们出门、通勤、回家。那些纹样、手作、材质和细节，一旦进入日常，非遗就有了新的呼吸感。#非遗穿进日常的N种方式 #生活美学 #东方审美 #日常里的传统",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "first_prompt": "清晨自然光洒入普通城市住宅的玄关与客厅，年轻人准备出门的日常瞬间，桌上与衣架上自然融入非遗元素的日用品与穿搭细节：带传统纹样的布包、手作盘扣外套、纹样丝巾、竹编收纳、手工染色布艺，整体不是展览陈列而是真实生活场景，人物动作松弛，伸手整理衣领与包带，电影感构图，近景与中景结合，柔和侧逆光，空气里有细小浮尘，暖灰与木色基调，细节丰富，光影层次明显，写实，高级质感，2K，9:16竖屏",
+    "last_prompt": "傍晚微暗的城市街巷与便利生活场景延续同一人物，结束一天后在路边灯光下停步回望，身上的非遗元素与日常环境更自然地融为一体：衣角盘扣、布包纹样、手作配饰、竹编细节在暖黄路灯与蓝调暮色中被轻轻照亮，情绪从清晨的准备转为一天后的沉静与自洽，画面有呼吸感与时间流逝痕迹，不是同一机位复制，电影感强，低饱和蓝金色调，对比柔和，人物中景偏远景，留白充足，真实城市生活氛围，2K，9:16竖屏",
+    "video_prompt": "围绕题目非遗穿进日常的N种方式展开，同一人物的一天，从清晨出门到傍晚归途，首尾情绪递进清晰。镜头语言以细腻电影感为核心：开场从玄关物件特写缓慢推近到人物整理衣着与布包，切到手部触碰盘扣、布料纹样、竹编纹理的微距特写，再平滑摇镜带出客厅与日常生活环境；中段用跟随镜头记录人物走入街道、乘电梯、路过橱窗、在便利生活场景中行动，穿插轻微升降和小幅变焦，让非遗元素在日常动作里被自然看见；节奏上前半段柔和舒展，中段略有生活流动感，后半段放慢，加入时间流逝感，光线从晨间暖光过渡到傍晚蓝调与路灯暖黄，形成情绪对照；结尾镜头缓慢拉远，人物停在街角微微回头，非遗元素与城市夜色融为一体，整体写实、克制、高级、光影层次丰富、空气感明显、720p竖屏短视频"
+  },
+  "video": {
+    "mode": "frames2video",
+    "audio_reference": ""
+  },
+  "first_submit_id": "ba8c155172f25647",
+  "last_submit_id": "27f0a665060e0cc9",
+  "video_submit_id": "1c0c5d9598f884c4",
+  "subtitle_mode": "external_only",
+  "subtitle_error": "ffmpeg version 8.1 Copyright (c) 2000-2026 the FFmpeg developers\n  built with Apple clang version 21.0.0 (clang-2100.0.123.102)\n  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gpl --enable-libsvtav1 --enable-libopus --enable-libx264 --enable-libmp3lame --enable-libdav1d --enable-libvmaf --enable-libvpx --enable-libx265 --enable-openssl --enable-videotoolbox --enable-audiotoolbox --enable-neon\n  libavutil      60. 26.100 / 60. 26.100\n  libavcodec     62. 28.100 / 62. 28.100\n  libavformat    62. 12.100 / 62. 12.100\n  libavdevice    62.  3.100 / 62.  3.100\n  libavfilter    11. 14.100 / 11. 14.100\n  libswscale      9.  5.100 /  9.  5.100\n  libswresample   6.  3.100 /  6.  3.100\n[in#0 @ 0xbe0c18000] Unknown cover type: 0x1.\nInput #0, mov,mp4,m4a,3gp,3g2,mj2, from '/Users/mac/.openclaw/workspace/jimeng_runs/20260422-162311-0f07a3/final.mp4':\n  Metadata:\n    major_brand     : isom\n    minor_version   : 512\n    compatible_brands: isomiso2avc1mp41\n    LvMetaInfo      : {\"data\":{\"os\":\"\",\"product\":\"dreamina\",\"exportType\":\"generation\",\"videoId\":\"0\"}}\n    UserComment     : {\"aigc_label_type\":0,\"source_info\":\"dreamina\"}\n    comment         : vid:v02870g10004d7k9b9iljhtc884r0lrg\n    encoder         : Lavf58.76.100\n  Duration: 00:00:15.07, start: 0.000000, bitrate: 6390 kb/s\n  Stream #0:0[0x1](und): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, stereo, fltp, 128 kb/s (default)\n    Metadata:\n      handler_name    : SoundHandler\n  Stream #0:1[0x2](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 720x1280 [SAR 1:1 DAR 9:16], 6275 kb/s, 24.04 fps, 60 tbr, 15360 tbn (default)\n    Metadata:\n      handler_name    : VideoHandler\n[AVFilterGraph @ 0xbe1007f80] No such filter: 'subtitles'\nError opening output file /Users/mac/.openclaw/workspace/jimeng_runs/20260422-162311-0f07a3/final_mastered.mp4.\nError opening output files: Filter not found"
+}

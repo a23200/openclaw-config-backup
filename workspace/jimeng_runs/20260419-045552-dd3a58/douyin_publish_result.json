@@ -1,0 +1,12 @@
+{
+  "started_at": 1776583484.9982378,
+  "ended_at": 1776583546.3643699,
+  "elapsed_sec": 61.37,
+  "status": "ok",
+  "exit_code": 0,
+  "error": "",
+  "link": "https://creator.douyin.com/goofy/douyin_creator_pc/mono/prefetch/creator_content/manage/prefetch.json\",\"/creator-micro/work-management/work-detail/:id\":\"https://creator.douyin.com/goofy/douyin_creator_pc/mono/prefetch/work-management/work-detail/prefetch.json\"},r=Object.keys(t).find(function(e){return",
+  "backend": "cdp",
+  "endpoint": "http://127.0.0.1:9222",
+  "config": "/Users/mac/.openclaw/workspace/jimeng_runs/20260419-045552-dd3a58/douyin_publish.json"
+}

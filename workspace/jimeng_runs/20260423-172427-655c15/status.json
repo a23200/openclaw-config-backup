@@ -1,0 +1,84 @@
+{
+  "id": "20260423-172427-655c15",
+  "title": "宇宙起源",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260423-172427-655c15/final_mastered.mp4",
+  "created_at": 1776936267.992019,
+  "updated_at": 1776936277.410122,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "关于宇宙起源的一段观察",
+    "enable_natural_voiceover": true,
+    "narration_style": "explain",
+    "material_category": "auto",
+    "narration_tone": "克制、沉静、带一点敬畏感，像在用很短时间讲清一个宏大问题",
+    "voice_profile": "elder_male",
+    "subtitle_style": "douyin_bold",
+    "narration_text": "最开始，没有星球，也没有银河。只有极端炽热与高密度的初始状态。一次剧烈膨胀后，空间、时间与能量同时展开。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "elder_male",
+      "voice": "onyx",
+      "speed": 1.02,
+      "gain": 1.02,
+      "pause_bias": 0.12,
+      "style": "explain",
+      "category": "auto"
+    },
+    "tts_voice": "onyx",
+    "tts_speed": 1.02,
+    "voice_gain": 1.02,
+    "pause_bias": 0.12,
+    "tts_engine": "edge_tts",
+    "mix_params": {
+      "voice_gain": 1.02,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260423-172427-655c15/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "如果把宇宙诞生压缩成15秒你会看到什么",
+    "description": "从近乎空无到星云翻涌，15秒看一遍宇宙起源的想象过程。#宇宙起源 #天文科普 #星云",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "宇宙起源",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "以沉静深空开场，建立宇宙诞生前的空旷与未知感",
+        "order": 1
+      },
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "用旋涡状星云承接能量汇聚，强化从混沌到形成的动态变化",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "以更梦幻的星云收束，形成宇宙扩张后仍在演化的余韵",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "克制、沉静、带一点敬畏感，像在用很短时间讲清一个宏大问题",
+    "voice_profile": "elder_male",
+    "narration_style": "explain"
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

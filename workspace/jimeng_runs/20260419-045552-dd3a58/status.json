@@ -1,0 +1,46 @@
+{
+  "id": "20260419-045552-dd3a58",
+  "title": "榫卯之间，真正的技术",
+  "status": "published",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260419-045552-dd3a58/final_mastered.mp4",
+  "created_at": 1776545752.818294,
+  "updated_at": 1776583546.3651478,
+  "input": {
+    "first_prompt": "9:16竖屏，电影感木作工坊，清晨冷暖交错的侧逆光，一张未经组装的榫卯木件静置在工作台上，细小木屑、工具痕迹、手部即将入镜的停顿感，空气里有尘埃悬浮，近景特写，浅景深，质感真实，光影层次分明，情绪克制而蓄势，写实电影摄影，高级色彩，2K",
+    "last_prompt": "9:16竖屏，电影感木作工坊，同一工作台上榫卯结构已经严丝合缝地完成拼接，一双手稳稳按住成型木作，边缘精准贴合，木纹在暖光下清晰发亮，周围木屑被动作带散，画面从紧张转为笃定，近中景，空间更开阔，写实电影摄影，光影通透，完成感强，2K",
+    "video_prompt": "以同一间木作工坊为时空核心，前半段从极近距离慢推镜进入未组装的榫卯木件与手指细节，呼吸感停顿一拍；随后切到侧面中近景，手部快速校准角度，轻微摇镜跟随木件咬合，加入短暂的微距景别切换表现纹理与误差控制；中段节奏加快，镜头小幅升降与变焦结合，突出卡入瞬间的力量与精准；后半段镜头缓慢拉开，光线由偏冷过渡到偏暖，空气中的木屑随动作扬起再落下，形成时间被拉长的电影感；整体节奏先压抑蓄力后利落释放，真实写实，高级光影，720p竖屏短视频"
+  },
+  "video": {
+    "mode": "frames2video",
+    "audio_reference": ""
+  },
+  "post": {
+    "mode": "visual_only",
+    "title_card_text": "真正的技术 从来不是炫耀而是精准",
+    "resolved_mode": "visual_only"
+  },
+  "publish": {
+    "title": "当手稳到这个程度 才叫真正的技术",
+    "description": "最厉害的技巧，不是花哨，是每一下都刚刚好。把分寸感练到极致，镜头就会替你说话。#真正的技术 #电影感短片 #木作美学 #匠心细节",
+    "auto_publish": false,
+    "cover": "auto"
+  },
+  "first_submit_id": "c712869c29ae2e36",
+  "last_submit_id": "a3368374ee956ed6",
+  "video_submit_id": "6fce6ae15b886928",
+  "_recovered_note": "视频生成成功但 dreamina CLI 轮询中途 ret=2008，手动修复 submit_id 并下载视频",
+  "publish_config": "/Users/mac/.openclaw/workspace/jimeng_runs/20260419-045552-dd3a58/douyin_publish.json",
+  "publish_result": {
+    "started_at": 1776583484.9982378,
+    "ended_at": 1776583546.3643699,
+    "elapsed_sec": 61.37,
+    "status": "ok",
+    "exit_code": 0,
+    "error": "",
+    "link": "https://creator.douyin.com/goofy/douyin_creator_pc/mono/prefetch/creator_content/manage/prefetch.json\",\"/creator-micro/work-management/work-detail/:id\":\"https://creator.douyin.com/goofy/douyin_creator_pc/mono/prefetch/work-management/work-detail/prefetch.json\"},r=Object.keys(t).find(function(e){return",
+    "backend": "cdp",
+    "endpoint": "http://127.0.0.1:9222",
+    "config": "/Users/mac/.openclaw/workspace/jimeng_runs/20260419-045552-dd3a58/douyin_publish.json"
+  }
+}

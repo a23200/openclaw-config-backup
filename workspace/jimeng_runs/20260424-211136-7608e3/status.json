@@ -1,0 +1,98 @@
+{
+  "id": "20260424-211136-7608e3",
+  "title": "把宇宙讲清楚",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-211136-7608e3/final_mastered.mp4",
+  "created_at": 1777036296.430762,
+  "updated_at": 1777036319.809016,
+  "post": {
+    "mode": "auto",
+    "title_card_text": "关于把宇宙讲清楚的一段观察",
+    "enable_natural_voiceover": true,
+    "material_category": "auto",
+    "narration_tone": "冷静、克制、清晰，像在用最短时间讲明白一个宏大问题",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary",
+    "subtitle_style": "cinematic_white",
+    "selection_engine": "cc-gpt-5.4",
+    "narration_text": "宇宙不是一片黑，它充满恒星、尘埃和气体。我们先看到的是星空，再深入会遇见星云。那是恒星诞生与演化的地方。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "steady_male",
+      "voice": "echo",
+      "speed": 0.96,
+      "gain": 1.0,
+      "pause_bias": 0.18,
+      "style": "documentary",
+      "category": "auto"
+    },
+    "tts_voice": "echo",
+    "tts_speed": 0.96,
+    "voice_gain": 1.0,
+    "pause_bias": 0.18,
+    "tts_engine": "edge_tts",
+    "mix_params": {
+      "voice_gain": 1.0,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-211136-7608e3/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "15秒把宇宙讲清楚：从星空到星云",
+    "description": "宇宙不是遥远背景，它是时间、物质和光共同写下的故事。用15秒看懂宇宙的基本层次。#宇宙科普 #星云 #天文 #短视频科普",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "把宇宙讲清楚",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "作为开场建立浩瀚、冷静的宇宙基调，便于引出主题",
+        "order": 1
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "从星空推进到星云，视觉层次更丰富，承接讲解节奏",
+        "order": 2
+      },
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "以更强的旋动感和深空感收尾，强化宇宙演化与未知感",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "冷静、克制、清晰，像在用最短时间讲明白一个宏大问题",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "cc-gpt-5.4",
+    "suggested_tags": [
+      "宇宙科普",
+      "星空",
+      "星云",
+      "天文",
+      "银河"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:cinematic_white"
+}

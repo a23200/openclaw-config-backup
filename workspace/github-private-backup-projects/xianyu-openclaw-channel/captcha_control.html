@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>刮刮乐验证控制面板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            color-scheme: light;
+            --bg-start: #0f172a;
+            --bg-end: #1d4ed8;
+            --panel: rgba(255, 255, 255, 0.96);
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: rgba(148, 163, 184, 0.24);
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
+            --accent: #2563eb;
+            --accent-soft: rgba(37, 99, 235, 0.14);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+            min-height: 100vh;
+            padding: 24px;
+            color: var(--text);
+        }
+
+        .app {
+            max-width: 1220px;
+            margin: 0 auto;
+            background: var(--panel);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 28px;
+            backdrop-filter: blur(20px);
+        }
+
+        .topbar {
+            display: flex;
+            gap: 16px;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .title h1 {
+            font-size: 30px;
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+
+        .title p {
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .status.connected {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--accent);
+        }
+
+        .status.completed {
+            background: rgba(34, 197, 94, 0.12);
+            color: var(--success);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: currentColor;
+            box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.55);
+        }
+
+        .session-bar {
+            display: grid;
+            grid-template-columns: minmax(260px, 1fr) auto auto auto;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .session-bar input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 15px;
+            outline: none;
+            transition: box-shadow .2s ease, border-color .2s ease;
+        }
+
+        .session-bar input:focus {
+            border-color: rgba(37, 99, 235, 0.45);
+            box-shadow: 0 0 0 4px var(--accent-soft);
+        }
+
+        .btn {
+            border: none;
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .16s ease, opacity .16s ease, background .16s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(15, 23, 42, 0.06);
+            color: var(--text);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.95fr);
+            gap: 20px;
+        }
+
+        .panel {
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.88);
+            overflow: hidden;
+        }
+
+        .panel-head {
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+        }
+
+        .panel-head h2 {
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        .panel-head p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .preview-body {
+            padding: 16px;
+            background: linear-gradient(180deg, rgba(241, 245, 249, 0.76), rgba(248, 250, 252, 0.92));
+            min-height: 360px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .preview-frame {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+            min-height: 120px;
+        }
+
+        #captchaImage {
+            display: none;
+            max-width: 100%;
+            max-height: 560px;
+            border-radius: 18px;
+            box-shadow: 0 18px 60px rgba(15, 23, 42, 0.18);
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--muted);
+            min-height: 240px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 46px;
+            height: 46px;
+            border-radius: 999px;
+            border: 4px solid rgba(37, 99, 235, 0.12);
+            border-top-color: var(--accent);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .overlay-track,
+        .overlay-thumb,
+        .overlay-line {
+            position: absolute;
+            pointer-events: none;
+            display: none;
+        }
+
+        .overlay-track {
+            border: 2px dashed rgba(37, 99, 235, 0.85);
+            background: rgba(37, 99, 235, 0.12);
+            border-radius: 999px;
+        }
+
+        .overlay-thumb {
+            border: 2px solid rgba(249, 115, 22, 0.9);
+            background: rgba(249, 115, 22, 0.2);
+            border-radius: 999px;
+            box-shadow: 0 10px 30px rgba(249, 115, 22, 0.22);
+        }
+
+        .overlay-line {
+            height: 3px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.9), rgba(249, 115, 22, 0.9));
+            transform-origin: left center;
+        }
+
+        .side {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 18px;
+            background: white;
+        }
+
+        .card h3 {
+            font-size: 17px;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .badge-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .badge {
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            background: rgba(15, 23, 42, 0.06);
+            color: var(--text);
+        }
+
+        .badge.ok {
+            background: rgba(22, 163, 74, 0.12);
+            color: var(--success);
+        }
+
+        .badge.warn {
+            background: rgba(217, 119, 6, 0.12);
+            color: var(--warning);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .info-item {
+            border-radius: 18px;
+            background: rgba(15, 23, 42, 0.04);
+            padding: 14px;
+        }
+
+        .info-item span {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .info-item strong {
+            font-size: 18px;
+            line-height: 1.3;
+        }
+
+        .virtual-slider-wrap {
+            margin-top: 18px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.06), rgba(79, 70, 229, 0.08));
+            border: 1px solid rgba(37, 99, 235, 0.12);
+            padding: 16px;
+        }
+
+        .virtual-slider-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .virtual-slider-head strong {
+            font-size: 15px;
+        }
+
+        .virtual-slider-head span {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .virtual-slider {
+            position: relative;
+            width: 100%;
+            height: 72px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(148, 163, 184, 0.12), rgba(148, 163, 184, 0.2));
+            border: 1px solid rgba(148, 163, 184, 0.26);
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+            cursor: ew-resize;
+        }
+
+        .virtual-slider.disabled {
+            opacity: .48;
+            cursor: not-allowed;
+        }
+
+        .virtual-slider-fill {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0;
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.18), rgba(79, 70, 229, 0.22));
+        }
+
+        .virtual-slider-rail {
+            position: absolute;
+            left: 18px;
+            right: 18px;
+            top: 50%;
+            height: 8px;
+            transform: translateY(-50%);
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.34);
+        }
+
+        .virtual-slider-thumb {
+            position: absolute;
+            top: 50%;
+            left: 18px;
+            width: 56px;
+            height: 56px;
+            transform: translate(-50%, -50%);
+            border-radius: 999px;
+            background: linear-gradient(135deg, #f8fafc, #dbeafe);
+            border: 1px solid rgba(37, 99, 235, 0.26);
+            box-shadow: 0 12px 34px rgba(37, 99, 235, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .slider-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .log {
+            margin-top: 16px;
+            border-radius: 20px;
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 14px;
+            min-height: 140px;
+            max-height: 220px;
+            overflow-y: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .log-entry {
+            margin-bottom: 6px;
+            word-break: break-word;
+        }
+
+        .log-entry.info { color: #93c5fd; }
+        .log-entry.success { color: #86efac; }
+        .log-entry.error { color: #fca5a5; }
+        .log-entry.warn { color: #fdba74; }
+
+        @media (max-width: 980px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .session-bar {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 14px;
+            }
+
+            .app {
+                border-radius: 22px;
+                padding: 18px;
+            }
+
+            .session-bar {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="topbar">
+            <div class="title">
+                <h1>🎯 刮刮乐验证控制台</h1>
+                <p>重构为“截图预览 + 虚拟滑条”模式。你拖下面的控制条，系统会同步驱动真实验证码，不再要求你直接在截图上硬拖。</p>
+            </div>
+            <div class="status disconnected" id="status">
+                <span class="status-dot"></span>
+                <span id="statusText">未连接</span>
+            </div>
+        </div>
+
+        <div class="session-bar">
+            <input type="text" id="sessionIdInput" placeholder="输入会话 ID（通常是 cookie_id / 用户 ID）">
+            <button class="btn btn-primary" id="connectBtn" onclick="connectSession()">连接会话</button>
+            <button class="btn btn-secondary" onclick="refreshSession()">刷新截图</button>
+            <button class="btn btn-secondary" onclick="resetVirtualSlider()">重置滑条</button>
+        </div>
+
+        <div class="grid">
+            <div class="panel">
+                <div class="panel-head">
+                    <h2>验证码实时预览</h2>
+                    <p>蓝色虚线是识别到的轨道区域，橙色框是当前滑块按钮。下面的虚拟滑条会按同一轨迹控制真实页面。</p>
+                </div>
+                <div class="preview-body">
+                    <div class="preview-frame" id="previewFrame">
+                        <div class="placeholder" id="previewPlaceholder">
+                            <div class="spinner"></div>
+                            <div>等待连接或加载截图…</div>
+                        </div>
+                        <img id="captchaImage" alt="验证码截图">
+                        <div class="overlay-track" id="overlayTrack"></div>
+                        <div class="overlay-thumb" id="overlayThumb"></div>
+                        <div class="overlay-line" id="overlayLine"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side">
+                <div class="card">
+                    <h3>当前状态</h3>
+                    <p>建议流程：点击连接 → 等截图和轨道识别完成 → 按住下方虚拟滑条左右拖动 → 看到验证成功即可。</p>
+                    <div class="badge-row">
+                        <div class="badge" id="sessionBadge">会话：-</div>
+                        <div class="badge warn" id="sliderBadge">滑块未识别</div>
+                        <div class="badge" id="verifyBadge">状态：待处理</div>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span>连接状态</span>
+                            <strong id="connectionStatus">未连接</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>滑条位置</span>
+                            <strong id="ratioValue">0%</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>轨道识别</span>
+                            <strong id="trackValue">未就绪</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>验证结果</span>
+                            <strong id="verificationStatus">待处理</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>建议落点</span>
+                            <strong id="assistValue">无历史</strong>
+                        </div>
+                    </div>
+
+                    <div class="virtual-slider-wrap">
+                        <div class="virtual-slider-head">
+                            <div>
+                                <strong>虚拟滑条</strong>
+                                <span>按住拖动，后台同步控制真实滑块</span>
+                            </div>
+                            <span id="sliderHint">等待识别轨道…</span>
+                        </div>
+                        <div class="virtual-slider disabled" id="virtualSlider">
+                            <div class="virtual-slider-fill" id="virtualSliderFill"></div>
+                            <div class="virtual-slider-rail"></div>
+                            <div class="virtual-slider-thumb" id="virtualSliderThumb">↔</div>
+                        </div>
+                        <div class="slider-actions">
+                            <button class="btn btn-secondary" onclick="nudgeSlider(-0.03)">向左微调</button>
+                            <button class="btn btn-secondary" onclick="nudgeSlider(0.03)">向右微调</button>
+                            <button class="btn btn-primary" id="assistBtn" onclick="submitAssistDrag()" disabled>历史成功位提交</button>
+                            <button class="btn btn-secondary" onclick="finishVirtualSlider()">松开提交</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>操作日志</h3>
+                    <p>如果看起来没动，先点“刷新截图”；若轨道识别失败，通常刷新一次就会重新抓到。</p>
+                    <div class="log" id="log">
+                        <div class="log-entry info">等待连接…</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let currentSessionId = null;
+        let reconnectAttempts = 0;
+        let reconnectTimer = null;
+        let shouldReconnect = false;
+        let sessionExpired = false;
+        let socketGeneration = 0;
+        let lastSocketErrorCode = null;
+        let deferredScreenshotPayload = null;
+        let lastScreenshotRenderedAt = 0;
+        let sessionPayload = null;
+        let pointerDragging = false;
+        let remoteDragging = false;
+        let activePointerId = null;
+        let lastMoveSentAt = 0;
+        let currentRatio = 0;
+        const moveThrottleMs = 14;
+        const screenshotRenderThrottleMs = 220;
+
+        const el = (id) => document.getElementById(id);
+
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            el('log').appendChild(entry);
+            el('log').scrollTop = el('log').scrollHeight;
+        }
+
+        function clearReconnectTimer() {
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+        }
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function setStatus(status, text) {
+            const statusEl = el('status');
+            statusEl.className = `status ${status}`;
+            el('statusText').textContent = text;
+            el('connectionStatus').textContent = text;
+        }
+
+        function setVerificationText(text) {
+            el('verificationStatus').textContent = text;
+            el('verifyBadge').textContent = `状态：${text}`;
+        }
+
+        function setAssistState(assist) {
+            const assistEnabled = !!assist?.enabled && typeof assist?.recommended_ratio === 'number';
+            const assistBtn = el('assistBtn');
+
+            if (!assistEnabled) {
+                el('assistValue').textContent = '无历史';
+                assistBtn.disabled = true;
+                if (!sessionExpired && !sessionPayload?.interactive?.drag_bounds) {
+                    el('sliderHint').textContent = '等待识别轨道…';
+                }
+                return;
+            }
+
+            const ratio = Math.round(assist.recommended_ratio * 100);
+            const samples = assist.samples || 0;
+            el('assistValue').textContent = `${ratio}% (${samples}次)`;
+            assistBtn.disabled = false;
+
+            if (!pointerDragging && !remoteDragging) {
+                el('sliderHint').textContent = assist.hint || `历史成功位约 ${ratio}%`;
+            }
+        }
+
+        function expireSession(message) {
+            sessionExpired = true;
+            shouldReconnect = false;
+            lastSocketErrorCode = 'session_not_found';
+            clearReconnectTimer();
+            pointerDragging = false;
+            remoteDragging = false;
+            activePointerId = null;
+            setStatus('disconnected', '会话已失效');
+            setVerificationText('会话已失效');
+            setSliderEnabled(false);
+            setAssistState(null);
+            el('sliderHint').textContent = '请回市场调研页重新发起一次查询';
+            el('trackValue').textContent = '会话失效';
+            el('connectBtn').disabled = false;
+            log(message || '当前验证码会话已失效', 'error');
+        }
+
+        function setSliderEnabled(enabled) {
+            const slider = el('virtualSlider');
+            slider.classList.toggle('disabled', !enabled);
+            el('sliderBadge').textContent = enabled ? '滑块已识别' : '滑块未识别';
+            el('sliderBadge').className = enabled ? 'badge ok' : 'badge warn';
+            el('sliderHint').textContent = enabled ? '按住横向拖动即可' : '等待识别轨道…';
+            el('trackValue').textContent = enabled ? '已识别' : '未就绪';
+        }
+
+        function getSocketUrl(sessionId) {
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            return `${protocol}://${window.location.host}/api/captcha/ws/${sessionId}`;
+        }
+
+        function displayScreenshot(base64Image) {
+            const img = el('captchaImage');
+            const placeholder = el('previewPlaceholder');
+
+            img.onload = () => {
+                placeholder.style.display = 'none';
+                img.style.display = 'block';
+                const frame = el('previewFrame');
+                frame.style.width = `${img.clientWidth}px`;
+                frame.style.height = `${img.clientHeight}px`;
+                renderOverlay();
+            };
+
+            img.src = `data:image/jpeg;base64,${base64Image}`;
+            lastScreenshotRenderedAt = Date.now();
+        }
+
+        function flushDeferredScreenshot(force = false) {
+            if (!deferredScreenshotPayload) {
+                return;
+            }
+
+            if (!force && (pointerDragging || remoteDragging)) {
+                return;
+            }
+
+            const payload = deferredScreenshotPayload;
+            deferredScreenshotPayload = null;
+            if (payload?.screenshot) {
+                displayScreenshot(payload.screenshot);
+            }
+        }
+
+        function applyBoxStyle(node, box, naturalWidth, naturalHeight) {
+            if (!box || !naturalWidth || !naturalHeight) {
+                node.style.display = 'none';
+                return;
+            }
+
+            node.style.display = 'block';
+            node.style.left = `${(box.x / naturalWidth) * 100}%`;
+            node.style.top = `${(box.y / naturalHeight) * 100}%`;
+            node.style.width = `${(box.width / naturalWidth) * 100}%`;
+            node.style.height = `${(box.height / naturalHeight) * 100}%`;
+        }
+
+        function renderOverlay() {
+            const img = el('captchaImage');
+            const interactive = sessionPayload?.interactive;
+            const naturalWidth = img.naturalWidth || interactive?.clip_rect?.width;
+            const naturalHeight = img.naturalHeight || interactive?.clip_rect?.height;
+
+            applyBoxStyle(el('overlayTrack'), interactive?.relative_track_box, naturalWidth, naturalHeight);
+            applyBoxStyle(el('overlayThumb'), interactive?.relative_slider_box, naturalWidth, naturalHeight);
+
+            const line = el('overlayLine');
+            const dragBounds = interactive?.drag_bounds;
+            if (dragBounds && naturalWidth && naturalHeight) {
+                line.style.display = 'block';
+                line.style.left = `${(dragBounds.relative_min_x / naturalWidth) * 100}%`;
+                line.style.top = `${(dragBounds.relative_y / naturalHeight) * 100}%`;
+                line.style.width = `${((dragBounds.relative_max_x - dragBounds.relative_min_x) / naturalWidth) * 100}%`;
+            } else {
+                line.style.display = 'none';
+            }
+        }
+
+        function updateVirtualSlider(ratio) {
+            const slider = el('virtualSlider');
+            const thumb = el('virtualSliderThumb');
+            const fill = el('virtualSliderFill');
+            const trackRect = slider.getBoundingClientRect();
+            const minLeft = 18;
+            const maxLeft = Math.max(minLeft, trackRect.width - 18);
+            const px = minLeft + (maxLeft - minLeft) * ratio;
+
+            currentRatio = ratio;
+            thumb.style.left = `${px}px`;
+            fill.style.width = `${px}px`;
+            el('ratioValue').textContent = `${Math.round(ratio * 100)}%`;
+        }
+
+        function resetVirtualSlider() {
+            pointerDragging = false;
+            remoteDragging = false;
+            activePointerId = null;
+            updateVirtualSlider(0);
+            flushDeferredScreenshot(true);
+            log('虚拟滑条已重置', 'info');
+        }
+
+        function getDragRatioFromEvent(event) {
+            const slider = el('virtualSlider');
+            const rect = slider.getBoundingClientRect();
+            const raw = (event.clientX - rect.left - 18) / Math.max(1, rect.width - 36);
+            return clamp(raw, 0, 1);
+        }
+
+        function sendWs(payload) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                return false;
+            }
+            ws.send(JSON.stringify(payload));
+            return true;
+        }
+
+        function beginRemoteDrag() {
+            if (remoteDragging) {
+                return true;
+            }
+
+            const ok = sendWs({ type: 'drag_event', phase: 'start', ratio: 0 });
+            if (ok) {
+                remoteDragging = true;
+                log('开始控制真实滑块', 'info');
+            }
+            return ok;
+        }
+
+        function sendMoveRatio(ratio, force = false) {
+            const now = Date.now();
+            if (!force && now - lastMoveSentAt < moveThrottleMs) {
+                return;
+            }
+            lastMoveSentAt = now;
+            sendWs({ type: 'drag_event', phase: 'move', ratio });
+        }
+
+        function finishVirtualSlider() {
+            if (!remoteDragging && !pointerDragging) {
+                return;
+            }
+
+            pointerDragging = false;
+            activePointerId = null;
+
+            if (remoteDragging) {
+                sendWs({ type: 'drag_event', phase: 'end', ratio: currentRatio });
+                remoteDragging = false;
+                setVerificationText('验证中...');
+                flushDeferredScreenshot();
+                log(`提交拖拽位置 ${Math.round(currentRatio * 100)}%`, 'info');
+            }
+        }
+
+        function submitAssistDrag() {
+            const assist = sessionPayload?.assist;
+            if (!assist?.enabled || typeof assist?.recommended_ratio !== 'number') {
+                log('当前没有可用的历史成功辅助', 'warn');
+                return;
+            }
+
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('WebSocket 未连接，无法执行辅助提交', 'error');
+                return;
+            }
+
+            pointerDragging = false;
+            remoteDragging = false;
+            activePointerId = null;
+
+            const ratio = clamp(assist.recommended_ratio, 0, 1);
+            updateVirtualSlider(ratio);
+            setVerificationText('验证中...');
+            flushDeferredScreenshot();
+            sendWs({ type: 'assist_submit', ratio });
+            log(`按历史成功位提交 ${Math.round(ratio * 100)}%`, 'info');
+        }
+
+        function nudgeSlider(delta) {
+            const enabled = !!sessionPayload?.interactive?.drag_bounds;
+            if (!enabled) {
+                log('当前还没有识别到滑块轨道，无法微调', 'warn');
+                return;
+            }
+
+            const nextRatio = clamp(currentRatio + delta, 0, 1);
+            if (!remoteDragging && !beginRemoteDrag()) {
+                return;
+            }
+
+            updateVirtualSlider(nextRatio);
+            sendMoveRatio(nextRatio, true);
+            log(`微调到 ${Math.round(nextRatio * 100)}%`, 'info');
+        }
+
+        function refreshSession() {
+            if (!currentSessionId) {
+                log('请先连接会话', 'warn');
+                return;
+            }
+
+            if (sendWs({ type: 'refresh_session' })) {
+                log('已请求刷新截图', 'info');
+            }
+        }
+
+        async function preflightSession(sessionId) {
+            try {
+                const response = await fetch(`/api/captcha/session/${encodeURIComponent(sessionId)}`, {
+                    cache: 'no-store'
+                });
+
+                if (response.ok) {
+                    const payload = await response.json();
+                    updateSessionPayload(payload);
+                    return true;
+                }
+
+                if (response.status === 404) {
+                    expireSession('当前验证码会话已失效，请回市场调研页重新发起一次查询');
+                    return false;
+                }
+
+                log(`会话预检查失败（HTTP ${response.status}），继续尝试连接`, 'warn');
+                return true;
+            } catch (error) {
+                log(`会话预检查失败：${error.message}`, 'warn');
+                return true;
+            }
+        }
+
+        function handleSliderPointerDown(event) {
+            const enabled = !!sessionPayload?.interactive?.drag_bounds;
+            if (!enabled || !ws || ws.readyState !== WebSocket.OPEN) {
+                return;
+            }
+
+            event.preventDefault();
+            pointerDragging = true;
+            activePointerId = event.pointerId;
+            try {
+                el('virtualSlider').setPointerCapture(event.pointerId);
+            } catch (_) {}
+
+            if (!beginRemoteDrag()) {
+                pointerDragging = false;
+                activePointerId = null;
+                return;
+            }
+
+            const ratio = getDragRatioFromEvent(event);
+            updateVirtualSlider(ratio);
+            sendMoveRatio(ratio, true);
+        }
+
+        function handleSliderPointerMove(event) {
+            if (!pointerDragging || activePointerId !== event.pointerId) {
+                return;
+            }
+
+            event.preventDefault();
+            const ratio = getDragRatioFromEvent(event);
+            updateVirtualSlider(ratio);
+            sendMoveRatio(ratio);
+        }
+
+        function handleSliderPointerUp(event) {
+            if (!pointerDragging || activePointerId !== event.pointerId) {
+                return;
+            }
+
+            event.preventDefault();
+            const ratio = getDragRatioFromEvent(event);
+            updateVirtualSlider(ratio);
+            finishVirtualSlider();
+
+            try {
+                el('virtualSlider').releasePointerCapture(event.pointerId);
+            } catch (_) {}
+        }
+
+        function updateSessionPayload(data) {
+            sessionPayload = data;
+            el('sessionBadge').textContent = `会话：${data.session_id || '-'}`;
+
+            if (data.interactive?.relative_track_box) {
+                const w = Math.round(data.interactive.relative_track_box.width || 0);
+                const h = Math.round(data.interactive.relative_track_box.height || 0);
+                el('trackValue').textContent = `${w}×${h}`;
+            } else if (data.captcha_info) {
+                const w = Math.round(data.captcha_info.width || 0);
+                const h = Math.round(data.captcha_info.height || 0);
+                el('trackValue').textContent = `${w}×${h}`;
+            }
+
+            if (data.screenshot) {
+                if (pointerDragging || remoteDragging) {
+                    const now = Date.now();
+                    if (now - lastScreenshotRenderedAt >= screenshotRenderThrottleMs) {
+                        deferredScreenshotPayload = null;
+                        displayScreenshot(data.screenshot);
+                    } else {
+                        deferredScreenshotPayload = data;
+                    }
+                } else {
+                    deferredScreenshotPayload = null;
+                    displayScreenshot(data.screenshot);
+                }
+            }
+
+            const hasBounds = !!data.interactive?.drag_bounds;
+            setSliderEnabled(hasBounds);
+            setAssistState(data.assist);
+            renderOverlay();
+
+            if (!pointerDragging && !remoteDragging && !data.completed) {
+                updateVirtualSlider(0);
+            }
+
+            if (data.completed) {
+                shouldReconnect = false;
+                setStatus('completed', '验证成功');
+                setVerificationText('已完成');
+            } else if (el('verificationStatus').textContent === '验证中...') {
+                setVerificationText('待处理');
+            }
+        }
+
+        function handleSocketMessage(data) {
+            if (data.type === 'session_info' || data.type === 'screenshot_update') {
+                updateSessionPayload(data);
+                if (data.type === 'session_info') {
+                    log('会话已就绪', 'success');
+                    if (data.assist?.enabled && data.assist?.hint) {
+                        log(data.assist.hint, 'info');
+                    }
+                }
+                return;
+            }
+
+            if (data.type === 'completed') {
+                shouldReconnect = false;
+                flushDeferredScreenshot(true);
+                setStatus('completed', '验证成功');
+                setVerificationText('已完成');
+                log('✅ 验证成功', 'success');
+                return;
+            }
+
+            if (data.type === 'failed') {
+                flushDeferredScreenshot(true);
+                setVerificationText('验证失败');
+                log(data.message || '验证失败，请重试', 'error');
+                return;
+            }
+
+            if (data.type === 'completion_status') {
+                if (data.completed) {
+                    shouldReconnect = false;
+                    setStatus('completed', '验证成功');
+                    setVerificationText('已完成');
+                }
+                return;
+            }
+
+            if (data.type === 'error') {
+                lastSocketErrorCode = data.code || null;
+                if (data.code === 'session_not_found' || (data.message || '').includes('会话不存在')) {
+                    expireSession('当前验证码会话已失效，请回市场调研页重新发起一次查询');
+                    return;
+                }
+                log(data.message || '未知错误', 'error');
+            }
+        }
+
+        async function connectSession(options = {}) {
+            const { isReconnect = false } = options;
+            const sessionId = el('sessionIdInput').value.trim();
+            if (!sessionId) {
+                alert('请输入会话 ID');
+                return;
+            }
+
+            clearReconnectTimer();
+
+            if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+                const previousSocket = ws;
+                ws = null;
+                try {
+                    previousSocket.close();
+                } catch (_) {}
+            }
+
+            currentSessionId = sessionId;
+            sessionExpired = false;
+            shouldReconnect = true;
+            lastSocketErrorCode = null;
+            el('connectBtn').disabled = true;
+            el('sessionBadge').textContent = `会话：${sessionId}`;
+            setStatus('disconnected', '连接中...');
+            log(`正在连接会话 ${sessionId}`, 'info');
+
+            const sessionExists = await preflightSession(sessionId);
+            if (!sessionExists) {
+                return;
+            }
+
+            const generation = ++socketGeneration;
+            const socket = new WebSocket(getSocketUrl(sessionId));
+            ws = socket;
+
+            socket.onopen = () => {
+                if (ws !== socket || generation !== socketGeneration) {
+                    return;
+                }
+                reconnectAttempts = 0;
+                clearReconnectTimer();
+                setStatus('connected', '已连接');
+                el('connectBtn').disabled = false;
+                log('WebSocket 连接成功', 'success');
+            };
+
+            socket.onmessage = (event) => {
+                if (ws !== socket || generation !== socketGeneration) {
+                    return;
+                }
+                const data = JSON.parse(event.data);
+                handleSocketMessage(data);
+            };
+
+            socket.onerror = () => {
+                if (ws !== socket || generation !== socketGeneration) {
+                    return;
+                }
+                setStatus('disconnected', '连接异常');
+                el('connectBtn').disabled = false;
+                log('WebSocket 连接异常', 'error');
+            };
+
+            socket.onclose = () => {
+                if (ws === socket) {
+                    ws = null;
+                }
+                if (generation !== socketGeneration) {
+                    return;
+                }
+
+                setStatus('disconnected', '已断开');
+                el('connectBtn').disabled = false;
+                remoteDragging = false;
+                pointerDragging = false;
+                flushDeferredScreenshot(true);
+
+                if (
+                    currentSessionId &&
+                    shouldReconnect &&
+                    !sessionExpired &&
+                    lastSocketErrorCode !== 'session_not_found' &&
+                    el('verificationStatus').textContent !== '已完成'
+                ) {
+                    reconnectAttempts += 1;
+                    const delay = Math.min(3000, 700 * reconnectAttempts);
+                    log(`连接关闭，${delay}ms 后自动重连`, 'warn');
+                    reconnectTimer = setTimeout(() => connectSession({ isReconnect: true }), delay);
+                } else if (sessionExpired && !isReconnect) {
+                    log('已停止自动重连，请重新触发新的验证码会话', 'warn');
+                }
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const slider = el('virtualSlider');
+            slider.addEventListener('pointerdown', handleSliderPointerDown);
+            slider.addEventListener('pointermove', handleSliderPointerMove);
+            slider.addEventListener('pointerup', handleSliderPointerUp);
+            slider.addEventListener('pointercancel', handleSliderPointerUp);
+
+            updateVirtualSlider(0);
+
+            if (window.INITIAL_SESSION_ID) {
+                el('sessionIdInput').value = window.INITIAL_SESSION_ID;
+                connectSession();
+            }
+        });
+    </script>
+</body>
+</html>

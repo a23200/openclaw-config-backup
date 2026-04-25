@@ -1,0 +1,96 @@
+{
+  "id": "20260424-211215-98213e",
+  "title": "把宇宙讲清楚2",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-211215-98213e/final_mastered.mp4",
+  "created_at": 1777036335.120487,
+  "updated_at": 1777036345.386085,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "关于把宇宙讲清楚的一段观察",
+    "enable_natural_voiceover": true,
+    "material_category": "auto",
+    "narration_tone": "克制、清晰、带一点敬畏感，像在用最短时间把复杂概念讲明白",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary",
+    "subtitle_style": "douyin_bold",
+    "selection_engine": "manual",
+    "narration_text": "宇宙并不是一片空黑。我们看到的每一颗星，每一团星云。都是时间和引力共同留下的痕迹。地球只是太阳系里一颗普通行星。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "steady_male",
+      "voice": "echo",
+      "speed": 0.96,
+      "gain": 1.0,
+      "pause_bias": 0.18,
+      "style": "documentary",
+      "category": "auto"
+    },
+    "tts_voice": "echo",
+    "tts_speed": 0.96,
+    "voice_gain": 1.0,
+    "pause_bias": 0.18,
+    "tts_engine": "edge_tts",
+    "mix_params": {
+      "voice_gain": 1.0,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-211215-98213e/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "15秒把宇宙讲清楚：我们到底身处怎样的空间",
+    "description": "从星空到星云，15秒带你快速理解宇宙的尺度与神秘。#宇宙科普 #星空 #天文 #短视频科普",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "把宇宙讲清楚",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "用稳定深空画面开场，先建立宇宙的宏大与未知感，适合引出科普主题",
+        "order": 1
+      },
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "承接开场进入更具体的宇宙结构，用星云旋动强化信息推进和视觉节奏",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "作为结尾形成神秘回味，用更梦幻的色彩收束主题，完成从提问到理解的情绪闭环",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "克制、清晰、带一点敬畏感，像在用最短时间把复杂概念讲明白",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "manual",
+    "suggested_tags": [
+      "宇宙",
+      "ClawLink",
+      "素材库短片"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

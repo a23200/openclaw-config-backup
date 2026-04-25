@@ -1,0 +1,30 @@
+{
+  "deckTitle": "make-ppt",
+  "slideCount": 2,
+  "slides": [
+    {
+      "page": 1,
+      "title": "make-ppt",
+      "contextTitle": "make-ppt",
+      "bullets": [
+        "独立的本地 PPT 生成项目目录",
+        "这个目录只保留了 PPT 相关能力"
+      ],
+      "scenePrompt": "editorial comic cover scene for a Chinese business PowerPoint about make-ppt, with layered abstract modules, flowing arrows, key themes and a strong management-deck feel",
+      "filename": "P1-make-ppt.png"
+    },
+    {
+      "page": 2,
+      "title": "make-ppt",
+      "contextTitle": "make-ppt",
+      "bullets": [
+        "独立的本地 PPT 生成项目目录",
+        "这个目录只保留了 PPT 相关能力",
+        "scripts/app-factory-preview.cjs：本地 Word/PDF/Markdown -> PPT 网页入口",
+        "scripts/build_comic_manga_ppt.py：漫画风 PPT 专用 Gemini 真生图脚本"
+      ],
+      "scenePrompt": "premium business comic infographic for 《make-ppt》, using editorial cards, arrows, dashboards and abstract symbols to explain 独立的本地 PPT 生成项目目录；这个目录只保留了 PPT 相关能力；scripts/app-factory-preview.cjs：本地 Word/PDF/Markdown -> PPT 网页入口",
+      "filename": "P2-make-ppt.png"
+    }
+  ]
+}

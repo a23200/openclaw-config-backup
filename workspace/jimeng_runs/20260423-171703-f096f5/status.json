@@ -1,0 +1,37 @@
+{
+  "id": "20260423-171703-f096f5",
+  "title": "庭前的沉默与追问",
+  "task_type": "jimeng",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260423-171703-f096f5/final_mastered.mp4",
+  "created_at": 1776935823.393118,
+  "updated_at": 1776998524.654013,
+  "post": {
+    "mode": "auto",
+    "title_card_text": "开庭不是终点而是她为自己发声的开始",
+    "enable_natural_voiceover": true,
+    "resolved_mode": "title_card"
+  },
+  "publish": {
+    "title": "她走进法庭的那一刻 比答案更重要的是发声",
+    "description": "当伤害与权益被放到法庭上讨论，最难的往往不是等待结果，而是鼓起开口的勇气。愿每一次依法发声都被认真听见。#案件观察 #女性权益 #工伤认定 #社会议题",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "first_prompt": "9:16竖屏，电影感现实题材，一名年轻女性独自站在法院走廊尽头，手里攥着工伤认定材料与起诉文件，清晨冷色顶光与窗侧自然光交错，空气里有压抑与克制，地面反光，长焦压缩空间，人物背影微微紧绷，面部不正面呈现，真实克制，无品牌无机构标识，高细节，光影层次分明，情绪指向明确",
+    "last_prompt": "9:16竖屏，电影感现实题材，同一名年轻女性从法庭门口缓慢走出，手中的文件已被整理平整，夕阳暖光穿过高窗落在她肩上，走廊仍安静但压迫感减弱，镜头捕捉她停顿后继续向前的瞬间，近中景，神情疲惫却坚定，不出现真实姓名与机构标识，高细节，冷暖对照，情绪从压抑过渡到坚决",
+    "video_prompt": "以现实主义电影镜头语言呈现案件开庭前后的情绪递进：开场为静止长镜头，缓慢推近法院走廊中的女性背影，细微手持呼吸感；随后切到文件边缘、握紧的手、鞋跟停顿的特写，节奏克制；中段镜头轻微横移，捕捉法庭门开启又关闭的瞬间，环境音氛围感强，时间像被拉长；再用一次轻缓升降镜头从文件抬升到人物侧脸，表现压抑与隐忍；尾段转为缓慢后拉，人物从门口走向有光的走廊，色温由冷转暖，形成情绪对照；整体720p竖屏短片质感，光影层次强，现实、克制、沉静、有呼吸感，不猎奇不煽情",
+    "bgm_path": ""
+  },
+  "video": {
+    "mode": "frames2video",
+    "audio_reference": ""
+  },
+  "first_submit_id": "3108415a3875dcbb",
+  "last_submit_id": "ecb2e88e9b080b15",
+  "video_submit_id": "e8cd991484d2af11",
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

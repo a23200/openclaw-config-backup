@@ -1,0 +1,66 @@
+{
+  "deckTitle": "2026公司架构解读：旧神陨落 新神开眼",
+  "slideCount": 5,
+  "slides": [
+    {
+      "page": 1,
+      "title": "2026公司架构解读",
+      "contextTitle": "2026公司架构解读：旧神陨落 新神开眼",
+      "bullets": [
+        "当前，公司正处在一个极其关键的阶段",
+        "这不是一次简单的结构调整，也不是一次常规意…"
+      ],
+      "scenePrompt": "editorial comic cover scene for a Chinese business PowerPoint about 2026公司架构解读：旧神陨落 新神开眼, with layered abstract modules, flowing arrows, key themes and a strong management-deck feel",
+      "filename": "P1-2026公司架构解读.png"
+    },
+    {
+      "page": 2,
+      "title": "二、资本路径与资本市场战略",
+      "contextTitle": "二、资本路径与资本市场战略",
+      "bullets": [
+        "当前，公司正处在一个极其关键的阶段",
+        "这不是一次简单的结构调整，也不是一次常规意义上的治理优化",
+        "这是一轮围绕未来竞争力展开的主动重构",
+        "我们正在推进的，不只是原有结构的阶段性优化，也不是对历史关系的被动整理"
+      ],
+      "scenePrompt": "action roadmap board with milestones, branching arrows, key actions and a clear next-step flow, focused on 当前，公司正处在一个极其关键的阶段；这不是一次简单的结构调整，也不是一次常规意义上的治理优化；这是一轮围绕未来竞争力展开的主动重构",
+      "filename": "P2-二、资本路径与资本市场战略.png"
+    },
+    {
+      "page": 3,
+      "title": "三、ClawLink AI应用体系",
+      "contextTitle": "三、ClawLink AI应用体系",
+      "bullets": [
+        "公司未来所有业务，都将以 AI 为核心驱动，在不同行业中展开自动化工作流的重构与接管",
+        "而承载这一切的，不是某一个工具，不是某一个项目，而是我们正在构建的——ClawLink AI 应用体系",
+        "但在真正介绍 ClawLink ai 应用体系之前，我们必须先把一件更底层的事情说透",
+        "这个时代，到底变了什么？"
+      ],
+      "scenePrompt": "premium business comic infographic for 《2026公司架构解读：旧神陨落 新神开眼》, using editorial cards, arrows, dashboards and abstract symbols to explain 公司未来所有业务，都将以 AI 为核心驱动，在不同行业中展开自动化工作流的重构与接管；而承载这一切的，不是某一个工具，不是某一个项目，而是我们正在构建的——ClawLink AI 应用体系；但在真正介绍 ClawLink ai 应用体系之前，我们必须先把一件更底层的事情说透",
+      "filename": "P3-三、ClawLinkAI应用体系.png"
+    },
+    {
+      "page": 4,
+      "title": "四、延展企业集群：四个行业表象，一…",
+      "contextTitle": "四、延展企业集群：四个行业表象，一套权力接管系统",
+      "bullets": [
+        "很多人看到这个标题，会以为我们在讲四个业务方向",
+        "如果你是这么理解的，那你还是在用旧时代的眼光看问题",
+        "我们不是在做四个彼此分散的项目，更不是在“这个赛道试一下，那个赛道试一下”",
+        "我们真正做的，始终只有一件事：把 ClawLink ai 应用体系，放进不同产业里，接管其中最核心的控制权"
+      ],
+      "scenePrompt": "system blueprint scene with layered platforms, nodes, data links and modular capability blocks, illustrating 很多人看到这个标题，会以为我们在讲四个业务方向；如果你是这么理解的，那你还是在用旧时代的眼光看问题；我们不是在做四个彼此分散的项目，更不是在“这个赛道试一下，那个赛道试一下”",
+      "filename": "P4-四、延展企业集群：四个行业表象，一….png"
+    },
+    {
+      "page": 5,
+      "title": "五、公司盈利模型",
+      "contextTitle": "五、公司盈利模型",
+      "bullets": [
+        "五、公司盈利模型"
+      ],
+      "scenePrompt": "premium business comic infographic for 《2026公司架构解读：旧神陨落 新神开眼》, using editorial cards, arrows, dashboards and abstract symbols to explain 五、公司盈利模型",
+      "filename": "P5-五、公司盈利模型.png"
+    }
+  ]
+}

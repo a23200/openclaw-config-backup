@@ -1,0 +1,32 @@
+Use the provided image strictly as a visual style reference, not as content to copy.
+Create a 16:9 educational infographic slide in the same visual language:
+- white background
+- bold deep blue headline area at the top center
+- clean blue and orange accent colors
+- thick black outlines
+- rounded comic speech bubble style
+- subtle geometric corner decorations inspired by the reference image
+- polished classroom infographic quality
+
+Very important composition rules:
+1. Reserve clean empty white space across the top for a large Chinese title and two short bullet lines to be added later.
+2. In the lower half, place exactly these subjects from left to right on one horizontal line:
+   - one seated husky dog, clearly recognizable as a husky, tail wagging
+   - one computer-head stick figure facing forward
+   - one computer-head stick figure facing forward
+   - one computer-head stick figure facing forward
+3. Connect the four subjects with orange arrows.
+4. Leave the three computer screens empty and clean for later text overlay.
+5. Leave one empty speech bubble above the rightmost computer-head figure for later text overlay.
+
+Hard constraints:
+- no readable text
+- no numbers
+- no formulas
+- no books
+- no servers
+- no extra characters
+- no extra icons except subtle corner ornaments
+- no large colored title banner or header block
+- no watermark
+- keep the layout clean and spacious

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>网站工程师 · 复刻与漏洞巡检</title>
+    <link rel="stylesheet" href="/website-engineer/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+          <div class="eyebrow">ClawLink Employee Service</div>
+          <h1>网站工程师</h1>
+          <p>这里不是展示页，而是这个员工自己的独立工作台：输入网址后可执行网页复刻预览与被动漏洞巡检。</p>
+        </div>
+        <div class="hero-badges">
+          <span>复刻网站</span>
+          <span>漏洞巡检</span>
+          <span>输出修复建议</span>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="panel control-panel">
+          <label class="field">
+            <span>目标网址</span>
+            <input id="target-url" type="text" placeholder="例如 https://example.com" />
+          </label>
+
+          <div class="actions">
+            <button id="load-example" class="ghost">载入示例</button>
+            <button id="clone-button" class="primary">复刻网页</button>
+            <button id="scan-button" class="secondary">查询漏洞</button>
+          </div>
+
+          <div id="status-box" class="status-box">等待输入网址。</div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>复刻预览</h2>
+            <div id="clone-meta" class="meta-row">尚未生成预览</div>
+          </div>
+          <div id="clone-metrics" class="chips"></div>
+          <iframe
+            id="clone-frame"
+            title="复刻预览"
+            sandbox="allow-forms allow-popups allow-pointer-lock"
+          ></iframe>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>漏洞巡检</h2>
+            <div id="scan-meta" class="meta-row">尚未执行巡检</div>
+          </div>
+          <div id="scan-summary" class="summary-grid"></div>
+          <div id="headers-box" class="headers-box"></div>
+          <div id="findings-list" class="findings-list">
+            <div class="empty-state">执行“查询漏洞”后，这里会列出基础风险项与修复建议。</div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/website-engineer/app.js"></script>
+  </body>
+  </html>

@@ -1,0 +1,14 @@
+{
+  "submit_id": "fbf22b9ddb6758e7",
+  "prompt": "9:16竖屏，电影感写实风格，同一位年轻人已经完成千禧年虚拟换装风格穿搭，站在演出场馆外的人群边缘，夜色里霓虹与路灯在亮面外套和配饰上形成流动反光，表情从犹豫变成笃定又兴奋，远处入口灯牌虚化，人群形成景深层次，微风吹动发丝与衣摆，手插口袋微微抬头，情绪像终于把头像里的自己带到现实，大全景到中景过渡感，冷暖对比明显，胶片颗粒，氛围克制而热烈",
+  "logid": "202604231513081921680002188476FF1",
+  "gen_status": "querying",
+  "credit_count": 3,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Generating",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":true,\"dreamina_matrix_queue_name\":\"\",\"dreamina_matrix_req_key\":\"\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":false,\"queue_name\":\"high_aes_general_v50\",\"matrix_req_key\":\"MImageGen:high_aes_general_v50\",\"matrix_second_req_key\":\"\"}"
+  }
+}

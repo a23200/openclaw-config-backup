@@ -1,0 +1,17 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,PingFang SC,74,&H00FFFFFF,&H000000FF,&H14000000,&H69000000,-1,0,0,0,100,100,0,0,1,4,1,2,80,80,165,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+
+Dialogue: 0,00:00:00.000,00:00:05.085,Default,,0,0,0,,你看到的星云，像在宇宙里缓慢 旋转
+Dialogue: 0,00:00:05.085,00:00:07.627,Default,,0,0,0,,其实它不是一整团东西在打转， 而是大量气体和尘
+Dialogue: 0,00:00:07.627,00:00:10.170,Default,,0,0,0,,埃

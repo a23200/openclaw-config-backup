@@ -13,6 +13,6 @@
     "imagetext:publish": "node ./src/publish-imagetext.mjs"
   },
   "dependencies": {
-    "playwright": "^1.52.0"
+    "playwright": "^1.59.1"
   }
 }

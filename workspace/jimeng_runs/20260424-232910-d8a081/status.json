@@ -1,0 +1,97 @@
+{
+  "id": "20260424-232910-d8a081",
+  "title": "黑洞明明存在，我们为什么就是看不见它",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-232910-d8a081/final_mastered.mp4",
+  "created_at": 1777044550.553354,
+  "updated_at": 1777044565.914262,
+  "post": {
+    "mode": "auto",
+    "title_card_text": "黑洞为什么看不见背后的原理",
+    "enable_natural_voiceover": true,
+    "material_category": "science",
+    "narration_tone": "清晰、可信、循序渐进，先用现象设问，再用直观比喻解释原因",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary",
+    "subtitle_style": "douyin_bold",
+    "selection_engine": "cc-gpt-5.4",
+    "narration_text": "黑洞之所以看不见，不是因为它躲在黑暗里。而是因为它的引力强到连光都逃不出来。既然没有光进入我们的眼睛。我们当然就直接看不见它。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "steady_male",
+      "voice": "echo",
+      "speed": 0.96,
+      "gain": 1.0,
+      "pause_bias": 0.18,
+      "style": "documentary",
+      "category": "science"
+    },
+    "tts_voice": "echo",
+    "tts_speed": 0.96,
+    "voice_gain": 1.0,
+    "pause_bias": 0.18,
+    "tts_engine": "edge_tts",
+    "mix_params": {
+      "voice_gain": 1.0,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-232910-d8a081/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "黑洞明明存在，我们为什么就是看不见它",
+    "description": "黑洞不是“黑色物体”那么简单，而是连光都逃不出来的区域。看不见它，但能看见它留下的痕迹。#黑洞 #宇宙科普 #天文知识 #科学",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "黑洞为什么看不见",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "用安静深空做现象引入，先建立“明明在宇宙里却看不见”的悬念",
+        "order": 1
+      },
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "用漩涡感视觉承接黑洞话题，强化引力吸积与空间扭曲的联想",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "收尾保持神秘感，用柔和星云画面承接解释后的余味，避免重复构图",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "science",
+    "narration_tone": "清晰、可信、循序渐进，先用现象设问，再用直观比喻解释原因",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "cc-gpt-5.4",
+    "suggested_tags": [
+      "黑洞",
+      "宇宙科普",
+      "天文知识",
+      "科学原理"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

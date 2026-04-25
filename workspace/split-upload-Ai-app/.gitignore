@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+prisma/dev.db
+prisma/dev.db-journal
+public/apks/*
+!public/apks/.gitkeep
+temp/*
+!temp/.gitkeep
+.DS_Store

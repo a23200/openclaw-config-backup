@@ -1,0 +1,12 @@
+{
+  "result": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-211613-文旅引爆点-clawlink六页增强样张/文旅引爆点-ClawLink风格-图片型PPT-六页样张-本地绘制增强.pptx",
+  "outputDir": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-211613-文旅引爆点-clawlink六页增强样张",
+  "slideCount": 6,
+  "mode": "本地绘制增强",
+  "contactSheet": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-211613-文旅引爆点-clawlink六页增强样张/contact-sheet.png",
+  "readme": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-211613-文旅引爆点-clawlink六页增强样张/README.txt",
+  "promptCatalog": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-211613-文旅引爆点-clawlink六页增强样张/gemini-prompts.json",
+  "imageDirectory": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-211613-文旅引爆点-clawlink六页增强样张",
+  "geminiBackdropDirectory": "",
+  "geminiErrors": []
+}

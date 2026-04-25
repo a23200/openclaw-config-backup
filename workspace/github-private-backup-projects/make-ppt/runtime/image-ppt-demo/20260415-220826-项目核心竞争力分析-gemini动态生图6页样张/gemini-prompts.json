@@ -1,0 +1,85 @@
+[
+  {
+    "page": 1,
+    "title": "项目核心竞争力分析",
+    "bullets": [
+      "一个简单的自动化脚本（Skill）可以被轻易复制，但一个能自我进化、垄断数…"
+    ],
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese strategy PowerPoint.\nThe first reference image defines the overall visual language and style.\nIf a second reference image is provided, use it only for page composition, layout rhythm, and information density.\n\nVisual style requirements:\n- white background with large clean negative space\n- thick black outlines, deep blue titles, orange accents, light blue and light orange blocks\n- polished business-infographic style, not childish, not photorealistic, not 3D\n- look like a premium consulting deck mixed with hand-drawn system thinking graphics\n- subtle geometric ornaments, arrows, loops, cards, dashboards, abstract business symbols\n\nContent context only. Do not render these words in the image.\nPage title context: 项目核心竞争力分析\nKey point context:\n- 一个简单的自动化脚本（Skill）可以被轻易复制，但一个能自我进化、垄断数…\n\nMain scene to generate:\n总览页：对比一次性 Skill 和持续进化 Field，中心呈现会学习、会积累、会扩张的系统生命体。\n\nComposition constraints:\n- top 32% of the canvas must stay almost pure white and empty for local title overlay\n- keep the main illustration in the middle and lower half\n- create a distinct page-level composition, not a generic background\n- use 3 to 6 major visual groups only; keep hierarchy clear\n- if reference layout is provided, keep a similar page structure but do not copy existing text\n\nHard constraints:\n- no readable text, no fake text, no pseudo text, no scribbled labels, no Chinese, no English, no numbers\n- no labels, no logos, no watermark, no UI text\n- no crowded tiny icons everywhere\n- no black background, no border\n- no malformed people, no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-214406-文旅引爆点-clawlink六页增强样张/gemini-backdrops/P2-gemini-backdrop.png",
+    "layoutReference": "",
+    "mode": "gemini-api",
+    "rawBackdrop": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-220826-项目核心竞争力分析-gemini动态生图6页样张/gemini-backdrops/P1-gemini-backdrop.png"
+  },
+  {
+    "page": 2,
+    "title": "第一层护城河：闭环自进化系统 vs 线性工具",
+    "bullets": [
+      "对手的Skill是静态的，我们的系统是动态进化的。它每运行一次，就完成一次…",
+      "对手的“Skill”： 是一个线性的、单向的工具（输入 -> 处理 -> …"
+    ],
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese strategy PowerPoint.\n        The first reference image defines the overall visual language and style.\n        If a second reference image is provided, use it only for page composition, layout rhythm, and information density.\n\n        Visual style requirements:\n        - white background with large clean negative space\n        - thick black outlines, deep blue titles, orange accents, light blue and light orange blocks\n        - polished business-infographic style, not childish, not photorealistic, not 3D\n        - look like a premium consulting deck mixed with hand-drawn system thinking graphics\n        - subtle geometric ornaments, arrows, loops, cards, dashboards, abstract business symbols\n\n        Content context only. Do not render these words in the image.\n        Page title context: 第一层护城河：闭环自进化系统 vs 线性工具\n        Key point context:\n        - 对手的Skill是静态的，我们的系统是动态进化的。它每运行一次，就完成一次…\n- 对手的“Skill”： 是一个线性的、单向的工具（输入 -> 处理 -> …\n\n        Main scene to generate:\n        闭环自进化系统页：用飞轮、反馈回路、数据反哺、决策引擎和下一轮优化表达系统越跑越强。\n\n        Composition constraints:\n        - top 32% of the canvas must stay almost pure white and empty for local title overlay\n        - keep the main illustration in the middle and lower half\n        - create a distinct page-level composition, not a generic background\n        - use 3 to 6 major visual groups only; keep hierarchy clear\n        - if reference layout is provided, keep a similar page structure but do not copy existing text\n\n        Hard constraints:\n        - no readable text, no fake text, no pseudo text, no scribbled labels, no Chinese, no English, no numbers\n        - no labels, no logos, no watermark, no UI text\n        - no crowded tiny icons everywhere\n        - no black background, no border\n        - no malformed people, no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-214406-文旅引爆点-clawlink六页增强样张/gemini-backdrops/P2-gemini-backdrop.png",
+    "layoutReference": "",
+    "mode": "gemini-api",
+    "rawBackdrop": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-220826-项目核心竞争力分析-gemini动态生图6页样张/gemini-backdrops/P2-gemini-backdrop.png"
+  },
+  {
+    "page": 3,
+    "title": "第二层护城河：垄断性数据资产 vs 分散信息",
+    "bullets": [
+      "这个“欲望图谱”本身就是最核心的资产。它让我们从“引爆”一个点，升级为“定…",
+      "对手的“Skill”： 只能服务于单一商家，看到的是一个点的数据。"
+    ],
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese strategy PowerPoint.\n        The first reference image defines the overall visual language and style.\n        If a second reference image is provided, use it only for page composition, layout rhythm, and information density.\n\n        Visual style requirements:\n        - white background with large clean negative space\n        - thick black outlines, deep blue titles, orange accents, light blue and light orange blocks\n        - polished business-infographic style, not childish, not photorealistic, not 3D\n        - look like a premium consulting deck mixed with hand-drawn system thinking graphics\n        - subtle geometric ornaments, arrows, loops, cards, dashboards, abstract business symbols\n\n        Content context only. Do not render these words in the image.\n        Page title context: 第二层护城河：垄断性数据资产 vs 分散信息\n        Key point context:\n        - 这个“欲望图谱”本身就是最核心的资产。它让我们从“引爆”一个点，升级为“定…\n- 对手的“Skill”： 只能服务于单一商家，看到的是一个点的数据。\n\n        Main scene to generate:\n        数据资产页：多个分散节点和用户信号汇聚成区域级图谱网络，表达从单点数据升级到市场风向定义能力。\n\n        Composition constraints:\n        - top 32% of the canvas must stay almost pure white and empty for local title overlay\n        - keep the main illustration in the middle and lower half\n        - create a distinct page-level composition, not a generic background\n        - use 3 to 6 major visual groups only; keep hierarchy clear\n        - if reference layout is provided, keep a similar page structure but do not copy existing text\n\n        Hard constraints:\n        - no readable text, no fake text, no pseudo text, no scribbled labels, no Chinese, no English, no numbers\n        - no labels, no logos, no watermark, no UI text\n        - no crowded tiny icons everywhere\n        - no black background, no border\n        - no malformed people, no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-214406-文旅引爆点-clawlink六页增强样张/gemini-backdrops/P2-gemini-backdrop.png",
+    "layoutReference": "",
+    "mode": "gemini-api",
+    "rawBackdrop": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-220826-项目核心竞争力分析-gemini动态生图6页样张/gemini-backdrops/P3-gemini-backdrop.png"
+  },
+  {
+    "page": 4,
+    "title": "第三层护城河：人机混合智能 vs 纯机器执行",
+    "bullets": [
+      "我们的系统是您的智慧与AI执行力相结合的产物。这种“人机混合智能”带来的创…",
+      "对手的“Skill”： 只是一个设定好规则的、机械执行的程序。"
+    ],
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese strategy PowerPoint.\n        The first reference image defines the overall visual language and style.\n        If a second reference image is provided, use it only for page composition, layout rhythm, and information density.\n\n        Visual style requirements:\n        - white background with large clean negative space\n        - thick black outlines, deep blue titles, orange accents, light blue and light orange blocks\n        - polished business-infographic style, not childish, not photorealistic, not 3D\n        - look like a premium consulting deck mixed with hand-drawn system thinking graphics\n        - subtle geometric ornaments, arrows, loops, cards, dashboards, abstract business symbols\n\n        Content context only. Do not render these words in the image.\n        Page title context: 第三层护城河：人机混合智能 vs 纯机器执行\n        Key point context:\n        - 我们的系统是您的智慧与AI执行力相结合的产物。这种“人机混合智能”带来的创…\n- 对手的“Skill”： 只是一个设定好规则的、机械执行的程序。\n\n        Main scene to generate:\n        人机混合智能页：AI 执行官处理规模化动作，人类指挥官做关键判断，形成互补协作的组合智能。\n\n        Composition constraints:\n        - top 32% of the canvas must stay almost pure white and empty for local title overlay\n        - keep the main illustration in the middle and lower half\n        - create a distinct page-level composition, not a generic background\n        - use 3 to 6 major visual groups only; keep hierarchy clear\n        - if reference layout is provided, keep a similar page structure but do not copy existing text\n\n        Hard constraints:\n        - no readable text, no fake text, no pseudo text, no scribbled labels, no Chinese, no English, no numbers\n        - no labels, no logos, no watermark, no UI text\n        - no crowded tiny icons everywhere\n        - no black background, no border\n        - no malformed people, no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-214406-文旅引爆点-clawlink六页增强样张/gemini-backdrops/P2-gemini-backdrop.png",
+    "layoutReference": "",
+    "mode": "gemini-api",
+    "rawBackdrop": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-220826-项目核心竞争力分析-gemini动态生图6页样张/gemini-backdrops/P4-gemini-backdrop.png"
+  },
+  {
+    "page": 5,
+    "title": "第四层护城河：平台化扩张能力 vs 单点定制",
+    "bullets": [
+      "当竞争对手还在做“项目交付”时，我们已经在做“网络扩张”。规模化能力将形成…",
+      "对手的“Skill”： 定制化开发，无法规模化，边际成本高。"
+    ],
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese strategy PowerPoint.\n        The first reference image defines the overall visual language and style.\n        If a second reference image is provided, use it only for page composition, layout rhythm, and information density.\n\n        Visual style requirements:\n        - white background with large clean negative space\n        - thick black outlines, deep blue titles, orange accents, light blue and light orange blocks\n        - polished business-infographic style, not childish, not photorealistic, not 3D\n        - look like a premium consulting deck mixed with hand-drawn system thinking graphics\n        - subtle geometric ornaments, arrows, loops, cards, dashboards, abstract business symbols\n\n        Content context only. Do not render these words in the image.\n        Page title context: 第四层护城河：平台化扩张能力 vs 单点定制\n        Key point context:\n        - 当竞争对手还在做“项目交付”时，我们已经在做“网络扩张”。规模化能力将形成…\n- 对手的“Skill”： 定制化开发，无法规模化，边际成本高。\n\n        Main scene to generate:\n        平台扩张页：从一个样板节点复制到大量节点，呈现标准化平台、网络扩张、规模效应和低边际成本。\n\n        Composition constraints:\n        - top 32% of the canvas must stay almost pure white and empty for local title overlay\n        - keep the main illustration in the middle and lower half\n        - create a distinct page-level composition, not a generic background\n        - use 3 to 6 major visual groups only; keep hierarchy clear\n        - if reference layout is provided, keep a similar page structure but do not copy existing text\n\n        Hard constraints:\n        - no readable text, no fake text, no pseudo text, no scribbled labels, no Chinese, no English, no numbers\n        - no labels, no logos, no watermark, no UI text\n        - no crowded tiny icons everywhere\n        - no black background, no border\n        - no malformed people, no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-214406-文旅引爆点-clawlink六页增强样张/gemini-backdrops/P2-gemini-backdrop.png",
+    "layoutReference": "",
+    "mode": "gemini-api",
+    "rawBackdrop": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-220826-项目核心竞争力分析-gemini动态生图6页样张/gemini-backdrops/P5-gemini-backdrop.png"
+  },
+  {
+    "page": 6,
+    "title": "最终结论",
+    "bullets": [
+      "竞争对手或许可以复制我们“做什么（What）”，但他们永远无法复制我们“如…",
+      "他们做一个一次性的“技能”，而我们，是在运营一个能学习、能垄断、能与您的智…"
+    ],
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese strategy PowerPoint.\n        The first reference image defines the overall visual language and style.\n        If a second reference image is provided, use it only for page composition, layout rhythm, and information density.\n\n        Visual style requirements:\n        - white background with large clean negative space\n        - thick black outlines, deep blue titles, orange accents, light blue and light orange blocks\n        - polished business-infographic style, not childish, not photorealistic, not 3D\n        - look like a premium consulting deck mixed with hand-drawn system thinking graphics\n        - subtle geometric ornaments, arrows, loops, cards, dashboards, abstract business symbols\n\n        Content context only. Do not render these words in the image.\n        Page title context: 最终结论\n        Key point context:\n        - 竞争对手或许可以复制我们“做什么（What）”，但他们永远无法复制我们“如…\n- 他们做一个一次性的“技能”，而我们，是在运营一个能学习、能垄断、能与您的智…\n\n        Main scene to generate:\n        最终结论页：用冰山、隐形引擎或生命体内核表达表面的 What 可复制，但深层 How 无法复制。\n\n        Composition constraints:\n        - top 32% of the canvas must stay almost pure white and empty for local title overlay\n        - keep the main illustration in the middle and lower half\n        - create a distinct page-level composition, not a generic background\n        - use 3 to 6 major visual groups only; keep hierarchy clear\n        - if reference layout is provided, keep a similar page structure but do not copy existing text\n\n        Hard constraints:\n        - no readable text, no fake text, no pseudo text, no scribbled labels, no Chinese, no English, no numbers\n        - no labels, no logos, no watermark, no UI text\n        - no crowded tiny icons everywhere\n        - no black background, no border\n        - no malformed people, no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-214406-文旅引爆点-clawlink六页增强样张/gemini-backdrops/P2-gemini-backdrop.png",
+    "layoutReference": "",
+    "mode": "gemini-api",
+    "rawBackdrop": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-220826-项目核心竞争力分析-gemini动态生图6页样张/gemini-backdrops/P6-gemini-backdrop.png"
+  }
+]

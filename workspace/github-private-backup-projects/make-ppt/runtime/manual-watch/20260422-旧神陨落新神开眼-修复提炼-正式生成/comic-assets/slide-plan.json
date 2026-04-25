@@ -1,0 +1,69 @@
+{
+  "deckTitle": "2026公司架构解读：旧神陨落 新神开眼",
+  "slideCount": 5,
+  "slides": [
+    {
+      "page": 1,
+      "title": "2026公司架构解读",
+      "contextTitle": "2026公司架构解读：旧神陨落 新神开眼",
+      "bullets": [
+        "把过去承载业务的结构，升级为承载未来放大的…",
+        "是为了让既有方向拥有更强的承载力、更高的稳…"
+      ],
+      "scenePrompt": "editorial comic cover scene for a Chinese business PowerPoint about 2026公司架构解读：旧神陨落 新神开眼, with layered abstract modules, flowing arrows, key themes and a strong management-deck feel",
+      "filename": "P1-2026公司架构解读.png"
+    },
+    {
+      "page": 2,
+      "title": "二、资本路径与资本市场战略",
+      "contextTitle": "二、资本路径与资本市场战略",
+      "bullets": [
+        "1 为什么选择构建资本市场路径",
+        "2 资本路径与结构规划",
+        "3 时间预期与阶段目标",
+        "把过去承载业务的结构，升级为承载未来放大的体系。"
+      ],
+      "scenePrompt": "action roadmap board with milestones, branching arrows, key actions and a clear next-step flow, focused on 1 为什么选择构建资本市场路径；2 资本路径与结构规划；3 时间预期与阶段目标",
+      "filename": "P2-二、资本路径与资本市场战略.png"
+    },
+    {
+      "page": 3,
+      "title": "三、ClawLink AI应用体系",
+      "contextTitle": "三、ClawLink AI应用体系",
+      "bullets": [
+        "5 商业本质变化：从“做事”到“闭环设计”",
+        "6 成本结构被彻底颠覆",
+        "人类的认知操作系统，正在被整体重写。",
+        "你过去赖以生存的能力，正在快速贬值。"
+      ],
+      "scenePrompt": "premium business comic infographic for 《2026公司架构解读：旧神陨落 新神开眼》, using editorial cards, arrows, dashboards and abstract symbols to explain 5 商业本质变化：从“做事”到“闭环设计”；6 成本结构被彻底颠覆；人类的认知操作系统，正在被整体重写。",
+      "filename": "P3-三、ClawLinkAI应用体系.png"
+    },
+    {
+      "page": 4,
+      "title": "四、延展企业集群：四个行业表象，一…",
+      "contextTitle": "四、延展企业集群：四个行业表象，一套权力接管系统",
+      "bullets": [
+        "1 商业逻辑：一条从文化资源到持续现金流的完整链路",
+        "2 系统能力：一套可复制的数字劳动力体系",
+        "3 收益结构：资产开始自我赚钱",
+        "2 智慧农业 × AI 替代专家系统"
+      ],
+      "scenePrompt": "system blueprint scene with layered platforms, nodes, data links and modular capability blocks, illustrating 1 商业逻辑：一条从文化资源到持续现金流的完整链路；2 系统能力：一套可复制的数字劳动力体系；3 收益结构：资产开始自我赚钱",
+      "filename": "P4-四、延展企业集群：四个行业表象，一….png"
+    },
+    {
+      "page": 5,
+      "title": "五、公司盈利模型",
+      "contextTitle": "五、公司盈利模型",
+      "bullets": [
+        "1 核心盈利逻辑：谁控制执行，谁就控制分配",
+        "3 收益结构：从赚辛苦钱，到赚系统的钱",
+        "5 放大路径：不是做更多，而是复制更快",
+        "6 关键分水岭：你是在使用 AI，还是在控制 AI"
+      ],
+      "scenePrompt": "premium business comic infographic for 《2026公司架构解读：旧神陨落 新神开眼》, using editorial cards, arrows, dashboards and abstract symbols to explain 1 核心盈利逻辑：谁控制执行，谁就控制分配；3 收益结构：从赚辛苦钱，到赚系统的钱；5 放大路径：不是做更多，而是复制更快",
+      "filename": "P5-五、公司盈利模型.png"
+    }
+  ]
+}

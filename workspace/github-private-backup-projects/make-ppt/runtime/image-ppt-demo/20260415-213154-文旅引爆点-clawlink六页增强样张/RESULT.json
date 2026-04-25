@@ -1,0 +1,17 @@
+{
+  "result": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-213154-文旅引爆点-clawlink六页增强样张/文旅引爆点-ClawLink风格-图片型PPT-六页样张-Gemini底图增强.pptx",
+  "outputDir": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-213154-文旅引爆点-clawlink六页增强样张",
+  "slideCount": 6,
+  "mode": "Gemini底图增强",
+  "contactSheet": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-213154-文旅引爆点-clawlink六页增强样张/contact-sheet.png",
+  "readme": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-213154-文旅引爆点-clawlink六页增强样张/README.txt",
+  "promptCatalog": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-213154-文旅引爆点-clawlink六页增强样张/gemini-prompts.json",
+  "imageDirectory": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-213154-文旅引爆点-clawlink六页增强样张",
+  "geminiBackdropDirectory": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-213154-文旅引爆点-clawlink六页增强样张/gemini-backdrops",
+  "geminiErrors": [],
+  "referenceImages": [
+    "/Users/mac/Desktop/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/文旅引爆点-Gemini单页样张-P2.png",
+    "/Users/mac/Desktop/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png"
+  ],
+  "referencePrompt": "/Users/mac/Desktop/make-ppt/归档/2026-04-15-generated-assets/runtime-image-ppt-demo/20260414-002010-文旅引爆点-火柴人样张/prompt.txt"
+}

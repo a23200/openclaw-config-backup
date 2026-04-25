@@ -1,0 +1,17 @@
+{
+  "result": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-221738-项目核心竞争力分析-gemini融合文字6页样张/项目核心竞争力分析-Gemini动态真实生图-6页样张.pptx",
+  "outputDir": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-221738-项目核心竞争力分析-gemini融合文字6页样张",
+  "slideCount": 6,
+  "deckTitle": "项目核心竞争力分析：我们真正的护城河",
+  "sourceDoc": "/Users/mac/Desktop/项目核心竞争力分析.md",
+  "styleReference": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-214406-文旅引爆点-clawlink六页增强样张/gemini-backdrops/P2-gemini-backdrop.png",
+  "textRichStyleReference": "/Users/mac/Desktop/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png",
+  "layoutReferenceRoot": "",
+  "readme": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-221738-项目核心竞争力分析-gemini融合文字6页样张/README.txt",
+  "slidePlan": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-221738-项目核心竞争力分析-gemini融合文字6页样张/slide-plan.json",
+  "promptCatalog": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-221738-项目核心竞争力分析-gemini融合文字6页样张/gemini-prompts.json",
+  "contactSheet": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-221738-项目核心竞争力分析-gemini融合文字6页样张/contact-sheet.png",
+  "imageDirectory": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-221738-项目核心竞争力分析-gemini融合文字6页样张",
+  "geminiBackdropDirectory": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-221738-项目核心竞争力分析-gemini融合文字6页样张/gemini-backdrops",
+  "mode": "gemini-generated-per-page"
+}

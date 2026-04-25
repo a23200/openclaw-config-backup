@@ -1,0 +1,59 @@
+{
+  "id": "20260423-025225-3e3806",
+  "title": "测试-宇宙科教类目",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260423-025225-3e3806/final_mastered.mp4",
+  "created_at": 1776883945.274175,
+  "updated_at": 1776883950.575098,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "",
+    "material_category": "science",
+    "narration_tone": "清晰、可信、循序渐进",
+    "voice_profile": "steady_male",
+    "narration_text": "宇宙的膨胀原理，看起来很遥远，其实只要抓住一个关键点就能理解。画面里的变化，不是在展示结果，而是在帮我们看见背后的原理。",
+    "resolved_mode": "narrated"
+  },
+  "publish": {
+    "title": "测试：宇宙膨胀原理",
+    "description": "测试素材库类目链路 #宇宙 #科普",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "宇宙的膨胀原理",
+    "clips": [
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 1
+      },
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "science",
+    "narration_tone": "清晰、可信、循序渐进",
+    "voice_profile": "steady_male"
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay"
+}

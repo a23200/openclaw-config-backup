@@ -1,0 +1,38 @@
+[
+  {
+    "page": 1,
+    "title": "文旅引爆点——AI合伙人运营系统",
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create a 16:9 full-slide illustration background for a Chinese business PowerPoint.\nStyle: clean hand-drawn stick-figure infographic, white background, simple black lines, vivid blue and orange accents, polished consulting-deck quality.\nScene: a clean white business explainer cover about a tourism AI partner system in Dali, stick figures, a small inn, mountains, arrows, charts, blue and orange accents, hand-drawn infographic style, no readable text, no letters, no numbers\nComposition: leave safe empty space at the top for a large Chinese title and subtitle; keep visual elements around the middle and lower half.\nCritical constraints: do not render any readable text, letters, numbers, logos, watermarks, or UI labels. Leave all text areas blank because text will be overlaid later.\nOutput: one finished raster illustration, no border."
+  },
+  {
+    "page": 2,
+    "title": "为什么现在要做文旅引爆点？",
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create a 16:9 full-slide illustration background for a Chinese business PowerPoint.\nStyle: clean hand-drawn stick-figure infographic, white background, simple black lines, vivid blue and orange accents, polished consulting-deck quality.\nScene: a split-screen hand-drawn business illustration comparing messy manual hotel operation on the left and automated AI growth system on the right, clean white background, blue and orange accents, stick figures, gears, dashboards, no readable text, no letters, no numbers\nComposition: leave safe empty space at the top for a large Chinese title and subtitle; keep visual elements around the middle and lower half.\nCritical constraints: do not render any readable text, letters, numbers, logos, watermarks, or UI labels. Leave all text areas blank because text will be overlaid later.\nOutput: one finished raster illustration, no border."
+  },
+  {
+    "page": 3,
+    "title": "AI合伙人的四大核心赋能",
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create a 16:9 full-slide illustration background for a Chinese business PowerPoint.\nStyle: clean hand-drawn stick-figure infographic, white background, simple black lines, vivid blue and orange accents, polished consulting-deck quality.\nScene: a central AI computer-head stick figure connected to four business capability cards, content marketing, pricing, reputation, customer insight, clean white hand-drawn infographic, blue and orange accents, no readable text, no letters, no numbers\nComposition: leave safe empty space at the top for a large Chinese title and subtitle; keep visual elements around the middle and lower half.\nCritical constraints: do not render any readable text, letters, numbers, logos, watermarks, or UI labels. Leave all text areas blank because text will be overlaid later.\nOutput: one finished raster illustration, no border."
+  },
+  {
+    "page": 4,
+    "title": "内容引爆矩阵如何带来客流？",
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create a 16:9 full-slide illustration background for a Chinese business PowerPoint.\nStyle: clean hand-drawn stick-figure infographic, white background, simple black lines, vivid blue and orange accents, polished consulting-deck quality.\nScene: a hand-drawn content marketing funnel for tourism, phones, social media cards, megaphone, tourist stick figures moving toward a small inn, clean white background, blue orange accents, no readable text, no letters, no numbers\nComposition: leave safe empty space at the top for a large Chinese title and subtitle; keep visual elements around the middle and lower half.\nCritical constraints: do not render any readable text, letters, numbers, logos, watermarks, or UI labels. Leave all text areas blank because text will be overlaid later.\nOutput: one finished raster illustration, no border."
+  },
+  {
+    "page": 5,
+    "title": "动态定价 + 口碑哨兵",
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create a 16:9 full-slide illustration background for a Chinese business PowerPoint.\nStyle: clean hand-drawn stick-figure infographic, white background, simple black lines, vivid blue and orange accents, polished consulting-deck quality.\nScene: a clean hand-drawn dashboard scene for hotel dynamic pricing and reputation monitoring, two dashboards, review bubbles, charts, AI assistant in the center, blue and orange accents, no readable text, no letters, no numbers\nComposition: leave safe empty space at the top for a large Chinese title and subtitle; keep visual elements around the middle and lower half.\nCritical constraints: do not render any readable text, letters, numbers, logos, watermarks, or UI labels. Leave all text areas blank because text will be overlaid later.\nOutput: one finished raster illustration, no border."
+  },
+  {
+    "page": 6,
+    "title": "第一阶段如何启动合作？",
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "Create a 16:9 full-slide illustration background for a Chinese business PowerPoint.\nStyle: clean hand-drawn stick-figure infographic, white background, simple black lines, vivid blue and orange accents, polished consulting-deck quality.\nScene: a step-by-step hand-drawn business cooperation path, target inn, diagnostic report clipboard, merchant negotiation, AI partner and revenue sharing, clean white background, blue and orange accents, no readable text, no letters, no numbers\nComposition: leave safe empty space at the top for a large Chinese title and subtitle; keep visual elements around the middle and lower half.\nCritical constraints: do not render any readable text, letters, numbers, logos, watermarks, or UI labels. Leave all text areas blank because text will be overlaid later.\nOutput: one finished raster illustration, no border."
+  }
+]

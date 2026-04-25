@@ -1,0 +1,31 @@
+{
+  "id": "20260419-031135-537507",
+  "title": "隧道驶向晨光-测试",
+  "status": "mastered",
+  "error": "仅字幕烧录失败: ffmpeg version 8.1 Copyright (c) 2000-2026 the FFmpeg developers\n  built with Apple clang version 17.0.0 (clang-1700.6.4.2)\n  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gpl --enable-libsvtav1 --enable-libopus --enable-libx264 --enable-libmp3lame --enable-libdav1d --enable-libvpx --enable-libx265 --enable-openssl --enable-videotoolbox --enable-audiotoolbox --enable-neon\n  libavutil      60. 26.100 / 60. 26.100\n  libavcodec     62. 28.100 / 62. 28.100\n  libavformat    62. 12.100 / 62. 12.100\n  libavdevice    62.  3.100 / 62.  3.100\n  libavfilter    11. 14.100 / 11. 14.100\n  libswscale      9.  5.100 /  9.  5.100\n  libswresample   6.  3.100 /  6.  3.100\n[in#0 @ 0x83ac18000] Unknown cover type: 0x1.\nInput #0, mov,mp4,m4a,3gp,3g2,mj2, from '/Users/mac/.openclaw/workspace/jimeng_runs/20260419-031135-537507/final.mp4':\n  Metadata:\n    major_brand     : isom\n    minor_version   : 512\n    compatible_brands: isomiso2avc1mp41\n    LvMetaInfo      : {\"data\":{\"os\":\"\",\"product\":\"dreamina\",\"exportType\":\"generation\",\"videoId\":\"0\"}}\n    UserComment     : {\"aigc_label_type\":0,\"source_info\":\"dreamina\"}\n    comment         : vid:v02870g10004d7hthb2ljhtcjhvvu0gg\n    encoder         : Lavf58.76.100\n  Duration: 00:00:15.07, start: 0.000000, bitrate: 6381 kb/s\n  Stream #0:0[0x1](und): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, stereo, fltp, 128 kb/s (default)\n    Metadata:\n      handler_name    : SoundHandler\n  Stream #0:1[0x2](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 720x1280 [SAR 1:1 DAR 9:16], 6265 kb/s, 24.04 fps, 60 tbr, 15360 tbn (default)\n    Metadata:\n      handler_name    : VideoHandler\n[AVFilterGraph @ 0x83b038480] No option name near '/Users/mac/.openclaw/workspace/jimeng_runs/20260419-031135-537507/subtitles.ass'\n[AVFilterGraph @ 0x83b038480] Error parsing a filter description around: \n[AVFilterGraph @ 0x83b038480] Error parsing filterchain 'ass=/Users/mac/.openclaw/workspace/jimeng_runs/20260419-031135-537507/subtitles.ass' around: \nError opening output file /Users/mac/.openclaw/workspace/jimeng_runs/20260419-031135-537507/final_mastered.mp4.\nError opening output files: Invalid argument",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260419-031135-537507/final_with_external_subtitles.mp4",
+  "created_at": 1776539495.653683,
+  "updated_at": 1776540788.133304,
+  "input": {
+    "first_prompt": "极度写实，电影感，主观视角，车内看着隧道里的黄灯飞速后退，车窗上的雨滴倒映着路灯，冷色调，孤独感，9:16竖屏，高分辨率",
+    "last_prompt": "极度写实，电影感，主观视角，隧道尽头出现第一缕晨光，远处天际线微亮，希望感，同一场景，同一镜头语言，9:16竖屏，高分辨率",
+    "video_prompt": "主观视角镜头缓慢向前推进，车窗外黄灯和雨滴持续后退，画面从幽暗隧道逐渐过渡到尽头晨光，情绪从压抑转为希望，保持电影感与真实质感"
+  },
+  "video": {
+    "mode": "frames2video",
+    "audio_reference": ""
+  },
+  "audio": {
+    "enable_narration": false
+  },
+  "publish": {
+    "title": "隧道驶向晨光-测试",
+    "description": "测试任务，不发布",
+    "auto_publish": false
+  },
+  "first_submit_id": "f5ce0f0fcaa29a72",
+  "last_submit_id": "7a65cdcf8926d2a0",
+  "video_submit_id": "573837cab112a84e",
+  "subtitle_mode": "external_only",
+  "subtitle_error": "ffmpeg 当前构建缺少 subtitles/ass filter，已降级为外挂字幕交付"
+}

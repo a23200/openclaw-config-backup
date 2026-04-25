@@ -1,0 +1,32 @@
+{
+  "id": "20260421-165538-5ccc03",
+  "title": "国内油价迎2026年首次下调",
+  "status": "failed",
+  "error": "旁白生成失败: Traceback (most recent call last):\n  File \"/Users/mac/.openclaw/workspace/all-auto-douyin-video/scripts/src/generate_audio.py\", line 3, in <module>\n    from gtts import gTTS\nModuleNotFoundError: No module named 'gtts'",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260421-165538-5ccc03/final.mp4",
+  "created_at": 1776761738.897054,
+  "updated_at": 1776771411.851959,
+  "input": {
+    "first_prompt": "清晨微蓝时刻的城市加油站，一辆普通家用车停在最外侧油枪旁，地面带有雨后微湿反光，冷色环境光与暖色顶棚灯交织，电子价牌数字清晰可见但不突出品牌信息，司机坐在车内看向油表与车窗外，神情克制放松，近景电影感构图，浅景深，细腻颗粒，真实光影层次，空气里有轻雾与城市苏醒前的安静，竖屏9:16，写实，2K",
+    "last_prompt": "同一座城市的清晨已被金色晨光点亮，车辆从加满油的加油站缓缓驶出，电子价牌与油枪退到背景，前景是后视镜里掠过的光斑与更从容的驾驶姿态，油表状态更充实，街道开始有生活气息，整体色温由冷转暖，情绪从谨慎计算过渡到轻微松弛与希望，电影感写实画面，层次分明，高光柔和，竖屏9:16，2K",
+    "video_prompt": "以加油站外景开场，镜头从湿润地面的反光缓慢上摇到车辆与价牌，随后轻微推近司机视线与油表形成信息聚焦；中段切到油枪入位、数字跳动、手指停顿后继续加油的近景，节奏克制，穿插一两个短暂特写表现价格变化带来的心理松动；再用小幅横移拍车窗外晨光与城市轮廓，加入轻微时间流逝感，让天色从偏冷过渡到温暖；结尾镜头跟随车辆平稳驶离，先近后远，带一点自然呼吸感的拉远，整体节奏由紧到松，画面真实克制、光影有层次、充满生活感与微妙释压感"
+  },
+  "video": {
+    "mode": "frames2video",
+    "audio_reference": ""
+  },
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "有些变化不喧哗 但足够让生活轻一点",
+    "resolved_mode": "narrated"
+  },
+  "publish": {
+    "title": "油价迎来2026年首次下调 这一点点变化正在落到日常里",
+    "description": "不是宏大叙事，只是很多普通人的一天会轻一点。把清晨加油站拍成一段有呼吸感的情绪短片，记录价格变化落到生活里的那一刻。#国内油价 #油价下调 #生活成本 #城市日常",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "first_submit_id": "82bb9182a2218987",
+  "last_submit_id": "22b937cfdd04b3f4",
+  "video_submit_id": "62219d2034b1eb0f"
+}

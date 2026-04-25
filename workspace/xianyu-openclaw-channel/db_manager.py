@@ -585,6 +585,7 @@ class DBManager:
 
             # 执行数据库迁移
             self._migrate_database(cursor)
+            self._repair_legacy_ai_provider_overrides(cursor)
 
             self.conn.commit()
             logger.info("数据库初始化完成")
@@ -1963,7 +1964,10 @@ class DBManager:
 
     # -------------------- AI回复设置操作 --------------------
     def save_ai_reply_settings(self, cookie_id: str, settings: dict) -> bool:
-        """保存AI回复设置"""
+        """保存AI回复设置。
+
+        model_name/api_key/base_url 允许为 None，表示回退到系统级配置。
+        """
         with self.lock:
             try:
                 cursor = self.conn.cursor()
@@ -1976,9 +1980,9 @@ class DBManager:
                 ''', (
                     cookie_id,
                     settings.get('ai_enabled', False),
-                    settings.get('model_name', 'qwen-plus'),
-                    settings.get('api_key', ''),
-                    settings.get('base_url', 'https://dashscope.aliyuncs.com/compatible-mode/v1'),
+                    settings.get('model_name'),
+                    settings.get('api_key'),
+                    settings.get('base_url'),
                     settings.get('max_discount_percent', 10),
                     settings.get('max_discount_amount', 100),
                     settings.get('max_bargain_rounds', 3),
@@ -1991,6 +1995,54 @@ class DBManager:
                 logger.error(f"保存AI回复设置失败: {e}")
                 self.conn.rollback()
                 return False
+
+    def get_ai_reply_settings_raw(self, cookie_id: str) -> dict:
+        """获取账号级 AI 配置原始值（不合并系统默认值）。"""
+        with self.lock:
+            try:
+                cursor = self.conn.cursor()
+                cursor.execute('''
+                SELECT ai_enabled, model_name, api_key, base_url,
+                       max_discount_percent, max_discount_amount, max_bargain_rounds,
+                       custom_prompts
+                FROM ai_reply_settings WHERE cookie_id = ?
+                ''', (cookie_id,))
+
+                result = cursor.fetchone()
+                if result:
+                    return {
+                        'ai_enabled': bool(result[0]),
+                        'model_name': result[1],
+                        'api_key': result[2],
+                        'base_url': result[3],
+                        'max_discount_percent': result[4],
+                        'max_discount_amount': result[5],
+                        'max_bargain_rounds': result[6],
+                        'custom_prompts': result[7] or '',
+                    }
+
+                return {
+                    'ai_enabled': False,
+                    'model_name': None,
+                    'api_key': None,
+                    'base_url': None,
+                    'max_discount_percent': 10,
+                    'max_discount_amount': 100,
+                    'max_bargain_rounds': 3,
+                    'custom_prompts': '',
+                }
+            except Exception as e:
+                logger.error(f"获取原始AI回复设置失败: {e}")
+                return {
+                    'ai_enabled': False,
+                    'model_name': None,
+                    'api_key': None,
+                    'base_url': None,
+                    'max_discount_percent': 10,
+                    'max_discount_amount': 100,
+                    'max_bargain_rounds': 3,
+                    'custom_prompts': '',
+                }
 
     def get_ai_reply_settings(self, cookie_id: str) -> dict:
         """获取AI回复设置
@@ -2021,9 +2073,22 @@ class DBManager:
                 
                 if result:
                     # 账号有设置时优先使用账号值；只有字段为空才使用系统设置
-                    account_model = result[1]
-                    account_api_key = result[2]
-                    account_base_url = result[3]
+                    account_model = (result[1] or '').strip() or None
+                    account_api_key = (result[2] or '').strip() or None
+                    account_base_url = (result[3] or '').strip() or None
+
+                    is_legacy_provider_override = (
+                        not account_api_key
+                        and account_model == DEFAULT_MODEL
+                        and account_base_url == DEFAULT_BASE_URL
+                        and (
+                            system_model != DEFAULT_MODEL
+                            or system_base_url != DEFAULT_BASE_URL
+                        )
+                    )
+                    if is_legacy_provider_override:
+                        account_model = None
+                        account_base_url = None
                     
                     # 账号级配置优先，只在为空时才回退到系统设置
                     use_model = account_model if account_model else system_model
@@ -2065,10 +2130,50 @@ class DBManager:
                     'custom_prompts': ''
                 }
 
+    def _repair_legacy_ai_provider_overrides(self, cursor):
+        """修复旧前端把账号级 AI 供应商配置覆盖成默认值的问题。"""
+        default_base_url = 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+        default_model = 'qwen-plus'
+
+        try:
+            self._execute_sql(cursor, "SELECT value FROM system_settings WHERE key = ?", ('ai_api_url',))
+            system_base_url = (cursor.fetchone() or [''])[0] or ''
+            self._execute_sql(cursor, "SELECT value FROM system_settings WHERE key = ?", ('ai_model',))
+            system_model = (cursor.fetchone() or [''])[0] or ''
+
+            if not system_base_url and not system_model:
+                return
+
+            if system_base_url == default_base_url and system_model == default_model:
+                return
+
+            self._execute_sql(cursor, '''
+                UPDATE ai_reply_settings
+                   SET model_name = NULL,
+                       api_key = NULL,
+                       base_url = NULL,
+                       updated_at = CURRENT_TIMESTAMP
+                 WHERE (api_key IS NULL OR TRIM(api_key) = '')
+                   AND COALESCE(model_name, '') = ?
+                   AND COALESCE(base_url, '') = ?
+            ''', (default_model, default_base_url))
+
+            if cursor.rowcount > 0:
+                logger.info(f"已修复 {cursor.rowcount} 条账号级 AI 供应商覆盖配置，改为继承系统设置")
+        except Exception as e:
+            logger.warning(f"修复旧AI供应商覆盖配置失败: {e}")
+
     def get_all_ai_reply_settings(self) -> Dict[str, dict]:
         """获取所有账号的AI回复设置"""
+        DEFAULT_BASE_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+        DEFAULT_MODEL = 'qwen-plus'
+
         with self.lock:
             try:
+                system_api_key = self.get_system_setting('ai_api_key') or ''
+                system_base_url = self.get_system_setting('ai_api_url') or DEFAULT_BASE_URL
+                system_model = self.get_system_setting('ai_model') or DEFAULT_MODEL
+
                 cursor = self.conn.cursor()
                 cursor.execute('''
                 SELECT cookie_id, ai_enabled, model_name, api_key, base_url,
@@ -2080,11 +2185,28 @@ class DBManager:
                 result = {}
                 for row in cursor.fetchall():
                     cookie_id = row[0]
+                    account_model = (row[2] or '').strip() or None
+                    account_api_key = (row[3] or '').strip() or None
+                    account_base_url = (row[4] or '').strip() or None
+
+                    is_legacy_provider_override = (
+                        not account_api_key
+                        and account_model == DEFAULT_MODEL
+                        and account_base_url == DEFAULT_BASE_URL
+                        and (
+                            system_model != DEFAULT_MODEL
+                            or system_base_url != DEFAULT_BASE_URL
+                        )
+                    )
+                    if is_legacy_provider_override:
+                        account_model = None
+                        account_base_url = None
+
                     result[cookie_id] = {
                         'ai_enabled': bool(row[1]),
-                        'model_name': row[2],
-                        'api_key': row[3],
-                        'base_url': row[4],
+                        'model_name': account_model if account_model else system_model,
+                        'api_key': account_api_key if account_api_key else system_api_key,
+                        'base_url': account_base_url if account_base_url else system_base_url,
                         'max_discount_percent': row[5],
                         'max_discount_amount': row[6],
                         'max_bargain_rounds': row[7],

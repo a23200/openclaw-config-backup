@@ -1,0 +1,23 @@
+{
+  "submit_id": "a3368374ee956ed6",
+  "prompt": "9:16竖屏，电影感木作工坊，同一工作台上榫卯结构已经严丝合缝地完成拼接，一双手稳稳按住成型木作，边缘精准贴合，木纹在暖光下清晰发亮，周围木屑被动作带散，画面从紧张转为笃定，近中景，空间更开阔，写实电影摄影，光影通透，完成感强，2K",
+  "gen_status": "success",
+  "result_json": {
+    "images": [
+      {
+        "image_url": "https://p26-dreamina-sign.byteimg.com/tos-cn-i-tb4s082cfz/fb43b398a7a14acfa8225062447d785e~tplv-tb4s082cfz-aigc_resize:0:0.png?lk3s=7c3bb0db&x-expires=1776549600&x-signature=A%2FBzJv8SUtLyIlaZYLKeYAsy2mY%3D&format=.png",
+        "width": 2560,
+        "height": 1440
+      }
+    ],
+    "videos": []
+  },
+  "credit_count": 3,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Finish",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":true,\"dreamina_matrix_queue_name\":\"\",\"dreamina_matrix_req_key\":\"\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":false,\"queue_name\":\"high_aes_general_v50\",\"matrix_req_key\":\"MImageGen:high_aes_general_v50\",\"matrix_second_req_key\":\"\"}"
+  }
+}

@@ -1,0 +1,110 @@
+[
+  {
+    "page": 1,
+    "title": "2026公司架构解读",
+    "bullets": [
+      "旧神陨落 新神开眼",
+      "一场关于效率与控制的财富游戏"
+    ],
+    "contextTitle": "2026公司架构解读：旧神陨落 新神开眼",
+    "contextPoints": [
+      "旧神陨落 新神开眼",
+      "一场关于效率与控制的财富游戏"
+    ],
+    "scenePrompt": "abstract premium cover scene with old structure collapsing, a new core awakening, strong arrows and large white space",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese business comic PowerPoint.\n            The first reference image defines the target visual language.\n            If a second reference image is provided, use it for composition rhythm, text integration style and page density.\n            If a third reference image is provided, use it as page-specific element inspiration and embedded-panel reference for the same page.\n\n            Visual style requirements:\n            - premium editorial comic infographic, not childish anime, not photorealistic, not 3D\n            - white background, large clean negative space, crisp black outlines\n            - deep blue accents, orange accents, light blue and light orange blocks\n            - business storyboard feeling, designed for management presentation instead of entertainment poster\n            - text must feel embedded inside the design, not pasted on top later\n            - prefer diagrams, cards, dashboards, arrows and abstract symbols over detailed people\n            - avoid cute mascots and avoid malformed human figures\n\n            Main scene to generate:\n            abstract premium cover scene with old structure collapsing, a new core awakening, strong arrows and large white space\n\n            You must render these exact lines directly inside the image, with correct wording and clean line separation:\n            2026公司架构解读\n旧神陨落 新神开眼\n一场关于效率与控制的财富游戏\n\n            Text layout rules:\n            - render the first line as the main cover title\n- render the remaining lines as subtitle or tagline lines, without bullet dots unless they are already present\n- place the text in one integrated editorial block near the upper-left or upper-middle area\n- the text zone must feel like part of the illustration, such as a designed information card or embedded panel\n- keep each line clearly separated, balanced and easy to read\n\n            Hard constraints:\n            - do not add any extra text beyond the exact lines above\n            - no wrong characters, no garbled Chinese, no fake text, no pseudo text\n            - no extra English or numbers beyond the exact lines above\n            - no watermark, no logo, no page number\n            - no giant disconnected title banner across the whole page\n            - no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/项目总表/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png",
+    "layoutReference": "/Users/mac/Desktop/项目总表/make-ppt/runtime/image-ppt-demo/20260415-223849-项目核心竞争力分析-gemini原生出字生图6页样张/P2-第一层护城河：闭环自进化系统vs线性工具.png",
+    "pageReference": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-修复提炼-正式生成/comic-assets/P1-2026公司架构解读.png",
+    "rawBackdrop": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-融合参考-v6-dryrun/gemini-backdrops/P1-gemini-backdrop.png",
+    "mode": "dry-run"
+  },
+  {
+    "page": 2,
+    "title": "二、资本路径与资本市场战略",
+    "bullets": [
+      "把过去承载业务的结构，升级为承载未来放大的体系。",
+      "是为了让既有方向拥有更强的承载力、更高的稳定性、以及更大的延展空间。"
+    ],
+    "contextTitle": "二、资本路径与资本市场战略",
+    "contextPoints": [
+      "把过去承载业务的结构，升级为承载未来放大的体系。",
+      "是为了让既有方向拥有更强的承载力、更高的稳定性、以及更大的延展空间。",
+      "我们是在提前清理旧结构、搭建新架构，让公司从“能做业务”，走向“能承载更大业务、承接更多资源、进入更高层级竞争”。",
+      "这是一次为更高阶段发展清场、铺路、提速的结构性升级。"
+    ],
+    "scenePrompt": "abstract strategic structure scene with layered bridge blocks, upward arrows, executive geometry and clean white space",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese business comic PowerPoint.\n            The first reference image defines the target visual language.\n            If a second reference image is provided, use it for composition rhythm, text integration style and page density.\n            If a third reference image is provided, use it as page-specific element inspiration and embedded-panel reference for the same page.\n\n            Visual style requirements:\n            - premium editorial comic infographic, not childish anime, not photorealistic, not 3D\n            - white background, large clean negative space, crisp black outlines\n            - deep blue accents, orange accents, light blue and light orange blocks\n            - business storyboard feeling, designed for management presentation instead of entertainment poster\n            - text must feel embedded inside the design, not pasted on top later\n            - prefer diagrams, cards, dashboards, arrows and abstract symbols over detailed people\n            - avoid cute mascots and avoid malformed human figures\n\n            Main scene to generate:\n            abstract strategic structure scene with layered bridge blocks, upward arrows, executive geometry and clean white space\n\n            You must render these exact lines directly inside the image, with correct wording and clean line separation:\n            二、资本路径与资本市场战略\n• 把过去承载业务的结构，升级为承载未来放大的体系。\n• 是为了让既有方向拥有更强的承载力、更高的稳定性、以及更大的延展空间。\n\n            Text layout rules:\n            - place all required text in one natural editorial zone near the upper-left or upper-middle area\n- render the title larger and the two bullet lines smaller below it\n- keep the text block integrated with the illustration like a designed information panel\n- keep each bullet on its own line with clear spacing\n- keep the text short, balanced and visually fused with the illustration\n\n            Hard constraints:\n            - do not add any extra text beyond the exact lines above\n            - no wrong characters, no garbled Chinese, no fake text, no pseudo text\n            - no extra English or numbers beyond the exact lines above\n            - no watermark, no logo, no page number\n            - no giant disconnected title banner across the whole page\n            - no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/项目总表/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png",
+    "layoutReference": "/Users/mac/Desktop/项目总表/make-ppt/runtime/image-ppt-demo/20260415-223849-项目核心竞争力分析-gemini原生出字生图6页样张/P2-第一层护城河：闭环自进化系统vs线性工具.png",
+    "pageReference": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-修复提炼-正式生成/comic-assets/P2-二、资本路径与资本市场战略.png",
+    "rawBackdrop": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-融合参考-v6-dryrun/gemini-backdrops/P2-gemini-backdrop.png",
+    "mode": "dry-run"
+  },
+  {
+    "page": 3,
+    "title": "三、ClawLink AI应用体系",
+    "bullets": [
+      "人类的认知操作系统，正在被整体重写。",
+      "你过去赖以生存的能力，正在快速贬值。"
+    ],
+    "contextTitle": "三、ClawLink AI应用体系",
+    "contextPoints": [
+      "人类的认知操作系统，正在被整体重写。",
+      "你过去赖以生存的能力，正在快速贬值。",
+      "什么值得自己做，什么必须交给系统去做。",
+      "不是让人更努力，而是让系统替你完成绝大部分执行。"
+    ],
+    "scenePrompt": "abstract command center scene with one glowing core, surrounding modules, curved connection lines and calm white space",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese business comic PowerPoint.\n            The first reference image defines the target visual language.\n            If a second reference image is provided, use it for composition rhythm, text integration style and page density.\n            If a third reference image is provided, use it as page-specific element inspiration and embedded-panel reference for the same page.\n\n            Visual style requirements:\n            - premium editorial comic infographic, not childish anime, not photorealistic, not 3D\n            - white background, large clean negative space, crisp black outlines\n            - deep blue accents, orange accents, light blue and light orange blocks\n            - business storyboard feeling, designed for management presentation instead of entertainment poster\n            - text must feel embedded inside the design, not pasted on top later\n            - prefer diagrams, cards, dashboards, arrows and abstract symbols over detailed people\n            - avoid cute mascots and avoid malformed human figures\n\n            Main scene to generate:\n            abstract command center scene with one glowing core, surrounding modules, curved connection lines and calm white space\n\n            You must render these exact lines directly inside the image, with correct wording and clean line separation:\n            三、ClawLink AI应用体系\n• 人类的认知操作系统，正在被整体重写。\n• 你过去赖以生存的能力，正在快速贬值。\n\n            Text layout rules:\n            - place all required text in one natural editorial zone near the upper-left or upper-middle area\n- render the title larger and the two bullet lines smaller below it\n- keep the text block integrated with the illustration like a designed information panel\n- keep each bullet on its own line with clear spacing\n- keep the text short, balanced and visually fused with the illustration\n\n            Hard constraints:\n            - do not add any extra text beyond the exact lines above\n            - no wrong characters, no garbled Chinese, no fake text, no pseudo text\n            - no extra English or numbers beyond the exact lines above\n            - no watermark, no logo, no page number\n            - no giant disconnected title banner across the whole page\n            - no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/项目总表/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png",
+    "layoutReference": "/Users/mac/Desktop/项目总表/make-ppt/runtime/image-ppt-demo/20260415-223849-项目核心竞争力分析-gemini原生出字生图6页样张/P2-第一层护城河：闭环自进化系统vs线性工具.png",
+    "pageReference": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-修复提炼-正式生成/comic-assets/P3-三、ClawLinkAI应用体系.png",
+    "rawBackdrop": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-融合参考-v6-dryrun/gemini-backdrops/P3-gemini-backdrop.png",
+    "mode": "dry-run"
+  },
+  {
+    "page": 4,
+    "title": "四、延展企业集群：四个行业表象，一套权力接管系统",
+    "bullets": [
+      "谁掌握系统，谁就掌握这个行业最值钱的那一层。",
+      "我们真正做的，始终只有一件事：把 ClawLink ai 应用体系，放进不同产业里，接管其中最核心的控制权。"
+    ],
+    "contextTitle": "四、延展企业集群：四个行业表象，一套权力接管系统",
+    "contextPoints": [
+      "谁掌握系统，谁就掌握这个行业最值钱的那一层。",
+      "我们真正做的，始终只有一件事：把 ClawLink ai 应用体系，放进不同产业里，接管其中最核心的控制权。",
+      "本质上，祂们只有同一个底层逻辑",
+      "祂们是四个战场，四个验证场，四个让旧秩序失去解释权、让新系统开始接管价值分配的入口"
+    ],
+    "scenePrompt": "abstract multi-sector hub scene with four linked zones, one central platform, converging paths and clean white space",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese business comic PowerPoint.\n            The first reference image defines the target visual language.\n            If a second reference image is provided, use it for composition rhythm, text integration style and page density.\n            If a third reference image is provided, use it as page-specific element inspiration and embedded-panel reference for the same page.\n\n            Visual style requirements:\n            - premium editorial comic infographic, not childish anime, not photorealistic, not 3D\n            - white background, large clean negative space, crisp black outlines\n            - deep blue accents, orange accents, light blue and light orange blocks\n            - business storyboard feeling, designed for management presentation instead of entertainment poster\n            - text must feel embedded inside the design, not pasted on top later\n            - prefer diagrams, cards, dashboards, arrows and abstract symbols over detailed people\n            - avoid cute mascots and avoid malformed human figures\n\n            Main scene to generate:\n            abstract multi-sector hub scene with four linked zones, one central platform, converging paths and clean white space\n\n            You must render these exact lines directly inside the image, with correct wording and clean line separation:\n            四、延展企业集群：四个行业表象，一套权力接管系统\n• 谁掌握系统，谁就掌握这个行业最值钱的那一层。\n• 我们真正做的，始终只有一件事：把 ClawLink ai 应用体系，放进不同产业里，接管其中最核心的控制权。\n\n            Text layout rules:\n            - place all required text in one natural editorial zone near the upper-left or upper-middle area\n- render the title larger and the two bullet lines smaller below it\n- keep the text block integrated with the illustration like a designed information panel\n- keep each bullet on its own line with clear spacing\n- keep the text short, balanced and visually fused with the illustration\n\n            Hard constraints:\n            - do not add any extra text beyond the exact lines above\n            - no wrong characters, no garbled Chinese, no fake text, no pseudo text\n            - no extra English or numbers beyond the exact lines above\n            - no watermark, no logo, no page number\n            - no giant disconnected title banner across the whole page\n            - no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/项目总表/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png",
+    "layoutReference": "/Users/mac/Desktop/项目总表/make-ppt/runtime/image-ppt-demo/20260415-223849-项目核心竞争力分析-gemini原生出字生图6页样张/P2-第一层护城河：闭环自进化系统vs线性工具.png",
+    "pageReference": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-修复提炼-正式生成/comic-assets/P4-四、延展企业集群：四个行业表象，一….png",
+    "rawBackdrop": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-融合参考-v6-dryrun/gemini-backdrops/P4-gemini-backdrop.png",
+    "mode": "dry-run"
+  },
+  {
+    "page": 5,
+    "title": "五、公司盈利模型",
+    "bullets": [
+      "谁在控制执行，谁就拥有结果分配权。",
+      "控制蛋糕是怎么被做出来、怎么被分出去。"
+    ],
+    "contextTitle": "五、公司盈利模型",
+    "contextPoints": [
+      "谁在控制执行，谁就拥有结果分配权。",
+      "控制蛋糕是怎么被做出来、怎么被分出去。",
+      "如何把已经跑通的系统，放大成更大的收入机器。",
+      "过去，我们靠交付赚钱；未来，我们靠系统运行持续收钱。"
+    ],
+    "scenePrompt": "abstract business engine scene with circular loops, layered pathways, scaling arrows and clean white space",
+    "prompt": "Create one finished 16:9 slide illustration for a Chinese business comic PowerPoint.\n            The first reference image defines the target visual language.\n            If a second reference image is provided, use it for composition rhythm, text integration style and page density.\n            If a third reference image is provided, use it as page-specific element inspiration and embedded-panel reference for the same page.\n\n            Visual style requirements:\n            - premium editorial comic infographic, not childish anime, not photorealistic, not 3D\n            - white background, large clean negative space, crisp black outlines\n            - deep blue accents, orange accents, light blue and light orange blocks\n            - business storyboard feeling, designed for management presentation instead of entertainment poster\n            - text must feel embedded inside the design, not pasted on top later\n            - prefer diagrams, cards, dashboards, arrows and abstract symbols over detailed people\n            - avoid cute mascots and avoid malformed human figures\n\n            Main scene to generate:\n            abstract business engine scene with circular loops, layered pathways, scaling arrows and clean white space\n\n            You must render these exact lines directly inside the image, with correct wording and clean line separation:\n            五、公司盈利模型\n• 谁在控制执行，谁就拥有结果分配权。\n• 控制蛋糕是怎么被做出来、怎么被分出去。\n\n            Text layout rules:\n            - place all required text in one natural editorial zone near the upper-left or upper-middle area\n- render the title larger and the two bullet lines smaller below it\n- keep the text block integrated with the illustration like a designed information panel\n- keep each bullet on its own line with clear spacing\n- keep the text short, balanced and visually fused with the illustration\n\n            Hard constraints:\n            - do not add any extra text beyond the exact lines above\n            - no wrong characters, no garbled Chinese, no fake text, no pseudo text\n            - no extra English or numbers beyond the exact lines above\n            - no watermark, no logo, no page number\n            - no giant disconnected title banner across the whole page\n            - no creepy faces, no extra hands or legs",
+    "styleReference": "/Users/mac/Desktop/项目总表/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png",
+    "layoutReference": "/Users/mac/Desktop/项目总表/make-ppt/runtime/image-ppt-demo/20260415-223849-项目核心竞争力分析-gemini原生出字生图6页样张/P2-第一层护城河：闭环自进化系统vs线性工具.png",
+    "pageReference": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-修复提炼-正式生成/comic-assets/P5-五、公司盈利模型.png",
+    "rawBackdrop": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-融合参考-v6-dryrun/gemini-backdrops/P5-gemini-backdrop.png",
+    "mode": "dry-run"
+  }
+]

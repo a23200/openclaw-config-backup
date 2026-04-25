@@ -1,0 +1,59 @@
+{
+  "video_id": 1,
+  "comments": [
+    {
+      "platform_comment_id": "comment_90001",
+      "content": "这个怎么联系？多少钱？",
+      "like_count": 12,
+      "reply_count": 2,
+      "comment_time": "2026-04-10T10:20:00+08:00",
+      "author": {
+        "platform_user_id": "user_10001",
+        "nickname": "想做副业的小王",
+        "profile_url": "https://www.douyin.com/user/user_10001",
+        "bio": "杭州 | 电商创业",
+        "province": "浙江",
+        "city": "杭州",
+        "follower_count": 120,
+        "following_count": 88,
+        "liked_count": 3500
+      }
+    },
+    {
+      "platform_comment_id": "comment_90002",
+      "content": "效果怎么样？新手能做吗？",
+      "like_count": 6,
+      "reply_count": 1,
+      "comment_time": "2026-04-10T10:30:00+08:00",
+      "author": {
+        "platform_user_id": "user_10002",
+        "nickname": "阿浩",
+        "profile_url": "https://www.douyin.com/user/user_10002",
+        "bio": "广州 | 自由职业",
+        "province": "广东",
+        "city": "广州",
+        "follower_count": 60,
+        "following_count": 140,
+        "liked_count": 1800
+      }
+    },
+    {
+      "platform_comment_id": "comment_90003",
+      "content": "广告吧，路过",
+      "like_count": 0,
+      "reply_count": 0,
+      "comment_time": "2026-04-10T10:40:00+08:00",
+      "author": {
+        "platform_user_id": "user_10003",
+        "nickname": "路人甲",
+        "profile_url": "https://www.douyin.com/user/user_10003",
+        "bio": "上海",
+        "province": "上海",
+        "city": "上海",
+        "follower_count": 20,
+        "following_count": 45,
+        "liked_count": 500
+      }
+    }
+  ]
+}

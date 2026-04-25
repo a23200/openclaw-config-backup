@@ -1,0 +1,6 @@
+/creator-micro/content/quality_statement?enter_method=click" target="_blank" rel="noreferrer">了解上传规则详情</a><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" fill="none" viewB
+class="tip-item-right-desc-dLojYs"><span>视频时长60分钟以内，文件大小16G以内，推荐上传mp4、webm格式视频</span></div></div></div><div class="tip-item-line-container-o0pDph"><div clas
+"tip-item-right-title-m2kXeX">视频画幅</div><div class="tip-item-right-desc-dLojYs"><span>建议上传宽高比为16:9、9:16、3:4、4:3、9:19.5（5.8寸）的视频</span></div></div></div><div style
+8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo="></div><div class="container-drag-title-UafWje">点击上传 或直接将视频文件拖入此区域</div><div class="container-drag-sub-title-Y0B74w">为了更
+好的观看体验和平台安全，平台将对上传的视频预审。超过40秒的视频建议上传横版视频</div><div class="container-drag-upload-tL99XD"><button class="semi-button semi-button-p
+und" stroke-width="2" d="M10 7.5v5M12.5 10h-5"></path></svg><span class="semi-button-content-right">上传视频</span></span></button><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMMAAABPCAYAAAB

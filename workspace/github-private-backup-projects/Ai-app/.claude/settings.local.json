@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:3001/api/health)",
+      "Bash(sqlite3 /Users/mac/Desktop/Ai-app/prisma/dev.db \"select id,name,status,apkUrl,updatedAt from Project order by datetime\\(updatedAt\\) desc limit 10;\")",
+      "Bash(curl -s http://localhost:3001/api/builds/012e97e3-cf85-4578-99d2-eb23d4add303/status)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s -X POST http://localhost:3001/api/builds/012e97e3-cf85-4578-99d2-eb23d4add303)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('status:',d['status']\\); print\\('step:',d['step']\\); print\\('files:',d['generatedFileCount']\\); print\\('error:',d.get\\('error',''\\)\\); print\\('last 10 logs:'\\); [print\\(' ',l\\) for l in d['logs'][-10:]]\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('status:',d['status']\\); print\\('step:',d['step']\\); print\\('files:',d['generatedFileCount']\\); print\\('error:',d.get\\('error',''\\)\\); print\\('last 15 logs:'\\); [print\\(' ',l\\) for l in d['logs'][-15:]]\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('status:',d['status']\\); print\\('step:',d['step']\\); print\\('files:',d['generatedFileCount']\\); print\\('error:',d.get\\('error',''\\)\\); print\\('last 20 logs:'\\); [print\\(' ',l\\) for l in d['logs'][-20:]]\")"
+    ]
+  }
+}

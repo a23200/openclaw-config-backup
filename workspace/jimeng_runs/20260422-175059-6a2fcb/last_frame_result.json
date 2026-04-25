@@ -1,0 +1,23 @@
+{
+  "submit_id": "0989fac001b84532",
+  "prompt": "9:16竖屏，同一座天台接近黎明，天色由冷蓝过渡到微亮的灰金色，舞者正面面对镜头完成全新变体的复仇摇动作，身体打开，步伐利落，衣摆被风带起，地面反光变得通透，身后城市从压抑变得开阔，情绪从克制转为宣泄后的松弛与自信，电影感，层次丰富，光线更柔和但依旧有力量，形成明显情绪递进",
+  "gen_status": "success",
+  "result_json": {
+    "images": [
+      {
+        "image_url": "https://p11-dreamina-sign.byteimg.com/tos-cn-i-tb4s082cfz/eea470bb25b54892b1ac0295e65eb999~tplv-tb4s082cfz-aigc_resize:0:0.png?lk3s=7c3bb0db&x-expires=1776855600&x-signature=T7HuARbtLdZc8bRftd5Pq3bCcnc%3D&format=.png",
+        "width": 1440,
+        "height": 2560
+      }
+    ],
+    "videos": []
+  },
+  "credit_count": 3,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Finish",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":true,\"dreamina_matrix_queue_name\":\"\",\"dreamina_matrix_req_key\":\"\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":false,\"queue_name\":\"high_aes_general_v50\",\"matrix_req_key\":\"MImageGen:high_aes_general_v50\",\"matrix_second_req_key\":\"\"}"
+  }
+}

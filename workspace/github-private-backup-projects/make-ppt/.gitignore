@@ -1,0 +1,6 @@
+.DS_Store
+.env
+__pycache__/
+*.pyc
+runtime/app-factory/projects/
+runtime/app-factory/ppt-master-projects/

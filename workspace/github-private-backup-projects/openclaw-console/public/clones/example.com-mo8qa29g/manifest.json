@@ -1,0 +1,11 @@
+{
+  "targetUrl": "https://example.com/",
+  "finalUrl": "https://example.com/",
+  "statusCode": 200,
+  "createdAt": "2026-04-21T14:37:35.095Z",
+  "htmlBytes": 939,
+  "assetCount": 0,
+  "okCount": 0,
+  "totalAssetBytes": 0,
+  "manifest": []
+}

@@ -1,0 +1,11 @@
+{
+  "result": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-215035-项目核心竞争力分析-gemini参考图风格七页样张/项目核心竞争力分析-Gemini参考图风格-七页样张.pptx",
+  "outputDir": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-215035-项目核心竞争力分析-gemini参考图风格七页样张",
+  "slideCount": 7,
+  "sourceDoc": "/Users/mac/Desktop/项目核心竞争力分析.md",
+  "background": "/Users/mac/Desktop/make-ppt/runtime/single-slide-demo/20260415-185005-神经网络学习-gemini参考图版/神经网络学习的重要参数-Gemini参考图版-底图.png",
+  "readme": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-215035-项目核心竞争力分析-gemini参考图风格七页样张/README.txt",
+  "contactSheet": "",
+  "imageDirectory": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-215035-项目核心竞争力分析-gemini参考图风格七页样张",
+  "mode": "gemini-reference-local-overlay"
+}

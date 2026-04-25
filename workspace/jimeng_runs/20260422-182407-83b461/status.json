@@ -1,0 +1,50 @@
+{
+  "id": "20260422-182407-83b461",
+  "title": "宇宙的膨胀原理",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260422-182407-83b461/final_mastered.mp4",
+  "created_at": 1776853447.5033212,
+  "updated_at": 1776853447.7031,
+  "post": {
+    "mode": "auto",
+    "title_card_text": "",
+    "resolved_mode": "visual_only"
+  },
+  "publish": {
+    "title": "十五秒直观看懂宇宙持续膨胀到底是什么原理",
+    "description": "宇宙不是向某个方向爆开，而是空间本身在不断被拉伸。用一条短片快速理解宇宙膨胀的直觉画面。#宇宙科普 #宇宙膨胀 #天文知识 #深空",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "宇宙的膨胀原理",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "作为开场建立深空尺度感，先把观众带入宇宙整体背景，适合引出膨胀这一宏观概念",
+        "order": 1
+      },
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "中段用漩涡与扩散感强化空间被拉开的视觉联想，提升节奏并承接原理讲解",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "结尾以更梦幻的星云画面收束，延续扩张与延展的视觉感受，形成完整的科普氛围",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0
+  }
+}

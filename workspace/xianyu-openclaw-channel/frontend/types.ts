@@ -185,9 +185,9 @@ export interface SystemSettings {
 
 export interface AIReplySettings {
   ai_enabled: boolean;
-  model_name: string;
-  api_key: string;
-  base_url: string;
+  model_name?: string;
+  api_key?: string;
+  base_url?: string;
   max_discount_percent: number;
   max_discount_amount?: number;
   max_bargain_rounds: number;

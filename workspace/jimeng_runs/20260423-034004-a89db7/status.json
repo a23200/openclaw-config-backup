@@ -1,0 +1,77 @@
+{
+  "id": "20260423-034004-a89db7",
+  "title": "后处理链路测试-宇宙",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260423-034004-a89db7/final_mastered.mp4",
+  "created_at": 1776886804.1273541,
+  "updated_at": 1776886921.019367,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "",
+    "enable_natural_voiceover": true,
+    "narration_style": "documentary",
+    "subtitle_style": "douyin_bold",
+    "material_category": "science",
+    "narration_tone": "冷静、解释感强",
+    "voice_profile": "steady_male",
+    "narration_text": "宇宙的膨胀，不是星系在空间里向外飞散。更准确地说，是空间本身正在变大。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "steady_male",
+      "voice": "echo",
+      "speed": 0.96,
+      "gain": 1.0,
+      "pause_bias": 0.18,
+      "style": "documentary",
+      "category": "science"
+    },
+    "tts_voice": "echo",
+    "tts_speed": 0.96,
+    "voice_gain": 1.0,
+    "pause_bias": 0.18,
+    "tts_engine": "fallback_tts",
+    "mix_params": {
+      "voice_gain": 1.0,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 10.17
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260423-034004-a89db7/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "",
+    "description": "",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "宇宙膨胀",
+    "clips": [
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "测试开场",
+        "order": 1
+      },
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "测试解释",
+        "order": 2
+      }
+    ],
+    "target_duration_sec": 10.0,
+    "material_category": "science",
+    "narration_tone": "冷静、解释感强",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary"
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

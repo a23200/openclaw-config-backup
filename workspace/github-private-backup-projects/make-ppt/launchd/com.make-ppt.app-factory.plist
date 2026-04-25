@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.make-ppt.app-factory</string>
+
+    <key>ProgramArguments</key>
+    <array>
+      <string>/Users/mac/Desktop/项目总表/make-ppt/scripts/start_app_factory_service.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/mac/Desktop/项目总表/make-ppt</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <dict>
+      <key>SuccessfulExit</key>
+      <false/>
+    </dict>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/mac/Desktop/项目总表/make-ppt/runtime/app-factory/logs/launchd.stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/mac/Desktop/项目总表/make-ppt/runtime/app-factory/logs/launchd.stderr.log</string>
+  </dict>
+</plist>

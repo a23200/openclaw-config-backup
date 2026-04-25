@@ -1,0 +1,14 @@
+{
+  "submit_id": "ecb2e88e9b080b15",
+  "prompt": "9:16竖屏，电影感现实题材，同一名年轻女性从法庭门口缓慢走出，手中的文件已被整理平整，夕阳暖光穿过高窗落在她肩上，走廊仍安静但压迫感减弱，镜头捕捉她停顿后继续向前的瞬间，近中景，神情疲惫却坚定，不出现真实姓名与机构标识，高细节，冷暖对照，情绪从压抑过渡到坚决",
+  "logid": "2026042317175019216800021854321DA",
+  "gen_status": "querying",
+  "credit_count": 3,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Generating",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":true,\"dreamina_matrix_queue_name\":\"\",\"dreamina_matrix_req_key\":\"\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":false,\"queue_name\":\"high_aes_general_v50\",\"matrix_req_key\":\"MImageGen:high_aes_general_v50\",\"matrix_second_req_key\":\"\"}"
+  }
+}

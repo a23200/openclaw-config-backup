@@ -1,0 +1,1 @@
+Playwright connectOverCDP to local Chrome 9222 fails in current environment with: Protocol error (Browser.setDownloadBehavior): Browser context management is not supported. Need attach-compatible path that avoids launchPersistentContext assumptions / download behavior hooks, or use raw CDP / browser tool path for publish automation.

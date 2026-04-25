@@ -1,0 +1,84 @@
+{
+  "id": "20260424-174502-fdc60b",
+  "title": "冥王星的孤单",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-174502-fdc60b/final_mastered.mp4",
+  "created_at": 1777023902.6072829,
+  "updated_at": 1777023931.257699,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "关于冥王星的孤单的一段观察",
+    "enable_natural_voiceover": true,
+    "narration_style": "documentary",
+    "material_category": "auto",
+    "narration_tone": "克制、清冷、带一点温柔的惆怅，像在讲一颗被误解却始终沉默前行的星球",
+    "voice_profile": "calm_female",
+    "subtitle_style": "douyin_bold",
+    "narration_text": "冥王星离太阳很远，远到一圈公转。要走两百四十八年。它曾被叫作第九大行星，后来又被重新分类。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "calm_female",
+      "voice": "nova",
+      "speed": 0.96,
+      "gain": 1.0,
+      "pause_bias": 0.18,
+      "style": "documentary",
+      "category": "auto"
+    },
+    "tts_voice": "nova",
+    "tts_speed": 0.96,
+    "voice_gain": 1.0,
+    "pause_bias": 0.18,
+    "tts_engine": "system_say",
+    "mix_params": {
+      "voice_gain": 1.0,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260424-174502-fdc60b/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "被降级之后，冥王星依然独自在黑暗边缘发光",
+    "description": "它离太阳很远，也离热闹很远。可就算被重新定义，冥王星还是在自己的轨道上沉默发光。#冥王星 #宇宙浪漫 #天文科普 #孤独感",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "冥王星的孤单",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "作为冷清开场，建立遥远、寂静的宇宙氛围，贴合孤单主题",
+        "order": 1
+      },
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "用旋涡感强化被边缘化与漂流感，承接情绪推进",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "以更柔和神秘的尾段收束情绪，让孤独感落在安静余韵里",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "克制、清冷、带一点温柔的惆怅，像在讲一颗被误解却始终沉默前行的星球",
+    "voice_profile": "calm_female",
+    "narration_style": "documentary"
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

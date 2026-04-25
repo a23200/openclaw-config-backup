@@ -1,0 +1,18 @@
+{
+  "result": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-gpt旧版排版参考-v2-精确文字版/2026公司架构解读-旧神陨落-新神开眼-gpt旧版排版参考-v2-精确文字版.pptx",
+  "outputDir": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-gpt旧版排版参考-v2-精确文字版",
+  "slideCount": 5,
+  "deckTitle": "2026公司架构解读：旧神陨落 新神开眼",
+  "sourceDoc": "/Users/mac/Desktop/项目总表/make-ppt/runtime/app-factory/projects/2026公司架构解读-旧神陨落-新神开眼-22ad58d9/sources/2026公司架构解读：旧神陨落 新神开眼.md",
+  "outlinePath": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-gpt旧版排版参考-v2-精确文字版/outline.md",
+  "slidePlan": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-gpt旧版排版参考-v2-精确文字版/slide-plan.json",
+  "promptCatalog": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-gpt旧版排版参考-v2-精确文字版/gemini-prompts.json",
+  "imageDirectory": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-gpt旧版排版参考-v2-精确文字版",
+  "geminiBackdropDirectory": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-gpt旧版排版参考-v2-精确文字版/gemini-backdrops",
+  "imageProvider": "openai",
+  "styleReference": "/Users/mac/Desktop/项目总表/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png",
+  "layoutReference": "/Users/mac/Desktop/项目总表/make-ppt/runtime/image-ppt-demo/20260415-223849-项目核心竞争力分析-gemini原生出字生图6页样张/P2-第一层护城河：闭环自进化系统vs线性工具.png",
+  "pageReferenceDirectory": "/Users/mac/Desktop/项目总表/make-ppt/runtime/manual-watch/20260422-旧神陨落新神开眼-修复提炼-正式生成/comic-assets",
+  "mode": "comic-gpt-image-native-text",
+  "dryRun": false
+}

@@ -1,0 +1,85 @@
+{
+  "id": "20260423-034447-dd76f6",
+  "title": "宇宙为什么会膨胀",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260423-034447-dd76f6/final_mastered.mp4",
+  "created_at": 1776887087.974773,
+  "updated_at": 1776888416.14876,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "",
+    "enable_natural_voiceover": true,
+    "narration_style": "documentary",
+    "subtitle_style": "douyin_bold",
+    "material_category": "science",
+    "narration_tone": "冷静、可信、解释感强，用短句讲清一个原理",
+    "voice_profile": "steady_male",
+    "narration_text": "宇宙的膨胀，并不是星系在空间里向外炸开。更准确地说，是空间本身正在变大。距离越远的星系，看起来退得越快。",
+    "bgm_path": "/tmp/jimeng_demo/ambient_bgm.mp3",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "steady_male",
+      "voice": "echo",
+      "speed": 0.96,
+      "gain": 1.0,
+      "pause_bias": 0.18,
+      "style": "documentary",
+      "category": "science"
+    },
+    "tts_voice": "echo",
+    "tts_speed": 0.96,
+    "voice_gain": 1.0,
+    "pause_bias": 0.18,
+    "tts_engine": "edge_tts",
+    "mix_params": {
+      "voice_gain": 1.0,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260423-034447-dd76f6/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "宇宙为什么会膨胀？看懂一个关键点",
+    "description": "宇宙不是简单地向外炸开，而是空间本身在变大。 #宇宙 #科普 #AI短片",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "宇宙为什么会膨胀",
+    "clips": [
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "开场建立宇宙尺度",
+        "order": 1
+      },
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "承接深空解释",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "结尾形成视觉记忆点",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "science",
+    "narration_tone": "冷静、可信、解释感强，用短句讲清一个原理",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary"
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

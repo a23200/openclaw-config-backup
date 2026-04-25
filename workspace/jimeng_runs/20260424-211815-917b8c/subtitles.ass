@@ -1,0 +1,17 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,PingFang SC,74,&H00FFFFFF,&H000000FF,&H14000000,&H69000000,-1,0,0,0,100,100,0,0,1,4,1,2,80,80,165,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+
+Dialogue: 0,00:00:00.000,00:00:03.753,Default,,0,0,0,,用宇宙素材作一条科教讲解，看 起来很遥远，其实
+Dialogue: 0,00:00:03.753,00:00:07.507,Default,,0,0,0,,只要抓住一个关键点就能理解， 画面里的变化，不
+Dialogue: 0,00:00:07.507,00:00:11.260,Default,,0,0,0,,是在展示结果

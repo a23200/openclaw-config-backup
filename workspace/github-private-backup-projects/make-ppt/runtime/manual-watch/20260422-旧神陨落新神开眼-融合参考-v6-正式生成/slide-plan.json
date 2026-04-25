@@ -1,0 +1,69 @@
+{
+  "deckTitle": "2026公司架构解读：旧神陨落 新神开眼",
+  "slideCount": 5,
+  "slides": [
+    {
+      "page": 1,
+      "title": "2026公司架构解读",
+      "contextTitle": "2026公司架构解读：旧神陨落 新神开眼",
+      "bullets": [
+        "旧神陨落 新神开眼",
+        "一场关于效率与控制的财富游戏"
+      ],
+      "scenePrompt": "abstract premium cover scene with old structure collapsing, a new core awakening, strong arrows and large white space",
+      "filename": "P1-2026公司架构解读.png"
+    },
+    {
+      "page": 2,
+      "title": "二、资本路径与资本市场战略",
+      "contextTitle": "二、资本路径与资本市场战略",
+      "bullets": [
+        "把过去承载业务的结构，升级为承载未来放大的体系。",
+        "是为了让既有方向拥有更强的承载力、更高的稳定性、以及更大的延展空间。",
+        "我们是在提前清理旧结构、搭建新架构，让公司从“能做业务”，走向“能承载更大业务、承接更多资源、进入更高层级竞争”。",
+        "这是一次为更高阶段发展清场、铺路、提速的结构性升级。"
+      ],
+      "scenePrompt": "abstract strategic structure scene with layered bridge blocks, upward arrows, executive geometry and clean white space",
+      "filename": "P2-二、资本路径与资本市场战略.png"
+    },
+    {
+      "page": 3,
+      "title": "三、ClawLink AI应用体系",
+      "contextTitle": "三、ClawLink AI应用体系",
+      "bullets": [
+        "人类的认知操作系统，正在被整体重写。",
+        "你过去赖以生存的能力，正在快速贬值。",
+        "什么值得自己做，什么必须交给系统去做。",
+        "不是让人更努力，而是让系统替你完成绝大部分执行。"
+      ],
+      "scenePrompt": "abstract command center scene with one glowing core, surrounding modules, curved connection lines and calm white space",
+      "filename": "P3-三、ClawLinkAI应用体系.png"
+    },
+    {
+      "page": 4,
+      "title": "四、延展企业集群：四个行业表象，一套权力接管系统",
+      "contextTitle": "四、延展企业集群：四个行业表象，一套权力接管系统",
+      "bullets": [
+        "谁掌握系统，谁就掌握这个行业最值钱的那一层。",
+        "我们真正做的，始终只有一件事：把 ClawLink ai 应用体系，放进不同产业里，接管其中最核心的控制权。",
+        "本质上，祂们只有同一个底层逻辑",
+        "祂们是四个战场，四个验证场，四个让旧秩序失去解释权、让新系统开始接管价值分配的入口"
+      ],
+      "scenePrompt": "abstract multi-sector hub scene with four linked zones, one central platform, converging paths and clean white space",
+      "filename": "P4-四、延展企业集群：四个行业表象，一….png"
+    },
+    {
+      "page": 5,
+      "title": "五、公司盈利模型",
+      "contextTitle": "五、公司盈利模型",
+      "bullets": [
+        "谁在控制执行，谁就拥有结果分配权。",
+        "控制蛋糕是怎么被做出来、怎么被分出去。",
+        "如何把已经跑通的系统，放大成更大的收入机器。",
+        "过去，我们靠交付赚钱；未来，我们靠系统运行持续收钱。"
+      ],
+      "scenePrompt": "abstract business engine scene with circular loops, layered pathways, scaling arrows and clean white space",
+      "filename": "P5-五、公司盈利模型.png"
+    }
+  ]
+}

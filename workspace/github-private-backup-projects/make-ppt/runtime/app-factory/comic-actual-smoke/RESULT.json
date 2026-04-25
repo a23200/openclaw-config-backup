@@ -1,0 +1,16 @@
+{
+  "result": "/Users/mac/Desktop/make-ppt/runtime/app-factory/comic-actual-smoke/smoke.pptx",
+  "outputDir": "/Users/mac/Desktop/make-ppt/runtime/app-factory/comic-actual-smoke",
+  "slideCount": 2,
+  "deckTitle": "make-ppt",
+  "sourceDoc": "/Users/mac/Desktop/make-ppt/README.md",
+  "outlinePath": "/Users/mac/Desktop/make-ppt/runtime/app-factory/comic-actual-smoke/outline.md",
+  "slidePlan": "/Users/mac/Desktop/make-ppt/runtime/app-factory/comic-actual-smoke/slide-plan.json",
+  "promptCatalog": "/Users/mac/Desktop/make-ppt/runtime/app-factory/comic-actual-smoke/gemini-prompts.json",
+  "imageDirectory": "/Users/mac/Desktop/make-ppt/runtime/app-factory/comic-actual-smoke",
+  "geminiBackdropDirectory": "/Users/mac/Desktop/make-ppt/runtime/app-factory/comic-actual-smoke/gemini-backdrops",
+  "styleReference": "/Users/mac/Desktop/make-ppt/归档/2026-04-15-generated-assets/desktop-generated/参考图-大模型能力突然变强.png",
+  "layoutReference": "/Users/mac/Desktop/make-ppt/runtime/image-ppt-demo/20260415-223849-项目核心竞争力分析-gemini原生出字生图6页样张/P2-第一层护城河：闭环自进化系统vs线性工具.png",
+  "mode": "comic-gemini-native-text",
+  "dryRun": false
+}

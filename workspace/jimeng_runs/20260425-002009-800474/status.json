@@ -1,0 +1,99 @@
+{
+  "id": "20260425-002009-800474",
+  "title": "把宇宙讲清楚",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260425-002009-800474/final_mastered.mp4",
+  "created_at": 1777047609.951484,
+  "updated_at": 1777047618.573806,
+  "post": {
+    "mode": "auto",
+    "title_card_text": "关于把宇宙讲清楚的一段观察",
+    "enable_natural_voiceover": true,
+    "material_category": "auto",
+    "narration_tone": "冷静克制，清晰讲解，带一点仰望感",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary",
+    "subtitle_style": "cinematic_white",
+    "selection_engine": "cc-gpt-5.4",
+    "narration_text": "宇宙不是一片安静的黑。我们看到的每一点微光，可能都是恒星、星云。甚至一个遥远星系。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "steady_male",
+      "voice": "echo",
+      "speed": 0.96,
+      "gain": 1.0,
+      "pause_bias": 0.18,
+      "style": "documentary",
+      "category": "auto"
+    },
+    "tts_voice": "echo",
+    "tts_speed": 0.96,
+    "voice_gain": 1.0,
+    "pause_bias": 0.18,
+    "tts_engine": "openai_tts",
+    "tts_detail": "openai tts ok",
+    "mix_params": {
+      "voice_gain": 1.0,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260425-002009-800474/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "15秒把宇宙讲清楚，你到底身处哪里",
+    "description": "从星空到星云，15秒建立对宇宙最直观的理解。先看见尺度，再理解我们的位置。#宇宙科普 #星空 #天文",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "把宇宙讲清楚",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "作为开场建立广阔冷静的宇宙尺度感，适合先抛出主题",
+        "order": 1
+      },
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "中段用更强的旋涡运动承接讲解，强化宇宙并非静止的观感",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "结尾回到神秘柔和的深空画面，收住情绪并留下想象空间",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "冷静克制，清晰讲解，带一点仰望感",
+    "voice_profile": "steady_male",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "cc-gpt-5.4",
+    "suggested_tags": [
+      "宇宙科普",
+      "星空",
+      "天文",
+      "银河",
+      "深空"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:cinematic_white"
+}

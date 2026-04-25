@@ -1,0 +1,268 @@
+{
+  "targetUrl": "https://www.ynu.edu.cn/xxgk/xxjj.htm",
+  "finalUrl": "https://www.ynu.edu.cn/xxgk/xxjj.htm",
+  "statusCode": 200,
+  "createdAt": "2026-04-21T14:41:30.207Z",
+  "htmlBytes": 48509,
+  "assetCount": 32,
+  "okCount": 32,
+  "totalAssetBytes": 1303288,
+  "manifest": [
+    {
+      "kind": "css",
+      "url": "https://www.ynu.edu.cn/css/swiper.min.css",
+      "statusCode": 200,
+      "bytes": 15691,
+      "contentType": "text/css",
+      "localPath": "assets/bf7d3db362.css"
+    },
+    {
+      "kind": "css",
+      "url": "https://www.ynu.edu.cn/css/slick.css",
+      "statusCode": 200,
+      "bytes": 4823,
+      "contentType": "text/css",
+      "localPath": "assets/3f9518b97c.css"
+    },
+    {
+      "kind": "css",
+      "url": "https://www.ynu.edu.cn/css/style.css",
+      "statusCode": 200,
+      "bytes": 50428,
+      "contentType": "text/css",
+      "localPath": "assets/45c82d95f1.css"
+    },
+    {
+      "kind": "css",
+      "url": "https://www.ynu.edu.cn/css/a_animate.css",
+      "statusCode": 200,
+      "bytes": 106531,
+      "contentType": "text/css",
+      "localPath": "assets/587fb64f08.css"
+    },
+    {
+      "kind": "css",
+      "url": "https://www.ynu.edu.cn/css/ny.css",
+      "statusCode": 200,
+      "bytes": 34435,
+      "contentType": "text/css",
+      "localPath": "assets/d6d6884278.css"
+    },
+    {
+      "kind": "css",
+      "url": "https://www.ynu.edu.cn/css/reset.css",
+      "statusCode": 200,
+      "bytes": 18193,
+      "contentType": "text/css",
+      "localPath": "assets/37d5a1c141.css"
+    },
+    {
+      "kind": "css",
+      "url": "https://www.ynu.edu.cn/_sitegray/_sitegray_d.css",
+      "statusCode": 200,
+      "bytes": 20,
+      "contentType": "text/css",
+      "localPath": "assets/a28d89b5a9.css"
+    },
+    {
+      "kind": "css",
+      "url": "https://www.ynu.edu.cn/jjy.vsb.css",
+      "statusCode": 200,
+      "bytes": 1041,
+      "contentType": "text/css",
+      "localPath": "assets/4dbb136565.css"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/_sitegray/_sitegray.js",
+      "statusCode": 200,
+      "bytes": 95,
+      "contentType": "application/javascript",
+      "localPath": "assets/1894efdb29.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/system/resource/js/counter.js",
+      "statusCode": 200,
+      "bytes": 1329,
+      "contentType": "application/javascript",
+      "localPath": "assets/b7ddb68d92.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/system/resource/js/vsbscreen.min.js",
+      "statusCode": 200,
+      "bytes": 3347,
+      "contentType": "application/javascript",
+      "localPath": "assets/5e8dfc230d.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/js/jquery.js",
+      "statusCode": 200,
+      "bytes": 87443,
+      "contentType": "application/javascript",
+      "localPath": "assets/8ccce89316.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/system/resource/js/dynclicks.js",
+      "statusCode": 200,
+      "bytes": 3504,
+      "contentType": "application/javascript",
+      "localPath": "assets/8e93b83d57.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/system/resource/js/base64.js",
+      "statusCode": 200,
+      "bytes": 4749,
+      "contentType": "application/javascript",
+      "localPath": "assets/51bac75d2a.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/system/resource/js/openlink.js",
+      "statusCode": 200,
+      "bytes": 648,
+      "contentType": "application/javascript",
+      "localPath": "assets/0031f6099e.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/system/resource/js/formfunc.js",
+      "statusCode": 200,
+      "bytes": 1356,
+      "contentType": "application/javascript",
+      "localPath": "assets/d3aa1a6016.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/system/resource/js/ajax.js",
+      "statusCode": 200,
+      "bytes": 6767,
+      "contentType": "application/javascript",
+      "localPath": "assets/c25d40f68e.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/system/resource/js/news/mp4video.js",
+      "statusCode": 200,
+      "bytes": 7419,
+      "contentType": "application/javascript",
+      "localPath": "assets/c68ae5ca87.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/js/slick.min.js",
+      "statusCode": 200,
+      "bytes": 55999,
+      "contentType": "application/javascript",
+      "localPath": "assets/2f70b50b68.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/js/wow.min2.js",
+      "statusCode": 200,
+      "bytes": 6728,
+      "contentType": "application/javascript",
+      "localPath": "assets/dbe6d3e24c.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/js/a_animate.js",
+      "statusCode": 200,
+      "bytes": 13749,
+      "contentType": "application/javascript",
+      "localPath": "assets/de8f445e81.js"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/js/public.js",
+      "statusCode": 200,
+      "bytes": 26052,
+      "contentType": "application/javascript",
+      "localPath": "assets/fa7f845f99.js"
+    },
+    {
+      "kind": "img",
+      "url": "https://www.ynu.edu.cn/images/logo.png",
+      "statusCode": 200,
+      "bytes": 6949,
+      "contentType": "image/png",
+      "localPath": "assets/527efb44bd.png"
+    },
+    {
+      "kind": "img",
+      "url": "https://www.ynu.edu.cn/images/zk.png",
+      "statusCode": 200,
+      "bytes": 168,
+      "contentType": "image/png",
+      "localPath": "assets/4ec56370dd.png"
+    },
+    {
+      "kind": "img",
+      "url": "https://www.ynu.edu.cn/images/en.png",
+      "statusCode": 200,
+      "bytes": 1235,
+      "contentType": "image/png",
+      "localPath": "assets/a922885bb5.png"
+    },
+    {
+      "kind": "img",
+      "url": "https://www.ynu.edu.cn/images/logo.png",
+      "statusCode": 200,
+      "bytes": 6949,
+      "contentType": "image/png",
+      "localPath": "assets/527efb44bd.png"
+    },
+    {
+      "kind": "img",
+      "url": "https://www.ynu.edu.cn/images/ser.png",
+      "statusCode": 200,
+      "bytes": 1249,
+      "contentType": "image/png",
+      "localPath": "assets/2e6616595d.png"
+    },
+    {
+      "kind": "js",
+      "url": "https://www.ynu.edu.cn/js/swiper.min.js",
+      "statusCode": 200,
+      "bytes": 441136,
+      "contentType": "application/javascript",
+      "localPath": "assets/82768aff6e.js"
+    },
+    {
+      "kind": "img",
+      "url": "https://www.ynu.edu.cn/images/f-logo.png",
+      "statusCode": 200,
+      "bytes": 9136,
+      "contentType": "image/png",
+      "localPath": "assets/69cc52b3b2.png"
+    },
+    {
+      "kind": "img",
+      "url": "https://www.ynu.edu.cn/images/f-img1.png",
+      "statusCode": 200,
+      "bytes": 5959,
+      "contentType": "image/png",
+      "localPath": "assets/b03acac045.png"
+    },
+    {
+      "kind": "img",
+      "url": "https://www.ynu.edu.cn/images/f-img2.png",
+      "statusCode": 200,
+      "bytes": 6302,
+      "contentType": "image/png",
+      "localPath": "assets/4fa9574d12.png"
+    },
+    {
+      "kind": "img",
+      "url": "https://www.ynu.edu.cn/images/ban1.jpg",
+      "statusCode": 200,
+      "bytes": 373858,
+      "contentType": "image/jpeg",
+      "localPath": "assets/3f883bdff9.jpg"
+    }
+  ]
+}
