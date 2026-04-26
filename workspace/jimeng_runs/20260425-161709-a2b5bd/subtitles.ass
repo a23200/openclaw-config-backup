@@ -1,0 +1,17 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,PingFang SC,68,&H00FFFFFF,&H000000FF,&H2D000000,&HFF000000,-1,0,0,0,100,100,0,0,1,3,1,2,80,80,170,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+
+Dialogue: 0,00:00:00.000,00:00:04.333,Default,,0,0,0,,民王心理太阳很远，远到一圈公 转，要走248年
+Dialogue: 0,00:00:04.333,00:00:08.667,Default,,0,0,0,,他不再被归为大行行，却依旧在 黑暗边缘安静运
+Dialogue: 0,00:00:08.667,00:00:13.000,Default,,0,0,0,,行

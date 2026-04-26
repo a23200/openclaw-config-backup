@@ -1,0 +1,99 @@
+{
+  "id": "20260425-161709-a2b5bd",
+  "title": "冥王星的孤单",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260425-161709-a2b5bd/final_mastered.mp4",
+  "created_at": 1777105029.965683,
+  "updated_at": 1777105039.1884851,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "关于冥王星的孤单的一段观察",
+    "enable_natural_voiceover": true,
+    "material_category": "auto",
+    "narration_tone": "克制、清冷、带一点温柔的感伤，像在讲一个被忽略的宇宙故事",
+    "voice_profile": "calm_female",
+    "narration_style": "documentary",
+    "subtitle_style": "cinematic_white",
+    "selection_engine": "manual",
+    "narration_text": "冥王星离太阳很远，远到一圈公转。要走二百四十八年。它不再被归为大行星，却依旧在黑暗边缘安静运行。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "calm_female",
+      "voice": "nova",
+      "speed": 0.96,
+      "gain": 1.0,
+      "pause_bias": 0.18,
+      "bgm_volume": 0.28,
+      "style": "documentary",
+      "category": "auto"
+    },
+    "tts_voice": "nova",
+    "tts_speed": 0.96,
+    "voice_gain": 1.0,
+    "pause_bias": 0.18,
+    "bgm_volume": 0.28,
+    "tts_engine": "openai_tts",
+    "tts_detail": "openai tts ok",
+    "mix_params": {
+      "voice_gain": 1.0,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260425-161709-a2b5bd/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "它离太阳很远，也离热闹很远的冥王星",
+    "description": "冥王星不是最亮的那颗，却总像独自漂在宇宙边缘。安静、遥远，也因此格外迷人。#冥王星 #宇宙浪漫 #星空科普",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "冥王星的孤单",
+    "clips": [
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "作为冷清开场，铺垫遥远、安静的宇宙氛围",
+        "order": 1
+      },
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "用旋涡感强化漂浮与失重，承接冥王星的孤独感受",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "以更梦幻也更空旷的画面收尾，让情绪停留在寂静里",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "克制、清冷、带一点温柔的感伤，像在讲一个被忽略的宇宙故事",
+    "voice_profile": "calm_female",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "manual",
+    "suggested_tags": [
+      "宇宙",
+      "ClawLink",
+      "素材库短片"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:cinematic_white"
+}
