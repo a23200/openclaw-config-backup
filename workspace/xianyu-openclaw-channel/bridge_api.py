@@ -1000,6 +1000,7 @@ class MarketSellerContactItem(BaseModel):
     title: str = ""
     seller_name: str = ""
     seller_user_id: str = ""
+    seller_user_candidates: list[str] = Field(default_factory=list)
     price_text: str = ""
     price_display: str = ""
     condition: str = ""
@@ -1296,9 +1297,13 @@ def _get_market_contact_retry_delay(error: Exception | str, attempt: int) -> flo
 async def _send_market_contact_message(instance, item: MarketSellerContactItem, message_text: str) -> tuple[str, str]:
     max_attempts = 4
     last_error: Exception | None = None
-    resolved_user_id = str(
-        await instance.resolve_chat_peer_user_id(item.item_id, item.seller_user_id) or item.seller_user_id or ""
-    ).strip()
+    candidate_user_ids = await instance.resolve_chat_peer_user_candidates(
+        item.item_id,
+        item.seller_user_candidates or item.seller_user_id,
+    )
+    resolved_user_id = str(candidate_user_ids[0] if candidate_user_ids else "").strip()
+    if not resolved_user_id:
+        resolved_user_id = str(item.seller_user_id or "").strip()
     if not resolved_user_id:
         raise RuntimeError("未能解析到卖家的真实聊天ID")
 
@@ -1307,11 +1312,18 @@ async def _send_market_contact_message(instance, item: MarketSellerContactItem, 
             f"[Bridge] 已解析真实聊天ID: item={item.item_id}, "
             f"search_seller_id={item.seller_user_id}, peer_user_id={resolved_user_id}"
         )
+    if len(candidate_user_ids) > 1:
+        logger.info(f"[Bridge] 自动沟通候选聊天ID: item={item.item_id}, candidates={candidate_user_ids[:4]}")
 
     for attempt in range(1, max_attempts + 1):
         try:
-            chat_id = await instance.send_msg_once(resolved_user_id, item.item_id, message_text) or ""
-            return str(chat_id or "").strip(), resolved_user_id
+            chat_id, used_user_id = await instance.send_msg_once(
+                candidate_user_ids or resolved_user_id,
+                item.item_id,
+                message_text,
+            )
+            final_user_id = str(used_user_id or resolved_user_id).strip()
+            return str(chat_id or "").strip(), final_user_id
         except Exception as exc:
             last_error = exc
             if attempt >= max_attempts or not _is_transient_market_contact_error(exc):

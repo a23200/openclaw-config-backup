@@ -1371,6 +1371,15 @@ def get_cookies_details(current_user: Dict[str, Any] = Depends(get_current_user)
             if cookie_manager.manager is not None
             else db_manager.get_cookie_status(cookie_id)
         )
+        connected = False
+        if cookie_manager.manager is not None:
+            try:
+                from bridge_api import xianyu_instances
+                instance = xianyu_instances.get(cookie_id)
+                websocket = getattr(instance, "ws", None) if instance is not None else None
+                connected = instance is not None and websocket is not None and not getattr(websocket, "closed", False)
+            except Exception:
+                connected = False
         cookie_details = db_manager.get_cookie_details(cookie_id)
         auto_confirm = cookie_details.get('auto_confirm') if cookie_details else db_manager.get_auto_confirm(cookie_id)
         remark = cookie_details.get('remark', '') if cookie_details else ''
@@ -1379,6 +1388,7 @@ def get_cookies_details(current_user: Dict[str, Any] = Depends(get_current_user)
             'id': cookie_id,
             'value': cookie_value,
             'enabled': cookie_enabled,
+            'connected': connected,
             'auto_confirm': auto_confirm,
             'remark': remark,
             'pause_duration': cookie_details.get('pause_duration', 10) if cookie_details else 10,

@@ -41,6 +41,7 @@ export const getAccountDetails = async (): Promise<AccountDetail[]> => {
     value: item.value,
     cookie: item.value,
     enabled: item.enabled,
+    connected: item.connected ?? false,
     auto_confirm: item.auto_confirm,
     remark: item.remark,
     note: item.remark,
@@ -61,6 +62,7 @@ export const getConversationAccounts = async (): Promise<AccountDetail[]> => {
     value: item.value,
     cookie: item.value,
     enabled: item.enabled,
+    connected: item.connected ?? item.enabled ?? false,
     auto_confirm: item.auto_confirm,
     remark: item.remark,
     note: item.remark,
@@ -351,6 +353,7 @@ export const contactMarketSellers = async (data: {
     title: string;
     seller_name: string;
     seller_user_id: string;
+    seller_user_candidates?: string[];
     price_text?: string;
     price_display?: string;
     condition?: string;

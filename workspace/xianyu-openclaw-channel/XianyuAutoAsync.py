@@ -12,7 +12,7 @@ from enum import Enum
 from pathlib import Path
 from loguru import logger
 import websockets
-from urllib.parse import urljoin, urlparse
+from urllib.parse import parse_qs, urljoin, urlparse
 import urllib.request
 from utils.xianyu_utils import (
     decrypt, generate_mid, generate_uuid, trans_cookies,
@@ -785,6 +785,7 @@ class XianyuLive:
         self.pending_ws_requests = {}
         self.pending_ws_requests_lock = asyncio.Lock()
         self.item_chat_peer_user_cache = {}
+        self.item_chat_peer_candidates_cache = {}
         self.item_chat_peer_user_cache_lock = asyncio.Lock()
         
         # 消息去重机制：防止同一条消息被处理多次
@@ -7275,16 +7276,145 @@ class XianyuLive:
         except Exception as e:
             logger.warning(f"【{self.cookie_id}】强制关闭时出现异常（已忽略）: {e}")
 
-    async def _register_pending_ws_request(self, request_mid: str):
+    async def _register_pending_ws_request(self, request_mid: str, **meta):
         loop = asyncio.get_running_loop()
         future = loop.create_future()
         async with self.pending_ws_requests_lock:
-            self.pending_ws_requests[request_mid] = future
+            self.pending_ws_requests[request_mid] = {
+                "future": future,
+                "meta": meta or {},
+            }
         return future
 
     async def _remove_pending_ws_request(self, request_mid: str):
         async with self.pending_ws_requests_lock:
             return self.pending_ws_requests.pop(request_mid, None)
+
+    def _coerce_unique_strings(self, values, normalizer=None) -> list[str]:
+        normalize = normalizer or (lambda value: str(value).strip())
+        seen: set[str] = set()
+        result: list[str] = []
+
+        def append_value(value):
+            if value is None:
+                return
+            if isinstance(value, (list, tuple, set)):
+                for nested in value:
+                    append_value(nested)
+                return
+            normalized = normalize(value)
+            if normalized and normalized not in seen:
+                seen.add(normalized)
+                result.append(normalized)
+
+        append_value(values)
+        return result
+
+    def _collect_values_by_keys(self, payload, keys: tuple[str, ...], max_depth: int = 7, normalizer=None) -> list[str]:
+        normalize = normalizer or (lambda value: str(value).strip())
+        seen_objects: set[int] = set()
+        seen_values: set[str] = set()
+        values: list[str] = []
+
+        def walk(current, depth: int = 0):
+            if current is None or depth > max_depth:
+                return
+            if isinstance(current, (str, int, float, bool)):
+                return
+
+            object_id = id(current)
+            if object_id in seen_objects:
+                return
+            seen_objects.add(object_id)
+
+            if isinstance(current, dict):
+                for key in keys:
+                    candidate = current.get(key)
+                    if candidate in (None, ""):
+                        continue
+                    normalized = normalize(candidate)
+                    if normalized and normalized not in seen_values:
+                        seen_values.add(normalized)
+                        values.append(normalized)
+                for nested in current.values():
+                    walk(nested, depth + 1)
+            elif isinstance(current, list):
+                for nested in current:
+                    walk(nested, depth + 1)
+
+        walk(payload)
+        return values
+
+    def _extract_query_values_from_url(self, url: str, keys: tuple[str, ...]) -> list[str]:
+        if not isinstance(url, str):
+            return []
+        candidate_url = url.strip()
+        if not candidate_url or "?" not in candidate_url:
+            return []
+
+        try:
+            parsed = urlparse(candidate_url)
+        except Exception:
+            return []
+
+        query_map = parse_qs(parsed.query or "", keep_blank_values=False)
+        values: list[str] = []
+        for key in keys:
+            values.extend(query_map.get(key, []))
+        return values
+
+    def _collect_query_values_from_payload(self, payload, url_keys: tuple[str, ...], query_keys: tuple[str, ...], max_depth: int = 7) -> list[str]:
+        raw_urls = self._collect_values_by_keys(payload, url_keys, max_depth=max_depth)
+        values: list[str] = []
+        for raw_url in raw_urls:
+            values.extend(self._extract_query_values_from_url(raw_url, query_keys))
+        return values
+
+    def _is_meaningful_goofish_user_id(self, value) -> bool:
+        normalized = self._normalize_goofish_user_id(value)
+        if not normalized:
+            return False
+        if normalized.lower() in {"0", "unknown", "unknown_user", "none", "null"}:
+            return False
+        return len(normalized) >= 3
+
+    def _normalize_goofish_user_ids(self, values) -> list[str]:
+        candidates = self._coerce_unique_strings(values, self._normalize_goofish_user_id)
+        return [candidate for candidate in candidates if self._is_meaningful_goofish_user_id(candidate)]
+
+    def _build_chat_peer_user_candidates(self, item_info: dict, fallback_user_ids="") -> list[str]:
+        payload = item_info if isinstance(item_info, dict) else {}
+        data = payload.get("data") if isinstance(payload, dict) else {}
+        track_params = data.get("trackParams") if isinstance(data, dict) else {}
+        seller_do = data.get("sellerDO") if isinstance(data, dict) else {}
+        user_do = data.get("userDO") if isinstance(data, dict) else {}
+
+        peer_keys = (
+            "peerUserId", "peer_user_id", "peerUid", "peer_uid",
+            "toUserId", "to_user_id", "receiverId", "receiver_id",
+        )
+        seller_keys = (
+            "sellerUserId", "seller_user_id", "sellerId", "seller_id",
+            "sellerUid", "seller_uid", "openUid", "open_uid",
+            "accountId", "account_id",
+        )
+        generic_keys = ("userId", "user_id", "uid", "userID")
+        url_keys = (
+            "reminderUrl", "targetUrl", "targetURL", "jumpUrl", "detailUrl",
+            "itemUrl", "item_url", "shareUrl", "share_url", "webUrl",
+            "web_url", "nativeUrl", "url",
+        )
+
+        return self._normalize_goofish_user_ids([
+            self._collect_query_values_from_payload(payload, url_keys, peer_keys + seller_keys + generic_keys, max_depth=7),
+            self._collect_values_by_keys(track_params, peer_keys + seller_keys + generic_keys, max_depth=2, normalizer=self._normalize_goofish_user_id),
+            self._collect_values_by_keys(seller_do, peer_keys + seller_keys + generic_keys, max_depth=3, normalizer=self._normalize_goofish_user_id),
+            self._collect_values_by_keys(user_do, peer_keys + seller_keys + generic_keys, max_depth=3, normalizer=self._normalize_goofish_user_id),
+            self._collect_values_by_keys(data, peer_keys + seller_keys, max_depth=5, normalizer=self._normalize_goofish_user_id),
+            self._collect_values_by_keys(payload, peer_keys + seller_keys, max_depth=7, normalizer=self._normalize_goofish_user_id),
+            self._collect_values_by_keys(data, generic_keys, max_depth=5, normalizer=self._normalize_goofish_user_id),
+            fallback_user_ids,
+        ])
 
     async def _fetch_item_info_for_peer_resolution(self, item_id: str) -> dict:
         item_id = str(item_id or "").strip()
@@ -7328,65 +7458,60 @@ class XianyuLive:
             ) as response:
                 return await response.json(content_type=None)
 
-    async def resolve_chat_peer_user_id(self, item_id: str, fallback_user_id: str = "") -> str:
+    async def resolve_chat_peer_user_candidates(self, item_id: str, fallback_user_id="") -> list[str]:
         item_id = str(item_id or "").strip()
-        normalized_fallback = self._normalize_goofish_user_id(fallback_user_id)
-        if normalized_fallback.isdigit():
-            return normalized_fallback
+        normalized_fallbacks = self._normalize_goofish_user_ids(fallback_user_id)
         if not item_id:
-            return normalized_fallback
+            return normalized_fallbacks
 
         async with self.item_chat_peer_user_cache_lock:
-            cached_user_id = self.item_chat_peer_user_cache.get(item_id)
+            cached_candidates = list(self.item_chat_peer_candidates_cache.get(item_id) or [])
+            cached_user_id = str(self.item_chat_peer_user_cache.get(item_id) or "").strip()
+        if cached_candidates:
+            return self._normalize_goofish_user_ids([cached_candidates, normalized_fallbacks])
         if cached_user_id:
-            return cached_user_id
+            return self._normalize_goofish_user_ids([cached_user_id, normalized_fallbacks])
 
         try:
             item_info = await self._fetch_item_info_for_peer_resolution(item_id)
         except Exception as exc:
-            logger.warning(f"【{self.cookie_id}】解析聊天用户ID失败: item={item_id}, fallback={normalized_fallback}, error={exc}")
-            return normalized_fallback
+            logger.warning(
+                f"【{self.cookie_id}】解析聊天用户ID失败: item={item_id}, "
+                f"fallbacks={normalized_fallbacks}, error={exc}"
+            )
+            return normalized_fallbacks
 
-        data = item_info.get("data") if isinstance(item_info, dict) else {}
-        track_params = data.get("trackParams") if isinstance(data, dict) else {}
-        seller_do = data.get("sellerDO") if isinstance(data, dict) else {}
-        user_do = data.get("userDO") if isinstance(data, dict) else {}
-
-        resolved_user_id = self._normalize_goofish_user_id(
-            (track_params.get("sellerId") if isinstance(track_params, dict) else "")
-            or (data.get("sellerId") if isinstance(data, dict) else "")
-            or (seller_do.get("sellerId") if isinstance(seller_do, dict) else "")
-            or (seller_do.get("userId") if isinstance(seller_do, dict) else "")
-            or (user_do.get("userId") if isinstance(user_do, dict) else "")
-            or normalized_fallback
-        )
-
-        if resolved_user_id and resolved_user_id.isdigit():
+        candidate_user_ids = self._build_chat_peer_user_candidates(item_info, normalized_fallbacks)
+        if candidate_user_ids:
             async with self.item_chat_peer_user_cache_lock:
-                self.item_chat_peer_user_cache[item_id] = resolved_user_id
-            if normalized_fallback and resolved_user_id != normalized_fallback:
+                self.item_chat_peer_user_cache[item_id] = candidate_user_ids[0]
+                self.item_chat_peer_candidates_cache[item_id] = list(candidate_user_ids)
+            if normalized_fallbacks and candidate_user_ids[0] != normalized_fallbacks[0]:
                 logger.info(
                     f"【{self.cookie_id}】已将搜索卖家ID映射为真实聊天ID: "
-                    f"item={item_id}, search_id={normalized_fallback}, peer_id={resolved_user_id}"
+                    f"item={item_id}, search_id={normalized_fallbacks[0]}, "
+                    f"peer_id={candidate_user_ids[0]}, candidates={candidate_user_ids[:4]}"
                 )
-        return resolved_user_id or normalized_fallback
+            elif len(candidate_user_ids) > 1:
+                logger.info(f"【{self.cookie_id}】已提取多个聊天ID候选: item={item_id}, candidates={candidate_user_ids[:4]}")
+        return candidate_user_ids or normalized_fallbacks
+
+    async def resolve_chat_peer_user_id(self, item_id: str, fallback_user_id: str = "") -> str:
+        candidate_user_ids = await self.resolve_chat_peer_user_candidates(item_id, fallback_user_id)
+        return candidate_user_ids[0] if candidate_user_ids else ""
 
     def _extract_ws_response_error(self, message_data) -> str:
         if not isinstance(message_data, dict):
             return "鱼鱼返回了未知响应"
 
         body = message_data.get("body")
-        if isinstance(body, dict):
-            for key in ("reason", "message", "msg", "developerMessage", "moreInfo"):
-                value = str(body.get(key) or "").strip()
-                if value:
-                    return value
-            nested_conversation = body.get("singleChatConversation")
-            if isinstance(nested_conversation, dict):
-                for key in ("reason", "message", "msg"):
-                    value = str(nested_conversation.get(key) or "").strip()
-                    if value:
-                        return value
+        error_messages = self._collect_values_by_keys(
+            body,
+            ("reason", "message", "msg", "developerMessage", "moreInfo", "errorMsg", "errorMessage", "subMsg"),
+            max_depth=6,
+        )
+        if error_messages:
+            return error_messages[0]
 
         code = message_data.get("code")
         return f"鱼鱼返回异常响应{f' (code={code})' if code is not None else ''}"
@@ -7405,6 +7530,30 @@ class XianyuLive:
 
         return ""
 
+    def _summarize_ws_response_for_log(self, message_data, limit: int = 1200) -> str:
+        try:
+            text = json.dumps(message_data, ensure_ascii=False, separators=(",", ":"))
+        except Exception:
+            text = str(message_data)
+        text = re.sub(r"\s+", " ", text).strip()
+        if len(text) > limit:
+            return text[:limit].rstrip() + "…"
+        return text
+
+    def _should_try_next_chat_candidate(self, error: Exception | str) -> bool:
+        message = str(error or "").strip()
+        if not message:
+            return False
+        retry_markers = (
+            "闲鱼走神了",
+            "稍后再试",
+            "RGV587",
+            "系统繁忙",
+            "创建会话失败",
+            "鱼鱼返回异常响应",
+        )
+        return any(marker in message for marker in retry_markers)
+
     async def _resolve_pending_ws_request(self, message_data) -> bool:
         if not isinstance(message_data, dict):
             return False
@@ -7417,9 +7566,15 @@ class XianyuLive:
         if not request_mid:
             return False
 
-        future = await self._remove_pending_ws_request(request_mid)
-        if not future:
+        request_entry = await self._remove_pending_ws_request(request_mid)
+        if not request_entry:
             return False
+        if isinstance(request_entry, dict):
+            future = request_entry.get("future")
+            meta = request_entry.get("meta") or {}
+        else:
+            future = request_entry
+            meta = {}
 
         if future.done():
             return True
@@ -7431,7 +7586,13 @@ class XianyuLive:
             code_num = None
 
         if code_num is not None and code_num >= 400:
-            future.set_exception(RuntimeError(self._extract_ws_response_error(message_data)))
+            error_message = self._extract_ws_response_error(message_data)
+            logger.warning(
+                f"【{self.cookie_id}】WS请求失败: mid={request_mid}, lwp={meta.get('lwp') or ''}, "
+                f"item={meta.get('item_id') or ''}, toid={meta.get('toid') or ''}, cid={meta.get('cid') or ''}, "
+                f"code={code_num}, error={error_message}, response={self._summarize_ws_response_for_log(message_data)}"
+            )
+            future.set_exception(RuntimeError(error_message))
             return True
 
         future.set_result(message_data)
@@ -7439,7 +7600,12 @@ class XianyuLive:
 
     async def _send_msg_once_via_active_ws(self, websocket, toid, item_id, text):
         create_mid = generate_mid()
-        create_future = await self._register_pending_ws_request(create_mid)
+        create_future = await self._register_pending_ws_request(
+            create_mid,
+            lwp="/r/SingleChatConversation/create",
+            toid=toid,
+            item_id=item_id,
+        )
 
         try:
             await self.create_chat(websocket, toid, item_id, request_mid=create_mid)
@@ -7449,12 +7615,19 @@ class XianyuLive:
                 raise RuntimeError("创建会话失败：未拿到会话ID")
         except Exception:
             pending = await self._remove_pending_ws_request(create_mid)
-            if pending and not pending.done():
-                pending.cancel()
+            pending_future = pending.get("future") if isinstance(pending, dict) else pending
+            if pending_future and not pending_future.done():
+                pending_future.cancel()
             raise
 
         send_mid = generate_mid()
-        send_future = await self._register_pending_ws_request(send_mid)
+        send_future = await self._register_pending_ws_request(
+            send_mid,
+            lwp="/r/MessageSend/sendByReceiverScope",
+            cid=cid,
+            toid=toid,
+            item_id=item_id,
+        )
 
         try:
             await self.send_msg(websocket, cid, toid, text, request_mid=send_mid)
@@ -7462,8 +7635,9 @@ class XianyuLive:
             return cid
         except Exception:
             pending = await self._remove_pending_ws_request(send_mid)
-            if pending and not pending.done():
-                pending.cancel()
+            pending_future = pending.get("future") if isinstance(pending, dict) else pending
+            if pending_future and not pending_future.done():
+                pending_future.cancel()
             raise
 
     async def _send_msg_once_via_temp_ws(self, toid, item_id, text):
@@ -7554,20 +7728,42 @@ class XianyuLive:
 
     async def send_msg_once(self, toid, item_id, text):
         async with self.send_once_lock:
-            current_ws = self.ws
-            websocket = (
-                current_ws
-                if current_ws is not None and not getattr(current_ws, "closed", False)
-                else await self._wait_for_active_ws()
-            )
-            if websocket is None:
-                raise RuntimeError("当前聊天连接未就绪，请稍后重试")
-
-            resolved_toid = await self.resolve_chat_peer_user_id(item_id, toid)
-            if not resolved_toid:
+            resolved_toids = await self.resolve_chat_peer_user_candidates(item_id, toid)
+            if not resolved_toids:
                 raise RuntimeError("未能解析到可用的聊天用户ID")
 
-            return await self._send_msg_once_via_active_ws(websocket, resolved_toid, item_id, text)
+            last_error: Exception | None = None
+            for index, resolved_toid in enumerate(resolved_toids):
+                current_ws = self.ws
+                websocket = (
+                    current_ws
+                    if current_ws is not None and not getattr(current_ws, "closed", False)
+                    else await self._wait_for_active_ws()
+                )
+                if websocket is None:
+                    raise RuntimeError("当前聊天连接未就绪，请稍后重试")
+
+                try:
+                    chat_id = await self._send_msg_once_via_active_ws(websocket, resolved_toid, item_id, text)
+                    if index > 0:
+                        logger.info(
+                            f"【{self.cookie_id}】已切换聊天ID候选发送成功: item={item_id}, "
+                            f"peer_id={resolved_toid}, candidate_index={index + 1}/{len(resolved_toids)}"
+                        )
+                    return chat_id, resolved_toid
+                except Exception as exc:
+                    last_error = exc
+                    has_next_candidate = index < len(resolved_toids) - 1
+                    if not has_next_candidate or not self._should_try_next_chat_candidate(exc):
+                        raise
+                    logger.warning(
+                        f"【{self.cookie_id}】聊天ID候选发送失败，准备切换下一个候选: item={item_id}, "
+                        f"failed_peer_id={resolved_toid}, next_peer_id={resolved_toids[index + 1]}, error={exc}"
+                    )
+
+            if last_error is not None:
+                raise last_error
+            raise RuntimeError("消息发送失败：未拿到可用的聊天会话")
 
     async def _create_websocket_connection(self, headers):
         """创建WebSocket连接，兼容不同版本的websockets库"""

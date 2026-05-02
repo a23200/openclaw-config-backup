@@ -31,6 +31,7 @@ export interface AccountDetail {
   value?: string; // cookie value from backend
   cookie?: string; // alias for value
   enabled: boolean;
+  connected?: boolean;
   auto_confirm: boolean;
   remark?: string;
   note?: string; // alias for remark
@@ -220,6 +221,7 @@ export interface MarketResearchItem {
   area: string;
   seller_name: string;
   seller_user_id?: string;
+  seller_user_candidates?: string[];
   publish_time: string;
   item_url: string;
   tags_text: string;
@@ -282,6 +284,7 @@ export interface MarketSellerContactResult {
   title: string;
   seller_name: string;
   seller_user_id: string;
+  seller_user_candidates?: string[];
   quality_score: number;
   message: string;
   status?: 'queued' | 'sending' | 'sent' | 'failed';

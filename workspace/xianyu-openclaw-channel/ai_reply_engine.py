@@ -487,6 +487,37 @@ class AIReplyEngine:
             return self._short_reply(compact_knowledge)
         return None
 
+    def _get_item_text_for_fallback(self, item_info: dict, knowledge: str = '') -> str:
+        """汇总商品标题、描述、知识库文本，供本地兜底做关键词判断。"""
+        item_info = item_info or {}
+        parts = [
+            str(item_info.get('title') or ''),
+            str(item_info.get('desc') or ''),
+            str(knowledge or ''),
+        ]
+        return ' '.join(parts).lower()
+
+    def _extract_value_from_item_text(self, item_text: str, keys: List[str]) -> Optional[str]:
+        """从知识库/描述中提取类似“成色：基本全新”的短答案。"""
+        if not item_text:
+            return None
+        patterns = []
+        for key in keys:
+            patterns.extend([
+                rf'{re.escape(key)}\s*[:：]\s*([^\n；;。,.，]{{1,30}})',
+                rf'{re.escape(key)}\s*[是为]\s*([^\n；;。,.，]{{1,30}})',
+            ])
+        for pattern in patterns:
+            m = re.search(pattern, item_text, flags=re.IGNORECASE)
+            if m:
+                value = m.group(1).strip()
+                if value:
+                    return value
+        return None
+
+    def _contains_any(self, text: str, keywords: List[str]) -> bool:
+        return any(keyword in text for keyword in keywords)
+
     def _generate_price_fallback(self, item_info: dict, settings: dict, bargain_count: int) -> str:
         """生成本地议价兜底回复，严格遵守已配置的优惠上限。"""
         try:
@@ -550,12 +581,19 @@ class AIReplyEngine:
         profile = conversation_profile or {}
         our_role = str(profile.get('our_role') or 'seller').strip() or 'seller'
 
+        ai_knowledge = db_manager.get_item_ai_knowledge(cookie_id, item_id) or ''
         knowledge_answer = self._match_item_knowledge(
             message,
-            db_manager.get_item_ai_knowledge(cookie_id, item_id) or '',
+            ai_knowledge,
         )
         if knowledge_answer:
             return knowledge_answer
+
+        item_text = self._get_item_text_for_fallback(item_info, ai_knowledge)
+        seller_positive = self._contains_any(item_text, ['全新', '基本全新', '99新', '九九新', '95新', '九五新', '无拆修', '无维修', '功能正常'])
+        seller_defect = self._contains_any(item_text, ['瑕疵', '磕碰', '划痕', '维修', '拆修', '坏', '故障'])
+        condition_value = self._extract_value_from_item_text(item_text, ['成色', '新旧', '品相', '状态'])
+        accessory_value = self._extract_value_from_item_text(item_text, ['配件', '附件', '包含', '带'])
 
         if our_role == 'buyer':
             if intent == 'price':
@@ -571,26 +609,49 @@ class AIReplyEngine:
         if intent == 'price':
             return self._generate_price_fallback(item_info, settings, bargain_count)
 
-        if any(keyword in message_text for keyword in ['在不', '在吗', '在嘛', '还在', '有货']):
+        if self._contains_any(message_text, ['在不', '在吗', '在嘛', '老板在', '还在', '有货']):
             if '部署' in title or '代部署' in title:
                 return "在的哈，支持代部署，您可以直接说需求"
-            return "在的哈，还在呢，您想看哪方面？"
+            return "在的哈，还在的"
 
-        if any(keyword in message_text for keyword in ['包邮', '邮费', '发货', '多久到', '几天到', '快递']):
-            if '包邮' in desc or '包邮' in title:
+        if self._contains_any(message_text, ['包邮', '邮费', '运费']):
+            if '包邮' in item_text:
+                return "包邮的哈，拍下后我这边尽快发"
+            return "邮费这块按页面为准哈，拍下后我这边尽快发"
+
+        if self._contains_any(message_text, ['发货', '多久到', '几天到', '快递', '什么时候发']):
+            if '包邮' in item_text:
                 return "包邮的哈，拍下后我这边尽快发"
             return "拍下后我这边尽快发，正常三天左右能到"
 
-        if any(keyword in message_text for keyword in ['怎么用', '教程', '使用', '安装', '部署', '能教', '设置']):
+        if self._contains_any(message_text, ['怎么用', '教程', '使用', '安装', '部署', '能教', '设置']):
             if '部署' in title or '代部署' in title:
                 return "支持远程协助，拍下后我这边带您部署"
             return "拍下后会发教程，有问题您随时问我"
 
-        if any(keyword in message_text for keyword in ['售后', '保修', '问题', '坏了', '故障']):
-            return "后续有问题您随时找我，我这边会跟进处理"
+        if self._contains_any(message_text, ['售后', '保修', '质保']):
+            return "售后这块可以放心，收到有问题及时跟我说"
 
-        if any(keyword in message_text for keyword in ['成色', '几新', '新不新', '瑕疵']):
-            return "成色是不错的，实物如图，您要的话我再拍细节给您看"
+        if self._contains_any(message_text, ['坏了', '故障', '功能正常', '能用', '好用吗', '有问题吗']):
+            if seller_positive:
+                return "功能正常的哈，这个可以放心"
+            return "功能这边是正常使用的，具体以实物描述和图片为准哈"
+
+        if self._contains_any(message_text, ['全新吗', '基本全新', '成色', '几新', '新不新', '瑕疵', '划痕', '磕碰']):
+            if condition_value:
+                return self._short_reply(f"成色是{condition_value}哈，实物状态可以看图")
+            if seller_positive and not seller_defect:
+                return "成色挺新的哈，实物状态可以看图"
+            if seller_defect:
+                return "成色按图里为准哈，有细节问题我可以再给你确认"
+            return "成色还可以的，实物状态可以看图哈"
+
+        if self._contains_any(message_text, ['内存卡', 'sd卡', 'tf卡', '卡吗', '带卡', '配件', '附件', '电源', '充电器', '包装']):
+            if accessory_value:
+                return self._short_reply(f"配件是{accessory_value}哈")
+            if self._contains_any(item_text, ['内存卡', 'sd卡', 'tf卡']):
+                return "带不带卡按描述里的为准哈，我这边也可以再帮你确认下"
+            return "配件按图和描述里的来哈，没有写的一般是不含"
 
         if '部署' in title or '代部署' in title:
             return "在的哈，支持代部署，您可以直接说需求"
@@ -917,7 +978,8 @@ class AIReplyEngine:
                     logger.debug(f"【AI引擎】准备发送请求到: {url}")
                     logger.debug(f"【AI引擎】请求头: {json.dumps(safe_headers, indent=2)}")
                     logger.debug(f"【AI引擎】请求体 (Payload): {json.dumps(payload, ensure_ascii=False, indent=2)}")
-                    response = requests.post(url, headers=headers, json=payload, timeout=30)
+                    # 外部模型不可达时不能长时间阻塞闲鱼自动回复；失败后会走本地智能兜底。
+                    response = requests.post(url, headers=headers, json=payload, timeout=12)
                     
                     logger.debug(f"【AI引擎】收到响应 - 状态码: {response.status_code}")
                     logger.debug(f"【AI引擎】收到响应 - 原始文本 (Raw Text): '{response.text}'")
@@ -948,6 +1010,8 @@ class AIReplyEngine:
                     raise
                 except requests.exceptions.RequestException as req_err:
                     logger.error(f"【AI引擎】请求失败: {req_err}")
+                    self._remote_ai_failure_until[cookie_id] = time.time() + 300
+                    logger.warning(f"【{cookie_id}】外部AI网络异常，5分钟内自动使用本地智能兜底，避免每条消息长时间等待")
                     raise
                 except ValueError as val_err: # 捕获我们自己抛出的空响应体错误
                     logger.error(f"【AI引擎】值错误: {val_err}")

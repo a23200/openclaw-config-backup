@@ -266,15 +266,17 @@ const AccountList: React.FC = () => {
                     event.currentTarget.src = buildAvatarDataUrl(account.nickname || account.remark || account.id, account.id);
                   }}
                 />
-                <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-4 border-white flex items-center justify-center ${account.enabled ? 'bg-green-500' : 'bg-gray-300'}`}>
-                    {account.enabled && <Check className="w-3 h-3 text-white" />}
+                <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-4 border-white flex items-center justify-center ${account.connected ? 'bg-green-500' : account.enabled ? 'bg-yellow-400' : 'bg-gray-300'}`}>
+                    {account.connected && <Check className="w-3 h-3 text-white" />}
                 </div>
               </div>
               <div>
                 <div className="flex items-center gap-3 mb-1">
                     <h3 className="text-xl font-extrabold text-gray-900">{account.nickname || account.remark || `账号 ${account.id.substring(0,6)}...`}</h3>
-                    {account.enabled ? (
+                    {account.connected ? (
                         <span className="px-2.5 py-0.5 rounded-lg bg-green-100 text-green-700 text-xs font-bold">在线</span>
+                    ) : account.enabled ? (
+                        <span className="px-2.5 py-0.5 rounded-lg bg-yellow-100 text-yellow-700 text-xs font-bold">连接中断</span>
                     ) : (
                         <span className="px-2.5 py-0.5 rounded-lg bg-gray-100 text-gray-500 text-xs font-bold">暂停</span>
                     )}

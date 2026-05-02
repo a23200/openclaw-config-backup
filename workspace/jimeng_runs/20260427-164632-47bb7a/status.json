@@ -1,0 +1,101 @@
+{
+  "id": "20260427-164632-47bb7a",
+  "title": "夜景",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "publish_status": "unpublished",
+  "publish_error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260427-164632-47bb7a/final_mastered.mp4",
+  "created_at": 1777279592.270078,
+  "updated_at": 1777279599.8775349,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "关于夜景的一段观察",
+    "enable_natural_voiceover": true,
+    "material_category": "auto",
+    "narration_tone": "根据主题自动选择表达方式，保持自然、克制、适合短视频",
+    "voice_profile": "bright_female",
+    "narration_style": "documentary",
+    "subtitle_style": "douyin_bold",
+    "selection_engine": "manual",
+    "narration_text": "夜景，不需要急着解释。慢一点看，光线、颜色和远处的变化。会把情绪轻轻带到更安静的地方。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "bright_female",
+      "voice": "alloy",
+      "speed": 0.96,
+      "gain": 1.0,
+      "pause_bias": 0.18,
+      "bgm_volume": 0.28,
+      "style": "documentary",
+      "category": "auto"
+    },
+    "tts_voice": "alloy",
+    "tts_speed": 0.96,
+    "voice_gain": 1.0,
+    "pause_bias": 0.18,
+    "bgm_volume": 0.28,
+    "tts_engine": "smart_tts",
+    "tts_detail": "智能配音 ok",
+    "mix_params": {
+      "voice_gain": 1.0,
+      "bgm_volume": 0.28,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260427-164632-47bb7a/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "关于夜景的一段观察",
+    "description": "赛博朋克 精选片段合集 #赛博朋克 #ClawLink #AI短片",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "赛博朋克",
+    "stitch_mode": "concat",
+    "topic": "夜景",
+    "clips": [
+      {
+        "file": "01-霓虹雨夜.mp4",
+        "relpath": "01-霓虹雨夜.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 1
+      },
+      {
+        "file": "02-机械义体.mp4",
+        "relpath": "02-机械义体.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 2
+      },
+      {
+        "file": "03-全息投影.mp4",
+        "relpath": "03-全息投影.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "根据主题自动选择表达方式，保持自然、克制、适合短视频",
+    "voice_profile": "bright_female",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "manual",
+    "suggested_tags": [
+      "赛博朋克",
+      "ClawLink",
+      "素材库短片"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

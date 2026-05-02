@@ -1,0 +1,101 @@
+{
+  "id": "20260427-192956-23d607",
+  "title": "宇宙",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "publish_status": "unpublished",
+  "publish_error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260427-192956-23d607/final_mastered.mp4",
+  "created_at": 1777289396.28263,
+  "updated_at": 1777289406.516594,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "关于宇宙的一段观察",
+    "enable_natural_voiceover": true,
+    "material_category": "auto",
+    "narration_tone": "根据主题自动选择表达方式，保持自然、克制、适合短视频",
+    "voice_profile": "clear_male",
+    "narration_style": "documentary",
+    "subtitle_style": "douyin_bold",
+    "selection_engine": "manual",
+    "narration_text": "宇宙，听起来很宏大。其实理解它，可以先问两个问题。它从哪里来？又怎样形成今天的样子？画面只是入口。真正重要的是背后的规律。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "clear_male",
+      "voice": "fable",
+      "speed": 0.96,
+      "gain": 1.03,
+      "pause_bias": 0.18,
+      "bgm_volume": 0.24,
+      "style": "documentary",
+      "category": "auto"
+    },
+    "tts_voice": "fable",
+    "tts_speed": 0.96,
+    "voice_gain": 1.03,
+    "pause_bias": 0.18,
+    "bgm_volume": 0.24,
+    "tts_engine": "smart_tts",
+    "tts_detail": "智能配音 ok",
+    "mix_params": {
+      "voice_gain": 1.03,
+      "bgm_volume": 0.24,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260427-192956-23d607/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "关于宇宙的一段观察",
+    "description": "宇宙 精选片段合集 #宇宙 #ClawLink #AI短片",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "宇宙",
+    "clips": [
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 1
+      },
+      {
+        "file": "01-霓虹街道_副本.mp4",
+        "relpath": "01-霓虹街道_副本.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 2
+      },
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "根据主题自动选择表达方式，保持自然、克制、适合短视频",
+    "voice_profile": "clear_male",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "manual",
+    "suggested_tags": [
+      "宇宙",
+      "ClawLink",
+      "素材库短片"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

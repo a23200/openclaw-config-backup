@@ -381,6 +381,7 @@ const MarketResearch: React.FC = () => {
           title: item.title,
           seller_name: item.seller_name,
           seller_user_id: item.seller_user_id || '',
+          seller_user_candidates: item.seller_user_candidates || [],
           price_text: item.price_text,
           price_display: item.price_display,
           condition: item.condition,

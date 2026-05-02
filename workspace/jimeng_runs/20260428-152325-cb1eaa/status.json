@@ -1,0 +1,101 @@
+{
+  "id": "20260428-152325-cb1eaa",
+  "title": "生活vlog",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "publish_status": "unpublished",
+  "publish_error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260428-152325-cb1eaa/final_mastered.mp4",
+  "created_at": 1777361005.214588,
+  "updated_at": 1777361015.730809,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "关于生活vlog的一段观察",
+    "enable_natural_voiceover": true,
+    "material_category": "auto",
+    "narration_tone": "根据主题自动选择表达方式，保持自然、克制、适合短视频",
+    "voice_profile": "clear_male",
+    "narration_style": "documentary",
+    "subtitle_style": "douyin_bold",
+    "selection_engine": "manual",
+    "narration_text": "这条视频想讲清楚的是：生活vlog。先，看整体，再，看关键细节。你会发现，它真正重要的不是表面的形式。而是背后那条清晰的逻辑。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "clear_male",
+      "voice": "fable",
+      "speed": 0.96,
+      "gain": 1.03,
+      "pause_bias": 0.18,
+      "bgm_volume": 0.24,
+      "style": "documentary",
+      "category": "auto"
+    },
+    "tts_voice": "fable",
+    "tts_speed": 0.96,
+    "voice_gain": 1.03,
+    "pause_bias": 0.18,
+    "bgm_volume": 0.24,
+    "tts_engine": "smart_tts",
+    "tts_detail": "智能配音 ok",
+    "mix_params": {
+      "voice_gain": 1.03,
+      "bgm_volume": 0.24,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260428-152325-cb1eaa/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "关于生活vlog的一段观察",
+    "description": "食物生活 精选片段合集 #食物生活 #ClawLink #AI短片",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "食物生活",
+    "stitch_mode": "concat",
+    "topic": "生活vlog",
+    "clips": [
+      {
+        "file": "01-咖啡拉花.mp4",
+        "relpath": "01-咖啡拉花.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 1
+      },
+      {
+        "file": "02-面包出炉.mp4",
+        "relpath": "02-面包出炉.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 2
+      },
+      {
+        "file": "03-番茄切片.mp4",
+        "relpath": "03-番茄切片.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "根据主题自动选择表达方式，保持自然、克制、适合短视频",
+    "voice_profile": "clear_male",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "manual",
+    "suggested_tags": [
+      "食物生活",
+      "ClawLink",
+      "素材库短片"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

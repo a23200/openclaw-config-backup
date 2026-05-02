@@ -22,6 +22,7 @@ from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable, Sequence
+from urllib.parse import parse_qs, urlparse
 
 
 CONDITION_PATTERNS: list[tuple[str, Sequence[str]]] = [
@@ -68,6 +69,42 @@ COLOR_KEYWORDS: Sequence[str] = (
     "远峰蓝",
     "沙漠色",
     "钛金属",
+)
+
+SELLER_PRIMARY_KEYS: Sequence[str] = (
+    "peerUserId",
+    "peer_user_id",
+    "sellerUserId",
+    "seller_user_id",
+    "sellerId",
+    "seller_id",
+    "sellerUid",
+    "seller_uid",
+    "openUid",
+    "open_uid",
+)
+
+SELLER_FALLBACK_KEYS: Sequence[str] = (
+    "userId",
+    "user_id",
+    "uid",
+    "accountId",
+    "account_id",
+)
+
+SELLER_URL_KEYS: Sequence[str] = (
+    "reminderUrl",
+    "targetUrl",
+    "targetURL",
+    "jumpUrl",
+    "detailUrl",
+    "itemUrl",
+    "item_url",
+    "shareUrl",
+    "share_url",
+    "webUrl",
+    "web_url",
+    "url",
 )
 
 CSV_FIELDNAMES: Sequence[str] = (
@@ -274,19 +311,117 @@ def normalize_main_image(value: Any) -> str:
     return image_url
 
 
+def normalize_goofish_user_id(value: Any) -> str:
+    if value is None:
+        return ""
+    normalized = str(value).strip()
+    if "@" in normalized:
+        normalized = normalized.split("@", 1)[0]
+    if normalized.lower() in {"", "0", "unknown", "unknown_user", "none", "null"}:
+        return ""
+    return normalized
+
+
+def _append_unique_value(bucket: list[str], seen: set[str], value: Any) -> None:
+    normalized = normalize_goofish_user_id(value)
+    if normalized and normalized not in seen:
+        seen.add(normalized)
+        bucket.append(normalized)
+
+
+def _collect_values_by_keys(payload: Any, keys: Sequence[str], max_depth: int = 7) -> list[str]:
+    seen_objects: set[int] = set()
+    seen_values: set[str] = set()
+    values: list[str] = []
+
+    def walk(current: Any, depth: int = 0) -> None:
+        if current is None or depth > max_depth:
+            return
+        if isinstance(current, (str, int, float, bool)):
+            return
+
+        object_id = id(current)
+        if object_id in seen_objects:
+            return
+        seen_objects.add(object_id)
+
+        if isinstance(current, dict):
+            for key in keys:
+                _append_unique_value(values, seen_values, current.get(key))
+            for nested in current.values():
+                walk(nested, depth + 1)
+        elif isinstance(current, (list, tuple)):
+            for nested in current:
+                walk(nested, depth + 1)
+
+    walk(payload)
+    return values
+
+
+def _extract_query_values_from_url(url: Any, keys: Sequence[str]) -> list[str]:
+    if not isinstance(url, str):
+        return []
+    raw_url = url.strip()
+    if not raw_url or "?" not in raw_url:
+        return []
+    try:
+        parsed = urlparse(raw_url)
+    except Exception:
+        return []
+
+    query = parse_qs(parsed.query or "", keep_blank_values=False)
+    values: list[str] = []
+    seen: set[str] = set()
+    for key in keys:
+        for candidate in query.get(key, []):
+            _append_unique_value(values, seen, candidate)
+    return values
+
+
+def _collect_query_values_from_payload(payload: Any, url_keys: Sequence[str], query_keys: Sequence[str], max_depth: int = 7) -> list[str]:
+    values: list[str] = []
+    seen: set[str] = set()
+    for raw_url in _collect_values_by_keys(payload, url_keys, max_depth=max_depth):
+        for candidate in _extract_query_values_from_url(raw_url, query_keys):
+            if candidate not in seen:
+                seen.add(candidate)
+                values.append(candidate)
+    return values
+
+
+def extract_seller_user_candidates(item: dict[str, Any]) -> list[str]:
+    candidates: list[str] = []
+    seen: set[str] = set()
+
+    direct_values = (
+        item.get("seller_user_id"),
+        item.get("sellerUserId"),
+        item.get("seller_id"),
+        item.get("sellerId"),
+        item.get("user_id"),
+        item.get("userId"),
+    )
+    for value in direct_values:
+        _append_unique_value(candidates, seen, value)
+
+    payloads = [item, item.get("raw_data"), item.get("raw_item")]
+    for payload in payloads:
+        for candidate in _collect_query_values_from_payload(payload, SELLER_URL_KEYS, (*SELLER_PRIMARY_KEYS, *SELLER_FALLBACK_KEYS)):
+            _append_unique_value(candidates, seen, candidate)
+        for candidate in _collect_values_by_keys(payload, SELLER_PRIMARY_KEYS, max_depth=7):
+            _append_unique_value(candidates, seen, candidate)
+        for candidate in _collect_values_by_keys(payload, SELLER_FALLBACK_KEYS, max_depth=7):
+            _append_unique_value(candidates, seen, candidate)
+
+    return candidates
+
+
 def normalize_item(item: dict[str, Any]) -> dict[str, Any]:
     text = build_search_text(item)
     price_value = parse_price(item.get("price"))
     defects = extract_defects(text)
-    seller_user_id = str(
-        item.get("seller_user_id")
-        or item.get("sellerUserId")
-        or item.get("seller_id")
-        or item.get("sellerId")
-        or item.get("user_id")
-        or item.get("userId")
-        or ""
-    ).split("@", 1)[0].strip()
+    seller_user_candidates = extract_seller_user_candidates(item)
+    seller_user_id = seller_user_candidates[0] if seller_user_candidates else ""
     return {
         "item_id": str(item.get("item_id") or ""),
         "title": str(item.get("title") or "").strip(),
@@ -309,6 +444,7 @@ def normalize_item(item: dict[str, Any]) -> dict[str, Any]:
         "area": str(item.get("area") or "地区未知"),
         "seller_name": str(item.get("seller_name") or "匿名卖家"),
         "seller_user_id": seller_user_id,
+        "seller_user_candidates": seller_user_candidates,
         "publish_time": str(item.get("publish_time") or ""),
         "item_url": str(item.get("item_url") or "").strip(),
         "tags_text": stringify_tags(item.get("tags")),
