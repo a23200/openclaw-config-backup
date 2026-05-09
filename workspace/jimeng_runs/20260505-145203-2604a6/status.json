@@ -1,0 +1,75 @@
+{
+  "id": "20260505-145203-2604a6",
+  "title": "云南旅游",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "publish_status": "unpublished",
+  "publish_error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260505-145203-2604a6/final_mastered.mp4",
+  "created_at": 1777963923.92327,
+  "updated_at": 1777963925.156801,
+  "post": {
+    "mode": "auto",
+    "title_card_text": "关于云南旅游的一段观察",
+    "enable_natural_voiceover": true,
+    "material_category": "auto",
+    "narration_tone": "根据主题自动选择表达方式，保持自然、克制、适合短视频",
+    "voice_profile": "clear_male",
+    "narration_style": "documentary",
+    "subtitle_style": "douyin_bold",
+    "selection_engine": "fallback",
+    "resolved_mode": "title_card"
+  },
+  "publish": {
+    "title": "关于云南旅游的一段观察",
+    "description": "ASMR疗愈 精选片段合集 #ASMR疗愈 #ClawLink #AI短片",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "ASMR疗愈",
+    "stitch_mode": "concat",
+    "topic": "云南旅游",
+    "clips": [
+      {
+        "file": "01-水滴玻璃.mp4",
+        "relpath": "01-水滴玻璃.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 1
+      },
+      {
+        "file": "02-沙漏细沙.mp4",
+        "relpath": "02-沙漏细沙.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 2
+      },
+      {
+        "file": "03-木勺豆粒.mp4",
+        "relpath": "03-木勺豆粒.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "auto",
+    "narration_tone": "根据主题自动选择表达方式，保持自然、克制、适合短视频",
+    "voice_profile": "clear_male",
+    "narration_style": "documentary"
+  },
+  "selection": {
+    "engine": "fallback",
+    "suggested_tags": [
+      "ASMR疗愈",
+      "ClawLink",
+      "AI短片"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}
