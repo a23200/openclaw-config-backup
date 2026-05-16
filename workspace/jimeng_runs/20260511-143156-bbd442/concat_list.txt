@@ -1,0 +1,3 @@
+file '/Users/mac/Movies/素材/人文街拍/01-早市烟火.mp4'
+file '/Users/mac/Movies/素材/人文街拍/02-雨后巷口.mp4'
+file '/Users/mac/Movies/素材/人文街拍/03-地铁人流.mp4'

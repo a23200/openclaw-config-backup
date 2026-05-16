@@ -1,0 +1,18 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,PingFang SC,74,&H00FFFFFF,&H000000FF,&H14000000,&HFF000000,-1,0,0,0,100,100,0,0,1,4,1,2,80,80,165,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+
+Dialogue: 0,00:00:00.000,00:00:04.008,Default,,0,0,0,,这条视频想讲清楚的是：人生主 题
+Dialogue: 0,00:00:04.008,00:00:07.483,Default,,0,0,0,,先，看整体，再，看关键细节
+Dialogue: 0,00:00:07.483,00:00:12.293,Default,,0,0,0,,你会发现，它真正重要的不是表 面的形式
+Dialogue: 0,00:00:12.293,00:00:15.232,Default,,0,0,0,,而是背后那条清晰的逻辑
