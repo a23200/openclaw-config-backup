@@ -1,3 +1,4 @@
+import { translate as tr } from './i18n';
 // 简化的请求工具，不依赖 axios
 const API_BASE_URL = '';
 
@@ -44,7 +45,7 @@ const request = async <T = any>(url: string, options: RequestOptions = {}): Prom
     if (response.status === 401) {
       localStorage.removeItem('auth_token');
       window.dispatchEvent(new Event('auth:logout'));
-      throw new Error('未授权，请重新登录');
+      throw new Error(tr('request.unauthorized'))
     }
     
     // 解析响应
@@ -53,13 +54,13 @@ const request = async <T = any>(url: string, options: RequestOptions = {}): Prom
     // 检查 HTTP 状态码
     if (!response.ok) {
       // FastAPI 错误格式: { detail: "错误信息" }
-      const errorMessage = data.detail || data.message || `请求失败 (${response.status})`;
+      const errorMessage = data.detail || data.message || tr('request.failedStatus', { status: response.status });
       throw new Error(errorMessage);
     }
     
     // 检查响应体中的 success 字段（业务逻辑错误）
     if (data.success === false) {
-      const errorMessage = data.message || data.detail || '操作失败';
+      const errorMessage = data.message || data.detail || tr('request.operationFailed');
       throw new Error(errorMessage);
     }
     

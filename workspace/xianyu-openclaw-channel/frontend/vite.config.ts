@@ -144,6 +144,6 @@ export default defineConfig({
         manualChunks: undefined,
       },
     },
-    emptyOutDir: true,
+    emptyOutDir: false,
   },
 });

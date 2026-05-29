@@ -22,10 +22,12 @@ import {
   Upload, Key, Eye, EyeOff, Bot, Settings
 } from 'lucide-react';
 import { buildAvatarDataUrl } from '../utils/image';
+import { useI18n, translate as tr } from '../lib/i18n';
 
 type ModalType = 'edit' | 'ai-settings' | null;
 
 const AccountList: React.FC = () => {
+  useI18n();
   const [accounts, setAccounts] = useState<AccountDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [showQRModal, setShowQRModal] = useState(false);
@@ -97,7 +99,7 @@ const AccountList: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('确认删除该账号吗？')) {
+    if (confirm(tr('accounts.confirmDelete'))) {
       await deleteAccount(id);
       loadAccounts();
     }
@@ -183,7 +185,7 @@ const AccountList: React.FC = () => {
       loadAccounts();
     } catch (error) {
       console.error('更新账号失败:', error);
-      alert('更新失败，请重试');
+      alert(tr('alerts.updateFailedRetry'));
     } finally {
       setSaving(false);
     }
@@ -199,7 +201,7 @@ const AccountList: React.FC = () => {
       loadAccounts();
     } catch (error) {
       console.error('更新AI设置失败:', error);
-      alert('更新失败，请重试');
+      alert(tr('alerts.updateFailedRetry'));
     } finally {
       setSaving(false);
     }
@@ -240,8 +242,8 @@ const AccountList: React.FC = () => {
     <div className="space-y-8 animate-fade-in relative">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">账号管理</h2>
-          <p className="text-gray-500 mt-2 font-medium">管理您的鱼鱼授权账号及设置。</p>
+          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">{tr('accounts.title')}</h2>
+          <p className="text-gray-500 mt-2 font-medium">{tr('accounts.subtitle')}</p>
         </div>
         <button
             onClick={startQRLogin}
@@ -274,11 +276,11 @@ const AccountList: React.FC = () => {
                 <div className="flex items-center gap-3 mb-1">
                     <h3 className="text-xl font-extrabold text-gray-900">{account.nickname || account.remark || `账号 ${account.id.substring(0,6)}...`}</h3>
                     {account.connected ? (
-                        <span className="px-2.5 py-0.5 rounded-lg bg-green-100 text-green-700 text-xs font-bold">在线</span>
+                        <span className="px-2.5 py-0.5 rounded-lg bg-green-100 text-green-700 text-xs font-bold">{tr('status.online')}</span>
                     ) : account.enabled ? (
-                        <span className="px-2.5 py-0.5 rounded-lg bg-yellow-100 text-yellow-700 text-xs font-bold">连接中断</span>
+                        <span className="px-2.5 py-0.5 rounded-lg bg-yellow-100 text-yellow-700 text-xs font-bold">{tr('status.disconnected')}</span>
                     ) : (
-                        <span className="px-2.5 py-0.5 rounded-lg bg-gray-100 text-gray-500 text-xs font-bold">暂停</span>
+                        <span className="px-2.5 py-0.5 rounded-lg bg-gray-100 text-gray-500 text-xs font-bold">{tr('status.paused')}</span>
                     )}
                     {account.ai_enabled && (
                         <span className="px-2.5 py-0.5 rounded-lg bg-purple-100 text-purple-700 text-xs font-bold flex items-center gap-1">
@@ -286,9 +288,9 @@ const AccountList: React.FC = () => {
                         </span>
                     )}
                 </div>
-                <p className="text-sm text-gray-500 font-medium mb-3">{account.remark || account.note || '暂无备注'}</p>
+                <p className="text-sm text-gray-500 font-medium mb-3">{account.remark || account.note || tr('accounts.noRemark')}</p>
                 <div className="flex gap-2">
-                   {account.auto_confirm && <span className="text-xs bg-yellow-50 text-yellow-700 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5"><MessageSquare className="w-3 h-3"/> 自动回复</span>}
+                   {account.auto_confirm && <span className="text-xs bg-yellow-50 text-yellow-700 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5"><MessageSquare className="w-3 h-3"/>{tr('accounts.autoReply')}</span>}
                    {account.pause_duration > 0 && <span className="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5"><Clock className="w-3 h-3"/> 暂停{account.pause_duration}分钟</span>}
                 </div>
               </div>
@@ -297,14 +299,14 @@ const AccountList: React.FC = () => {
                 <button
                     onClick={() => openEditModal(account)}
                     className="p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-600"
-                    title="编辑账号"
+                    title={tr('accounts.editAccount')}
                 >
                     <Edit2 className="w-5 h-5" />
                 </button>
                 <button
                     onClick={() => openAIModal(account)}
                     className="p-3 rounded-xl hover:bg-purple-100 transition-colors text-purple-600"
-                    title="AI设置"
+                    title={tr('accounts.aiSettings')}
                 >
                     <Bot className="w-5 h-5" />
                 </button>
@@ -329,8 +331,8 @@ const AccountList: React.FC = () => {
                 <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <User className="w-10 h-10 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">暂无账号</h3>
-                <p className="text-gray-500 mt-1">请点击右上角扫码添加您的鱼鱼账号</p>
+                <h3 className="text-lg font-bold text-gray-900">{tr('accounts.emptyTitle')}</h3>
+                <p className="text-gray-500 mt-1">{tr('accounts.emptySubtitle')}</p>
             </div>
         )}
       </div>
@@ -348,8 +350,8 @@ const AccountList: React.FC = () => {
 
                   <div className="modal-body">
                       <div className="text-center">
-                          <h3 className="text-2xl font-extrabold text-gray-900 mb-2">扫码登录</h3>
-                          <p className="text-gray-500 mb-8 font-medium">请打开鱼鱼APP扫描下方二维码</p>
+                          <h3 className="text-2xl font-extrabold text-gray-900 mb-2">{tr('accounts.qrLogin')}</h3>
+                          <p className="text-gray-500 mb-8 font-medium">{tr('accounts.qrHint')}</p>
 
                           <div className="w-64 h-64 bg-[#F7F8FA] rounded-[2rem] mx-auto flex items-center justify-center overflow-hidden border-4 border-white shadow-inner mb-8 relative">
                               {qrStatus === 'loading' && <Loader2 className="w-10 h-10 text-[#FFE815] animate-spin" />}
@@ -359,18 +361,18 @@ const AccountList: React.FC = () => {
                                       <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
                                          <Check className="w-8 h-8" />
                                       </div>
-                                      <span className="font-bold text-lg">登录成功</span>
+                                      <span className="font-bold text-lg">{tr('accounts.loginSuccess')}</span>
                                   </div>
                               )}
                               {qrStatus === 'error' && (
                                   <div className="flex flex-col items-center">
-                                      <span className="text-red-500 font-bold mb-2">获取失败</span>
-                                      <button onClick={startQRLogin} className="text-xs bg-gray-200 px-3 py-1 rounded-full flex items-center gap-1 hover:bg-gray-300"><RefreshCw className="w-3 h-3"/> 重试</button>
+                                      <span className="text-red-500 font-bold mb-2">{tr('accounts.fetchFailed')}</span>
+                                      <button onClick={startQRLogin} className="text-xs bg-gray-200 px-3 py-1 rounded-full flex items-center gap-1 hover:bg-gray-300"><RefreshCw className="w-3 h-3"/>{tr('common.retry')}</button>
                                   </div>
                               )}
                           </div>
 
-                          <p className="text-xs text-gray-400 font-medium bg-gray-50 py-2 rounded-xl">二维码有效期为5分钟，请尽快扫码。</p>
+                          <p className="text-xs text-gray-400 font-medium bg-gray-50 py-2 rounded-xl">{tr('accounts.qrExpires')}</p>
                       </div>
                   </div>
               </div>
@@ -384,7 +386,7 @@ const AccountList: React.FC = () => {
           <div className="modal-container" style={{maxWidth: '600px'}}>
             <div className="modal-header">
               <div>
-                <h3 className="text-2xl font-extrabold text-gray-900">编辑账号</h3>
+                <h3 className="text-2xl font-extrabold text-gray-900">{tr('accounts.editAccount')}</h3>
                 <p className="text-sm text-gray-500 mt-1">{editingAccount.nickname || editingAccount.remark || editingAccount.id}</p>
               </div>
               <button
@@ -398,7 +400,7 @@ const AccountList: React.FC = () => {
             <div className="modal-body space-y-6">
               {/* 账号ID */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">账号ID</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{tr('common.accountId')}</label>
                 <input
                   type="text"
                   value={editingAccount.id}
@@ -409,12 +411,12 @@ const AccountList: React.FC = () => {
 
               {/* 备注 */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">备注</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{tr('accounts.remark')}</label>
                 <input
                   type="text"
                   value={editForm.remark}
                   onChange={(e) => setEditForm({ ...editForm, remark: e.target.value })}
-                  placeholder="为账号添加备注"
+                  placeholder={tr('accounts.remarkPlaceholder')}
                   className="w-full ios-input px-4 py-3 rounded-xl"
                 />
               </div>
@@ -425,7 +427,7 @@ const AccountList: React.FC = () => {
                 <textarea
                   value={editForm.cookie}
                   onChange={(e) => setEditForm({ ...editForm, cookie: e.target.value })}
-                  placeholder="更新账号Cookie"
+                  placeholder={tr('accounts.cookiePlaceholder')}
                   className="w-full ios-input px-4 py-3 rounded-xl h-32 resize-none font-mono text-xs"
                 />
                 <p className="text-xs text-gray-500 mt-1">当前Cookie长度: {editForm.cookie.length} 字符</p>
@@ -438,7 +440,7 @@ const AccountList: React.FC = () => {
                     <Check className="w-4 h-4 text-green-500" />
                     自动确认收货
                   </div>
-                  <div className="text-xs text-gray-500">自动点击确认收货按钮</div>
+                  <div className="text-xs text-gray-500">{tr('accounts.autoConfirmDesc')}</div>
                 </div>
                 <button
                   type="button"
@@ -470,7 +472,7 @@ const AccountList: React.FC = () => {
                   max="1440"
                   className="w-full ios-input px-4 py-3 rounded-xl"
                 />
-                <p className="text-xs text-gray-500 mt-1">设置后会暂停处理该账号的订单，到时间后自动恢复</p>
+                <p className="text-xs text-gray-500 mt-1">{tr('accounts.pauseDurationDesc')}</p>
               </div>
 
               {/* 登录信息 */}
@@ -481,23 +483,23 @@ const AccountList: React.FC = () => {
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">用户名</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">{tr('accounts.username')}</label>
                     <input
                       type="text"
                       value={editForm.username}
                       onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                      placeholder="鱼鱼账号/手机号"
+                      placeholder={tr('accounts.usernamePlaceholder')}
                       className="w-full ios-input px-4 py-3 rounded-xl"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">登录密码</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">{tr('accounts.loginPassword')}</label>
                     <div className="relative">
                       <input
                         type={editForm.showLoginPassword ? 'text' : 'password'}
                         value={editForm.login_password}
                         onChange={(e) => setEditForm({ ...editForm, login_password: e.target.value })}
-                        placeholder="用于自动登录"
+                        placeholder={tr('accounts.loginPasswordPlaceholder')}
                         className="w-full ios-input px-4 py-3 rounded-xl pr-12"
                       />
                       <button
@@ -511,8 +513,8 @@ const AccountList: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-bold text-gray-900">登录时显示浏览器</div>
-                      <div className="text-xs text-gray-500">调试时可开启查看登录过程</div>
+                      <div className="font-bold text-gray-900">{tr('accounts.showBrowser')}</div>
+                      <div className="text-xs text-gray-500">{tr('accounts.showBrowserDesc')}</div>
                     </div>
                     <button
                       type="button"
@@ -547,7 +549,7 @@ const AccountList: React.FC = () => {
                   disabled={saving}
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  {saving ? '保存中...' : '保存'}
+                  {saving ? tr('common.saving') : tr('common.save')}
                 </button>
               </div>
             </div>
@@ -584,7 +586,7 @@ const AccountList: React.FC = () => {
                     <Bot className="w-4 h-4 text-purple-500" />
                     启用AI自动回复
                   </div>
-                  <div className="text-xs text-gray-500">AI将自动处理买家的砍价消息</div>
+                  <div className="text-xs text-gray-500">{tr('accounts.enableAiDesc')}</div>
                 </div>
                 <button
                   type="button"
@@ -603,10 +605,10 @@ const AccountList: React.FC = () => {
 
               {/* 砍价策略 */}
               <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">砍价策略</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">{tr('accounts.bargainStrategy')}</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">最大折扣比例 (%)</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">{tr('accounts.maxDiscountPercent')}</label>
                     <input
                       type="number"
                       value={aiSettings.max_discount_percent}
@@ -615,10 +617,10 @@ const AccountList: React.FC = () => {
                       min="0"
                       max="100"
                     />
-                    <p className="text-xs text-gray-500 mt-1">例如：10表示最多降价10%</p>
+                    <p className="text-xs text-gray-500 mt-1">{tr('accounts.examplePercent')}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">最大折扣金额 (元)</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">{tr('accounts.maxDiscountAmount')}</label>
                     <input
                       type="number"
                       value={aiSettings.max_discount_amount}
@@ -626,10 +628,10 @@ const AccountList: React.FC = () => {
                       className="w-full ios-input px-4 py-3 rounded-xl"
                       min="0"
                     />
-                    <p className="text-xs text-gray-500 mt-1">例如：100表示最多降价100元</p>
+                    <p className="text-xs text-gray-500 mt-1">{tr('accounts.exampleAmount')}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">最大砍价轮次</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">{tr('accounts.maxBargainRounds')}</label>
                     <input
                       type="number"
                       value={aiSettings.max_bargain_rounds}
@@ -638,14 +640,14 @@ const AccountList: React.FC = () => {
                       min="1"
                       max="10"
                     />
-                    <p className="text-xs text-gray-500 mt-1">买家最多可以砍价的次数</p>
+                    <p className="text-xs text-gray-500 mt-1">{tr('accounts.exampleRounds')}</p>
                   </div>
                 </div>
               </div>
 
               {/* 自定义提示词 */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">自定义提示词（可选）</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{tr('accounts.customPrompt')}</label>
                 <textarea
                   value={aiSettings.custom_prompts}
                   onChange={(e) => setAiSettings({ ...aiSettings, custom_prompts: e.target.value })}
@@ -684,7 +686,7 @@ const AccountList: React.FC = () => {
                   disabled={saving}
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  {saving ? '保存中...' : '保存'}
+                  {saving ? tr('common.saving') : tr('common.save')}
                 </button>
               </div>
             </div>

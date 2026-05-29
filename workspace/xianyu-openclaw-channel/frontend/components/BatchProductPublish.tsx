@@ -7,6 +7,7 @@ import {
 import { getAccountDetails } from '../services/api';
 import { batchPublishProducts, ProductInfo } from '../services/productService';
 import { AccountDetail } from '../types';
+import { useI18n, translate as tr } from '../lib/i18n';
 
 interface ProductRow extends ProductInfo {
   id: string;
@@ -15,6 +16,7 @@ interface ProductRow extends ProductInfo {
 }
 
 const BatchProductPublish: React.FC = () => {
+  useI18n();
   const [accounts, setAccounts] = useState<AccountDetail[]>([]);
   const [selectedAccount, setSelectedAccount] = useState('');
   const [products, setProducts] = useState<ProductRow[]>([]);
@@ -54,7 +56,7 @@ const BatchProductPublish: React.FC = () => {
   const parseCSV = (text: string) => {
     const lines = text.split('\n').filter(line => line.trim());
     if (lines.length < 2) {
-      alert('CSV 文件格式错误');
+      alert(tr('batch.csvInvalid'));
       return;
     }
 
@@ -114,7 +116,7 @@ const BatchProductPublish: React.FC = () => {
       return;
     }
     if (products.length === 0) {
-      alert('请先上传商品数据');
+      alert(tr('batch.needProductData'));
       return;
     }
 
@@ -142,7 +144,7 @@ const BatchProductPublish: React.FC = () => {
         });
       }
     } catch (error: any) {
-      alert(error.message || '批量发布失败');
+      alert(error.message || tr('batch.publishFailed'));
     } finally {
       setPublishing(false);
     }
@@ -152,8 +154,8 @@ const BatchProductPublish: React.FC = () => {
     <div className="space-y-8 animate-fade-in">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">批量发布商品</h2>
-          <p className="text-gray-500 mt-2 font-medium">通过 CSV 文件批量导入并发布商品</p>
+          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">{tr('batch.title')}</h2>
+          <p className="text-gray-500 mt-2 font-medium">{tr('batch.subtitle')}</p>
         </div>
         <button
           onClick={downloadTemplate}
@@ -169,13 +171,13 @@ const BatchProductPublish: React.FC = () => {
         <div className="grid grid-cols-2 gap-6">
           {/* 选择账号 */}
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">发布账号 *</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">{tr('publish.account')}</label>
             <select
               value={selectedAccount}
               onChange={(e) => setSelectedAccount(e.target.value)}
               className="w-full ios-input px-4 py-3 rounded-xl"
             >
-              <option value="">请选择账号</option>
+              <option value="">{tr('common.selectAccount')}</option>
               {accounts.map(account => (
                 <option key={account.id} value={account.id}>
                   {account.nickname || account.remark || account.id}
@@ -186,7 +188,7 @@ const BatchProductPublish: React.FC = () => {
 
           {/* CSV 上传 */}
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">上传 CSV 文件 *</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">{tr('batch.uploadCsv')}</label>
             <label className="w-full h-[52px] border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center cursor-pointer hover:border-[#FFE815] hover:bg-yellow-50 transition-colors">
               <input
                 type="file"
@@ -195,14 +197,14 @@ const BatchProductPublish: React.FC = () => {
                 className="hidden"
               />
               <FileText className="w-5 h-5 text-gray-400 mr-2" />
-              <span className="text-sm text-gray-600 font-medium">选择 CSV 文件</span>
+              <span className="text-sm text-gray-600 font-medium">{tr('batch.chooseCsv')}</span>
             </label>
           </div>
         </div>
 
         {/* CSV 格式说明 */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <h4 className="font-bold text-blue-900 mb-2">CSV 文件格式说明</h4>
+          <h4 className="font-bold text-blue-900 mb-2">{tr('batch.csvHelpTitle')}</h4>
           <ul className="text-xs text-blue-800 space-y-1">
             <li>• 第一行为表头：title,description,price,images,category,location,original_price,stock</li>
             <li>• images 字段使用 | 分隔多张图片路径</li>
@@ -242,13 +244,13 @@ const BatchProductPublish: React.FC = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">状态</th>
-                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">标题</th>
-                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">价格</th>
-                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">图片</th>
-                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">分类</th>
-                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">库存</th>
-                  <th className="text-right py-3 px-4 text-sm font-bold text-gray-700">操作</th>
+                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">{tr('common.status')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">{tr('batch.table.title')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">{tr('batch.table.price')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">{tr('batch.table.images')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">{tr('batch.table.category')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">{tr('publish.stock')}</th>
+                  <th className="text-right py-3 px-4 text-sm font-bold text-gray-700">{tr('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -299,7 +301,7 @@ const BatchProductPublish: React.FC = () => {
         <div className="modal-overlay-centered">
           <div className="modal-container" style={{ maxWidth: '500px' }}>
             <div className="modal-header">
-              <h3 className="text-2xl font-extrabold text-gray-900">发布结果</h3>
+              <h3 className="text-2xl font-extrabold text-gray-900">{tr('batch.resultTitle')}</h3>
               <button
                 onClick={() => setShowResult(false)}
                 className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
@@ -313,22 +315,22 @@ const BatchProductPublish: React.FC = () => {
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-blue-50 rounded-xl p-4 text-center">
                   <div className="text-3xl font-bold text-blue-600">{publishResults.total}</div>
-                  <div className="text-sm text-blue-700 mt-1">总数</div>
+                  <div className="text-sm text-blue-700 mt-1">{tr('batch.total')}</div>
                 </div>
                 <div className="bg-green-50 rounded-xl p-4 text-center">
                   <div className="text-3xl font-bold text-green-600">{publishResults.success}</div>
-                  <div className="text-sm text-green-700 mt-1">成功</div>
+                  <div className="text-sm text-green-700 mt-1">{tr('common.success')}</div>
                 </div>
                 <div className="bg-red-50 rounded-xl p-4 text-center">
                   <div className="text-3xl font-bold text-red-600">{publishResults.failed}</div>
-                  <div className="text-sm text-red-700 mt-1">失败</div>
+                  <div className="text-sm text-red-700 mt-1">{tr('common.failed')}</div>
                 </div>
               </div>
 
               {/* 失败详情 */}
               {publishResults.failed > 0 && publishResults.details && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4 max-h-60 overflow-y-auto">
-                  <h4 className="font-bold text-red-900 mb-2">失败商品</h4>
+                  <h4 className="font-bold text-red-900 mb-2">{tr('batch.failedProducts')}</h4>
                   <div className="space-y-2">
                     {publishResults.details
                       .filter((d: any) => d.status === 'failed')

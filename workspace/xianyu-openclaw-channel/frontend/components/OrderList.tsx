@@ -4,6 +4,7 @@ import { Order, OrderStatus, Item } from '../types';
 import { getOrders, syncOrders, syncSingleOrder, manualShipOrder, updateOrder, deleteOrder, importOrders, getItems, repairOrderItemMedia } from '../services/api';
 import { Search, MoreHorizontal, Truck, RefreshCw, Copy, ChevronLeft, ChevronRight, PackageCheck, Edit, Eye, Plus, Save, X, User as UserIcon, Phone, MapPin, Upload, ExternalLink, Trash2 } from 'lucide-react';
 import { buildItemPlaceholderDataUrl } from '../utils/image';
+import { useI18n, translate as tr } from '../lib/i18n';
 
 const StatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
   const styles = {
@@ -16,12 +17,12 @@ const StatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
   };
 
   const labels = {
-    processing: '处理中',
-    pending_ship: '待发货',
-    shipped: '已发货',
-    completed: '已完成',
-    cancelled: '已取消',
-    refunding: '退款中',
+    processing: tr('status.processing'),
+    pending_ship: tr('status.pendingShip'),
+    shipped: tr('status.shipped'),
+    completed: tr('status.completed'),
+    cancelled: tr('status.cancelled'),
+    refunding: tr('status.refunding'),
   };
 
   return (
@@ -32,6 +33,7 @@ const StatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
 };
 
 const OrderList: React.FC = () => {
+  useI18n();
   const [orders, setOrders] = useState<Order[]>([]);
   const [allOrders, setAllOrders] = useState<Order[]>([]); // 保存所有订单用于搜索
   const [items, setItems] = useState<Item[]>([]);
@@ -173,7 +175,7 @@ const OrderList: React.FC = () => {
           return matchingItem.item_title;
       }
 
-      return '未知商品';
+      return tr('common.unknownProduct');
   };
 
   const getOrderItemPrice = (order: Order) => order.item_price || itemLookup[order.item_id]?.item_price || '';
@@ -236,10 +238,10 @@ const OrderList: React.FC = () => {
               setShipResult({ success: true, message: result.message });
               loadOrders();
           } else {
-              setShipResult({ success: false, message: result?.message || '发货失败' });
+              setShipResult({ success: false, message: result?.message || tr('orders.shipFailed') });
           }
       } catch (e: any) {
-          setShipResult({ success: false, message: e?.message || '请求失败' });
+          setShipResult({ success: false, message: e?.message || tr('orders.requestFailed') });
       } finally {
           setShipLoading(false);
       }
@@ -292,7 +294,7 @@ const OrderList: React.FC = () => {
       loadOrders();
     } catch (error) {
       console.error('更新订单失败:', error);
-      alert('更新失败，请重试');
+      alert(tr('alerts.updateFailedRetry'));
     }
   };
 
@@ -303,9 +305,9 @@ const OrderList: React.FC = () => {
       setShowImportModal(false);
       setImportText('');
       loadOrders();
-      alert('订单导入成功');
+      alert(tr('orders.importSuccess'));
     } catch (error) {
-      alert('导入失败，请检查JSON格式');
+      alert(tr('orders.importFailed'));
     }
   };
 
@@ -327,14 +329,14 @@ const OrderList: React.FC = () => {
   };
 
   const handleDelete = async (orderId: string) => {
-    if (!confirm('确认删除该订单吗？删除后无法恢复。')) return;
+    if (!confirm(tr('orders.confirmDelete'))) return;
     setDeletingOrderId(orderId);
     try {
       await deleteOrder(orderId);
       setAllOrders(prev => prev.filter(o => o.order_id !== orderId));
     } catch (error: any) {
       console.error('删除订单失败:', error);
-      alert(error?.message || '删除失败，请重试');
+      alert(error?.message || tr('alerts.deleteFailedRetry'));
       await loadOrders();
     } finally {
       setDeletingOrderId(null);
@@ -345,8 +347,8 @@ const OrderList: React.FC = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
         <div>
-          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">订单中心</h2>
-          <p className="text-gray-500 mt-2 font-medium">查看所有鱼鱼交易记录与状态。</p>
+          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">{tr('orders.title')}</h2>
+          <p className="text-gray-500 mt-2 font-medium">{tr('orders.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
             <button onClick={loadOrders} className="p-3 rounded-2xl bg-white border border-gray-100 text-gray-600 hover:bg-gray-50 hover:text-black transition-colors shadow-sm">
@@ -379,11 +381,11 @@ const OrderList: React.FC = () => {
         <div className="p-4 border-b border-gray-50 flex flex-col md:flex-row gap-4 justify-between items-center bg-[#FAFAFA]">
           <div className="flex gap-1 p-1 bg-gray-200/50 rounded-xl overflow-x-auto max-w-full">
              {[
-                 {k:'all', v:'全部'},
-                 {k:'shipped', v:'已发货'},
-                 {k:'pending_ship', v:'待发货'},
-                 {k:'cancelled', v:'已取消'},
-                 {k:'refunding', v:'其他'}
+                 {k:'all', v:tr('orders.filter.all')},
+                 {k:'shipped', v:tr('status.shipped')},
+                 {k:'pending_ship', v:tr('status.pendingShip')},
+                 {k:'cancelled', v:tr('status.cancelled')},
+                 {k:'refunding', v:tr('orders.filter.other')}
              ].map(opt => (
                  <button
                     key={opt.k}
@@ -398,7 +400,7 @@ const OrderList: React.FC = () => {
              <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#FFE815] transition-colors" />
              <input
                  type="text"
-                 placeholder="搜索订单号/商品/买家..."
+                 placeholder={tr('dashboard.searchOrdersPlaceholder')}
                  value={searchText}
                  onChange={(e) => { setSearchText(e.target.value); setPage(1); }}
                  className="ios-input pl-10 pr-4 py-2.5 rounded-xl w-64 bg-white border-none shadow-sm focus:ring-0"
@@ -411,11 +413,11 @@ const OrderList: React.FC = () => {
           <table className="w-full text-left border-collapse table-fixed">
             <thead>
               <tr className="bg-white text-gray-400 text-xs font-bold uppercase tracking-wider border-b border-gray-50">
-                <th className="px-6 py-5" style={{width: '28%'}}>订单信息</th>
-                <th className="px-6 py-5" style={{width: '26%'}}>买家信息</th>
-                <th className="px-6 py-5" style={{width: '11%'}}>实付金额</th>
-                <th className="px-6 py-5" style={{width: '13%'}}>当前状态</th>
-                <th className="px-6 py-5 text-right" style={{width: '22%'}}>操作</th>
+                <th className="px-6 py-5" style={{width: '28%'}}>{tr('orders.table.orderInfo')}</th>
+                <th className="px-6 py-5" style={{width: '26%'}}>{tr('orders.table.buyerInfo')}</th>
+                <th className="px-6 py-5" style={{width: '11%'}}>{tr('orders.table.amountPaid')}</th>
+                <th className="px-6 py-5" style={{width: '13%'}}>{tr('orders.table.currentStatus')}</th>
+                <th className="px-6 py-5 text-right" style={{width: '22%'}}>{tr('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -447,23 +449,23 @@ const OrderList: React.FC = () => {
                   </td>
                   <td className="px-6 py-5">
                       <div className="flex flex-col gap-1">
-                          <div className="text-xs text-gray-500">买家ID</div>
+                          <div className="text-xs text-gray-500">{tr('orders.buyerId')}</div>
                           <div className="text-sm font-bold text-gray-800">{order.buyer_id}</div>
                           {order.receiver_name && (
                               <>
-                                  <div className="text-xs text-gray-500">收货人</div>
+                                  <div className="text-xs text-gray-500">{tr('orders.receiverName')}</div>
                                   <div className="text-xs text-gray-600">{order.receiver_name}</div>
                               </>
                           )}
                           {order.receiver_phone && (
                               <>
-                                  <div className="text-xs text-gray-500">联系电话</div>
+                                  <div className="text-xs text-gray-500">{tr('orders.receiverPhone')}</div>
                                   <div className="text-xs text-gray-600 font-mono">{order.receiver_phone}</div>
                               </>
                           )}
                           {order.receiver_address && (
                               <>
-                                  <div className="text-xs text-gray-500">收货地址</div>
+                                  <div className="text-xs text-gray-500">{tr('orders.receiverAddress')}</div>
                                   <div className="text-xs text-gray-600 line-clamp-1">{order.receiver_address}</div>
                               </>
                           )}
@@ -487,21 +489,21 @@ const OrderList: React.FC = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mr-2 inline-flex text-gray-400 hover:text-amber-600 p-2 rounded-xl hover:bg-amber-50 transition-colors"
-                      title="查看鱼鱼详情"
+                      title={tr('orders.viewGoofish')}
                     >
                       <ExternalLink className="w-4 h-4" />
                     </a>
                     <button
                       onClick={() => handleViewDetail(order)}
                       className="mr-2 text-gray-400 hover:text-blue-600 p-2 rounded-xl hover:bg-blue-50 transition-colors"
-                      title="查看详情"
+                      title={tr('common.viewDetails')}
                     >
                       <Eye className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleEdit(order)}
                       className="mr-2 text-gray-400 hover:text-black p-2 rounded-xl hover:bg-gray-100 transition-colors"
-                      title="编辑订单"
+                      title={tr('orders.editTitle')}
                     >
                       <Edit className="w-4 h-4" />
                     </button>
@@ -509,7 +511,7 @@ const OrderList: React.FC = () => {
                       onClick={() => handleSyncSingle(order.order_id)}
                       disabled={syncingOrderId === order.order_id}
                       className="mr-2 text-gray-400 hover:text-green-600 p-2 rounded-xl hover:bg-green-50 transition-colors disabled:opacity-50"
-                      title="同步订单"
+                      title={tr('orders.syncOne')}
                     >
                       <RefreshCw className={`w-4 h-4 ${syncingOrderId === order.order_id ? 'animate-spin' : ''}`} />
                     </button>
@@ -517,7 +519,7 @@ const OrderList: React.FC = () => {
                       onClick={() => handleDelete(order.order_id)}
                       disabled={deletingOrderId === order.order_id}
                       className="text-gray-400 hover:text-red-500 p-2 rounded-xl hover:bg-red-50 transition-colors disabled:opacity-50"
-                      title="删除订单"
+                      title={tr('orders.deleteOrder')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -558,7 +560,7 @@ const OrderList: React.FC = () => {
           <div className="modal-container">
             <div className="modal-header">
               <div className="flex items-center justify-between w-full">
-                <h3 className="text-2xl font-extrabold text-gray-900">订单详情</h3>
+                <h3 className="text-2xl font-extrabold text-gray-900">{tr('orders.detailTitle')}</h3>
                 <button
                   onClick={() => setShowDetailModal(false)}
                   className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
@@ -571,26 +573,26 @@ const OrderList: React.FC = () => {
             <div className="modal-body space-y-6">
               {/* Order Info */}
               <div className="space-y-4">
-                <h4 className="text-lg font-bold text-gray-800">订单信息</h4>
+                <h4 className="text-lg font-bold text-gray-800">{tr('orders.table.orderInfo')}</h4>
                 <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl">
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">订单号</div>
+                    <div className="text-xs text-gray-500 mb-1">{tr('orders.orderNumber')}</div>
                     <div className="font-mono text-sm font-bold text-gray-900">{selectedOrder.order_id}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">状态</div>
+                    <div className="text-xs text-gray-500 mb-1">{tr('common.status')}</div>
                     <StatusBadge status={selectedOrder.status} />
                   </div>
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">实付金额</div>
+                    <div className="text-xs text-gray-500 mb-1">{tr('orders.table.amountPaid')}</div>
                     <div className="text-lg font-extrabold text-gray-900">¥{selectedOrder.amount}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">数量</div>
+                    <div className="text-xs text-gray-500 mb-1">{tr('common.quantity')}</div>
                     <div className="font-bold text-gray-900">{selectedOrder.quantity}</div>
                   </div>
                   <div className="col-span-2">
-                    <div className="text-xs text-gray-500 mb-1">创建时间</div>
+                    <div className="text-xs text-gray-500 mb-1">{tr('orders.createdAt')}</div>
                     <div className="text-sm font-medium text-gray-700">{selectedOrder.created_at}</div>
                   </div>
                 </div>
@@ -598,7 +600,7 @@ const OrderList: React.FC = () => {
 
               {/* Item Info */}
               <div className="space-y-4">
-                <h4 className="text-lg font-bold text-gray-800">商品信息</h4>
+                <h4 className="text-lg font-bold text-gray-800">{tr('orders.productInfo')}</h4>
                 <div className="p-4 bg-gray-50 rounded-xl flex items-center gap-4">
                   <img
                     src={getOrderItemImage(selectedOrder)}
@@ -625,27 +627,27 @@ const OrderList: React.FC = () => {
 
               {/* Buyer Info */}
               <div className="space-y-4">
-                <h4 className="text-lg font-bold text-gray-800">买家信息</h4>
+                <h4 className="text-lg font-bold text-gray-800">{tr('orders.table.buyerInfo')}</h4>
                 <div className="p-4 bg-gray-50 rounded-xl space-y-3">
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">买家ID</div>
+                    <div className="text-xs text-gray-500 mb-1">{tr('orders.buyerId')}</div>
                     <div className="font-bold text-gray-900">{selectedOrder.buyer_id}</div>
                   </div>
                   {selectedOrder.receiver_name && (
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">收货人</div>
+                      <div className="text-xs text-gray-500 mb-1">{tr('orders.receiverName')}</div>
                       <div className="font-medium text-gray-700">{selectedOrder.receiver_name}</div>
                     </div>
                   )}
                   {selectedOrder.receiver_phone && (
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">联系电话</div>
+                      <div className="text-xs text-gray-500 mb-1">{tr('orders.receiverPhone')}</div>
                       <div className="font-mono text-sm text-gray-700">{selectedOrder.receiver_phone}</div>
                     </div>
                   )}
                   {selectedOrder.receiver_address && (
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">收货地址</div>
+                      <div className="text-xs text-gray-500 mb-1">{tr('orders.receiverAddress')}</div>
                       <div className="text-sm text-gray-700">{selectedOrder.receiver_address}</div>
                     </div>
                   )}
@@ -685,7 +687,7 @@ const OrderList: React.FC = () => {
           <div className="modal-container">
             <div className="modal-header">
               <div className="flex items-center justify-between w-full">
-                <h3 className="text-2xl font-extrabold text-gray-900">插入订单</h3>
+                <h3 className="text-2xl font-extrabold text-gray-900">{tr('orders.insertOrder')}</h3>
                 <button
                   onClick={() => setShowImportModal(false)}
                   className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
@@ -697,14 +699,14 @@ const OrderList: React.FC = () => {
 
             <div className="modal-body space-y-5">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">选择Excel文件</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{tr('orders.import.fileLabel')}</label>
                 <input
                   type="file"
                   accept=".xlsx,.xls"
                   onChange={(e) => setImportFile(e.target.files?.[0] || null)}
                   className="w-full ios-input px-4 py-3 rounded-xl text-sm"
                 />
-                <p className="text-xs text-gray-500 mt-2">支持 .xlsx 和 .xls 格式</p>
+                <p className="text-xs text-gray-500 mt-2">{tr('orders.import.support')}</p>
               </div>
 
               {importFile && (
@@ -745,7 +747,7 @@ const OrderList: React.FC = () => {
           <div className="modal-container" style={{ maxWidth: '480px' }}>
             <div className="modal-header">
               <div className="flex items-center justify-between w-full">
-                <h3 className="text-2xl font-extrabold text-gray-900">立即发货</h3>
+                <h3 className="text-2xl font-extrabold text-gray-900">{tr('orders.shipNow')}</h3>
                 <button
                   onClick={() => { setShowShipModal(false); setShipResult(null); }}
                   className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
@@ -756,7 +758,7 @@ const OrderList: React.FC = () => {
             </div>
 
             <div className="modal-body space-y-4">
-              <p className="text-sm text-gray-600">请选择发货方式：</p>
+              <p className="text-sm text-gray-600">{tr('orders.ship.choose')}</p>
 
               {/* 选项A: 仅修改发货状态 */}
               <button
@@ -769,7 +771,7 @@ const OrderList: React.FC = () => {
                     <Truck className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <div className="font-bold text-gray-900 text-sm">仅修改鱼鱼发货状态</div>
+                    <div className="font-bold text-gray-900 text-sm">{tr('orders.ship.statusOnlyTitle')}</div>
                     <div className="text-xs text-gray-500 mt-1 leading-relaxed">
                       不实际扣除或发送卡券，仅在鱼鱼平台将订单标记为"已发货"。
                       适用于已经给客户发过货、只是忘记在鱼鱼修改状态的情况。
@@ -789,7 +791,7 @@ const OrderList: React.FC = () => {
                     <PackageCheck className="w-5 h-5 text-yellow-700" />
                   </div>
                   <div>
-                    <div className="font-bold text-gray-900 text-sm">完整发货（匹配卡券并发送）</div>
+                    <div className="font-bold text-gray-900 text-sm">{tr('orders.ship.fullTitle')}</div>
                     <div className="text-xs text-gray-500 mt-1 leading-relaxed">
                       自动匹配发货规则、获取卡券、发送卡券信息给买家，并修改发货状态。
                       适用于订单既没有发送卡券给买家、也没有修改发货状态的情况。
@@ -802,7 +804,7 @@ const OrderList: React.FC = () => {
               {shipLoading && (
                 <div className="flex items-center justify-center gap-2 py-3">
                   <RefreshCw className="w-4 h-4 animate-spin text-gray-500" />
-                  <span className="text-sm text-gray-500">正在处理中...</span>
+                  <span className="text-sm text-gray-500">{tr('orders.processingNow')}</span>
                 </div>
               )}
 
@@ -819,7 +821,7 @@ const OrderList: React.FC = () => {
                 onClick={() => { setShowShipModal(false); setShipResult(null); }}
                 className="w-full px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold transition-colors"
               >
-                {shipResult?.success ? '完成' : '取消'}
+                {shipResult?.success ? tr('common.done') : tr('common.cancel')}
               </button>
             </div>
           </div>
@@ -833,7 +835,7 @@ const OrderList: React.FC = () => {
           <div className="modal-container">
             <div className="modal-header">
               <div className="flex items-center justify-between w-full">
-                <h3 className="text-2xl font-extrabold text-gray-900">编辑订单</h3>
+                <h3 className="text-2xl font-extrabold text-gray-900">{tr('orders.editTitle')}</h3>
                 <button
                   onClick={() => setShowEditModal(false)}
                   className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
@@ -846,7 +848,7 @@ const OrderList: React.FC = () => {
             <div className="modal-body space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">订单号</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">{tr('orders.orderNumber')}</label>
                   <input
                     type="text"
                     value={editingOrder.order_id}
@@ -855,25 +857,25 @@ const OrderList: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">订单状态</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">{tr('orders.orderStatus')}</label>
                   <select
                     value={editingOrder.status}
                     onChange={(e) => setEditingOrder({ ...editingOrder, status: e.target.value as OrderStatus })}
                     className="w-full ios-input px-4 py-3 rounded-xl"
                   >
-                    <option value="processing">处理中</option>
-                    <option value="pending_ship">待发货</option>
-                    <option value="shipped">已发货</option>
-                    <option value="completed">已完成</option>
-                    <option value="cancelled">已取消</option>
-                    <option value="refunding">退款中</option>
+                    <option value="processing">{tr('status.processing')}</option>
+                    <option value="pending_ship">{tr('status.pendingShip')}</option>
+                    <option value="shipped">{tr('status.shipped')}</option>
+                    <option value="completed">{tr('status.completed')}</option>
+                    <option value="cancelled">{tr('status.cancelled')}</option>
+                    <option value="refunding">{tr('status.refunding')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">买家ID</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">{tr('orders.buyerId')}</label>
                   <input
                     type="text"
                     value={editingOrder.buyer_id}
@@ -882,7 +884,7 @@ const OrderList: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">实付金额</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">{tr('orders.table.amountPaid')}</label>
                   <input
                     type="number"
                     value={editingOrder.amount}
@@ -894,7 +896,7 @@ const OrderList: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">收货人</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">{tr('orders.receiverName')}</label>
                   <input
                     type="text"
                     value={editingOrder.receiver_name || ''}
@@ -903,7 +905,7 @@ const OrderList: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">联系电话</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">{tr('orders.receiverPhone')}</label>
                   <input
                     type="text"
                     value={editingOrder.receiver_phone || ''}
@@ -914,7 +916,7 @@ const OrderList: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">收货地址</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{tr('orders.receiverAddress')}</label>
                 <textarea
                   value={editingOrder.receiver_address || ''}
                   onChange={(e) => setEditingOrder({ ...editingOrder, receiver_address: e.target.value })}
@@ -924,7 +926,7 @@ const OrderList: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">商品标题</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{tr('orders.productTitle')}</label>
                 <input
                   type="text"
                   value={editingOrder.item_title || ''}

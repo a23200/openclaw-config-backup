@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { AccountDetail, ShippingRule, ReplyRule, DefaultReply } from '../types';
 import { getAccountDetails, getReplyRules, updateReplyRule, deleteReplyRule, getShippingRules, updateShippingRule, deleteShippingRule, getCards, getDefaultReplies, getDefaultReply, updateDefaultReply, deleteDefaultReply, clearDefaultReplyRecords } from '../services/api';
 import { Plus, Trash2, MessageSquare, X, Save, Loader2, Key, Truck, Power, PowerOff, Edit2, RefreshCw, Sparkles, Bot } from 'lucide-react';
+import { useI18n, translate as tr } from '../lib/i18n';
 
 type TabType = 'reply' | 'delivery' | 'default';
 
@@ -30,6 +31,7 @@ interface DefaultReplyForm {
 }
 
 const Keywords: React.FC = () => {
+  useI18n();
   const [accounts, setAccounts] = useState<AccountDetail[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<string>('');
   const [activeTab, setActiveTab] = useState<TabType>('reply');
@@ -195,11 +197,11 @@ const Keywords: React.FC = () => {
 
   const handleSave = async () => {
     if (!selectedAccount) {
-      alert('请先选择账号');
+      alert(tr('product.chooseAccountFirst'));
       return;
     }
     if (!replyForm.keyword.trim() || !replyForm.reply_content.trim()) {
-      alert('请填写关键词和回复内容');
+      alert(tr('keywords.needKeywordAndReply'));
       return;
     }
 
@@ -216,7 +218,7 @@ const Keywords: React.FC = () => {
       );
       setShowReplyModal(false);
       loadKeywords();
-      alert('保存成功！');
+      alert(tr('alerts.saveSuccess'));
     } catch (e) {
       alert('保存失败：' + (e as Error).message);
     }
@@ -224,11 +226,11 @@ const Keywords: React.FC = () => {
 
   const handleSaveDelivery = async () => {
     if (!deliveryForm.keyword.trim()) {
-      alert('请填写触发关键词');
+      alert(tr('keywords.needTriggerKeyword'));
       return;
     }
     if (!deliveryForm.card_id) {
-      alert('请选择卡券');
+      alert(tr('keywords.selectCard'));
       return;
     }
 
@@ -243,29 +245,29 @@ const Keywords: React.FC = () => {
       });
       setShowDeliveryModal(false);
       loadShippingRules();
-      alert('保存成功！');
+      alert(tr('alerts.saveSuccess'));
     } catch (e) {
       alert('保存失败：' + (e as Error).message);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!selectedAccount || !confirm('确认删除该关键词吗？')) return;
+    if (!selectedAccount || !confirm(tr('keywords.confirmDeleteKeyword'))) return;
     try {
       await deleteReplyRule(id, selectedAccount);
       loadKeywords();
-      alert('删除成功！');
+      alert(tr('alerts.deleteSuccess'));
     } catch (e) {
       alert('删除失败：' + (e as Error).message);
     }
   };
 
   const handleDeleteDelivery = async (id: string) => {
-    if (!confirm('确认删除该发货规则吗？')) return;
+    if (!confirm(tr('keywords.confirmDeleteDelivery'))) return;
     try {
       await deleteShippingRule(id);
       loadShippingRules();
-      alert('删除成功！');
+      alert(tr('alerts.deleteSuccess'));
     } catch (e) {
       alert('删除失败：' + (e as Error).message);
     }
@@ -289,7 +291,7 @@ const Keywords: React.FC = () => {
 
   const handleSaveDefault = async () => {
     if (!defaultForm.cookie_id) {
-      alert('请先选择账号');
+      alert(tr('product.chooseAccountFirst'));
       return;
     }
 
@@ -302,28 +304,28 @@ const Keywords: React.FC = () => {
       });
       setShowDefaultModal(false);
       loadDefaultReplies();
-      alert('保存成功！');
+      alert(tr('alerts.saveSuccess'));
     } catch (e) {
       alert('保存失败：' + (e as Error).message);
     }
   };
 
   const handleDeleteDefault = async (cookieId: string) => {
-    if (!confirm('确认删除该默认回复吗？')) return;
+    if (!confirm(tr('keywords.confirmDeleteDefault'))) return;
     try {
       await deleteDefaultReply(cookieId);
       loadDefaultReplies();
-      alert('删除成功！');
+      alert(tr('alerts.deleteSuccess'));
     } catch (e) {
       alert('删除失败：' + (e as Error).message);
     }
   };
 
   const handleClearRecords = async (cookieId: string) => {
-    if (!confirm('确认清空该账号的回复记录吗？清空后可以重新对所有对话使用默认回复。')) return;
+    if (!confirm(tr('keywords.confirmClearRecords'))) return;
     try {
       await clearDefaultReplyRecords(cookieId);
-      alert('清空成功！');
+      alert(tr('alerts.clearSuccess'));
     } catch (e) {
       alert('清空失败：' + (e as Error).message);
     }
@@ -334,8 +336,8 @@ const Keywords: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">关键词管理</h2>
-          <p className="text-gray-500 mt-2 font-medium">配置自动回复和关键词发货规则</p>
+          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">{tr('keywords.title')}</h2>
+          <p className="text-gray-500 mt-2 font-medium">{tr('keywords.subtitle')}</p>
         </div>
       </div>
 
@@ -391,13 +393,13 @@ const Keywords: React.FC = () => {
       <div className="bg-white rounded-3xl shadow-xl p-6">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-4 w-full sm:w-auto">
-            <label className="text-sm font-bold text-gray-700 whitespace-nowrap">选择账号</label>
+            <label className="text-sm font-bold text-gray-700 whitespace-nowrap">{tr('keywords.selectAccount')}</label>
             <select
               className="flex-1 sm:w-64 ios-input px-5 py-3 rounded-2xl font-medium border-2 border-gray-200 focus:border-[#FFE815] focus:ring-4 focus:ring-[#FFE815]/20 transition-all"
               value={selectedAccount}
               onChange={(e) => setSelectedAccount(e.target.value)}
             >
-              <option value="">请选择账号</option>
+              <option value="">{tr('keywords.needAccount')}</option>
               {accounts.map((acc) => (
                 <option key={acc.id} value={acc.id}>
                   {acc.nickname}
@@ -423,7 +425,7 @@ const Keywords: React.FC = () => {
               className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3 rounded-2xl font-bold bg-gradient-to-r from-[#FFE815] to-[#FFD700] hover:from-[#FFD700] hover:to-[#FFC800] text-gray-900 shadow-xl hover:shadow-2xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-5 h-5" />
-              {activeTab === 'reply' ? '添加关键词' : activeTab === 'delivery' ? '添加发货规则' : '编辑默认回复'}
+              {activeTab === 'reply' ? tr('keywords.addKeyword') : activeTab === 'delivery' ? tr('keywords.addDelivery') : tr('keywords.editDefault')}
             </button>
           </div>
         </div>
@@ -435,8 +437,8 @@ const Keywords: React.FC = () => {
           <div className="w-24 h-24 bg-gradient-to-br from-[#FFE815]/20 to-[#FFD700]/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
             <MessageSquare className="w-12 h-12 text-[#FFE815]" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">请选择账号</h3>
-          <p className="text-gray-500 text-lg">选择一个账号以管理其关键词规则</p>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">{tr('keywords.needAccount')}</h3>
+          <p className="text-gray-500 text-lg">{tr('keywords.needAccountHint')}</p>
         </div>
       ) : activeTab === 'reply' ? (
         // 关键词回复列表
@@ -444,7 +446,7 @@ const Keywords: React.FC = () => {
           <div className="py-24 flex justify-center">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="w-16 h-16 text-[#FFE815] animate-spin" />
-              <p className="text-gray-500 font-medium">加载中...</p>
+              <p className="text-gray-500 font-medium">{tr('common.loading')}</p>
             </div>
           </div>
         ) : (
@@ -474,7 +476,7 @@ const Keywords: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-gray-600 bg-white/70 backdrop-blur-sm rounded-2xl px-4 py-3 line-clamp-2 shadow-inner border border-gray-100">
-                      💬 {keyword.reply_content || '无回复内容'}
+                      💬 {keyword.reply_content || tr('keywords.noReplyContent')}
                     </p>
                   </div>
 
@@ -483,14 +485,14 @@ const Keywords: React.FC = () => {
                     <button
                       onClick={() => handleEdit(keyword)}
                       className="p-3.5 bg-gradient-to-br from-amber-50 to-amber-100 text-amber-600 rounded-2xl hover:from-amber-100 hover:to-amber-200 transition-all shadow-md hover:shadow-lg hover:scale-110"
-                      title="编辑"
+                      title={tr('common.edit')}
                     >
                       <Edit2 className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(keyword.id)}
                       className="p-3.5 bg-gradient-to-br from-red-50 to-red-100 text-red-500 rounded-2xl hover:from-red-100 hover:to-red-200 transition-all shadow-md hover:shadow-lg hover:scale-110"
-                      title="删除"
+                      title={tr('common.delete')}
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -504,8 +506,8 @@ const Keywords: React.FC = () => {
                 <div className="w-24 h-24 bg-gradient-to-br from-[#FFE815]/20 to-[#FFD700]/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                   <MessageSquare className="w-12 h-12 text-[#FFE815]" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">暂无关键词</h3>
-                <p className="text-gray-500 text-lg">点击右上角添加新的关键词规则</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{tr('keywords.emptyReplyTitle')}</h3>
+                <p className="text-gray-500 text-lg">{tr('keywords.emptyReplyHint')}</p>
               </div>
             )}
           </div>
@@ -544,7 +546,7 @@ const Keywords: React.FC = () => {
                         ? 'bg-gradient-to-r from-green-400 to-green-500 text-white'
                         : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white'
                     }`}>
-                      {rule.enabled ? '已启用' : '已禁用'}
+                      {rule.enabled ? tr('common.enabled') : tr('common.disabled')}
                     </span>
                   </div>
                   <p className="text-gray-600 bg-white/70 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-inner border border-gray-100">
@@ -567,21 +569,21 @@ const Keywords: React.FC = () => {
                         ? 'bg-gradient-to-br from-amber-50 to-amber-100 text-amber-600 hover:from-amber-100 hover:to-amber-200'
                         : 'bg-gradient-to-br from-green-50 to-green-100 text-green-600 hover:from-green-100 hover:to-green-200'
                     }`}
-                    title={rule.enabled ? '禁用' : '启用'}
+                    title={rule.enabled ? tr('keywords.disable') : tr('keywords.enable')}
                   >
                     {rule.enabled ? <PowerOff className="w-5 h-5" /> : <Power className="w-5 h-5" />}
                   </button>
                   <button
                     onClick={() => handleEditDelivery(rule)}
                     className="p-3.5 bg-gradient-to-br from-amber-50 to-amber-100 text-amber-600 rounded-2xl hover:from-amber-100 hover:to-amber-200 transition-all shadow-md hover:shadow-lg hover:scale-110"
-                    title="编辑"
+                    title={tr('common.edit')}
                   >
                     <Edit2 className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleDeleteDelivery(rule.id)}
                     className="p-3.5 bg-gradient-to-br from-red-50 to-red-100 text-red-500 rounded-2xl hover:from-red-100 hover:to-red-200 transition-all shadow-md hover:shadow-lg hover:scale-110"
-                    title="删除"
+                    title={tr('common.delete')}
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
@@ -595,8 +597,8 @@ const Keywords: React.FC = () => {
               <div className="w-24 h-24 bg-gradient-to-br from-blue-400/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                 <Truck className="w-12 h-12 text-blue-400" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">暂无发货规则</h3>
-              <p className="text-gray-500 text-lg">点击右上角添加新的发货规则</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">{tr('keywords.emptyDeliveryTitle')}</h3>
+              <p className="text-gray-500 text-lg">{tr('keywords.emptyDeliveryHint')}</p>
             </div>
           )}
         </div>
@@ -637,7 +639,7 @@ const Keywords: React.FC = () => {
                           ? 'bg-gradient-to-r from-green-400 to-green-500 text-white'
                           : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white'
                       }`}>
-                        {hasDefaultReply ? '已启用' : '未设置'}
+                        {hasDefaultReply ? tr('common.enabled') : tr('common.notSet')}
                       </span>
                       {defaultReply?.reply_once && (
                         <span className="px-3 py-1.5 rounded-xl bg-purple-100 text-purple-700 text-xs font-bold shadow-md">
@@ -647,7 +649,7 @@ const Keywords: React.FC = () => {
                     </div>
                     {hasDefaultReply && (
                       <p className="text-gray-600 bg-white/70 backdrop-blur-sm rounded-2xl px-4 py-3 line-clamp-2 shadow-inner border border-gray-100">
-                        💬 {defaultReply.reply_content || '无回复内容'}
+                        💬 {defaultReply.reply_content || tr('keywords.noReplyContent')}
                       </p>
                     )}
                   </div>
@@ -657,7 +659,7 @@ const Keywords: React.FC = () => {
                     <button
                       onClick={() => loadDefaultReplyForEdit(account.id)}
                       className="p-3.5 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 rounded-2xl hover:from-purple-100 hover:to-purple-200 transition-all shadow-md hover:shadow-lg hover:scale-110"
-                      title="编辑"
+                      title={tr('common.edit')}
                     >
                       <Edit2 className="w-5 h-5" />
                     </button>
@@ -666,14 +668,14 @@ const Keywords: React.FC = () => {
                         <button
                           onClick={() => handleClearRecords(account.id)}
                           className="p-3.5 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 rounded-2xl hover:from-blue-100 hover:to-blue-200 transition-all shadow-md hover:shadow-lg hover:scale-110"
-                          title="清空回复记录"
+                          title={tr('keywords.clearRecords')}
                         >
                           <RefreshCw className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => handleDeleteDefault(account.id)}
                           className="p-3.5 bg-gradient-to-br from-red-50 to-red-100 text-red-500 rounded-2xl hover:from-red-100 hover:to-red-200 transition-all shadow-md hover:shadow-lg hover:scale-110"
-                          title="删除"
+                          title={tr('common.delete')}
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>
@@ -690,8 +692,8 @@ const Keywords: React.FC = () => {
               <div className="w-24 h-24 bg-gradient-to-br from-purple-400/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                 <Bot className="w-12 h-12 text-purple-400" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">暂无账号</h3>
-              <p className="text-gray-500 text-lg">请先添加账号</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">{tr('accounts.emptyTitle')}</h3>
+              <p className="text-gray-500 text-lg">{tr('keywords.emptyAccountsHint')}</p>
             </div>
           )}
         </div>
@@ -709,7 +711,7 @@ const Keywords: React.FC = () => {
                     <MessageSquare className="w-7 h-7 text-gray-900" />
                   </div>
                   <h3 className="text-3xl font-black text-gray-900">
-                    {editingKeyword ? '编辑关键词' : '添加关键词'}
+                    {editingKeyword ? tr('keywords.editKeyword') : tr('keywords.addKeyword')}
                   </h3>
                 </div>
                 <button
@@ -732,7 +734,7 @@ const Keywords: React.FC = () => {
                   type="text"
                   value={replyForm.keyword}
                   onChange={(e) => setReplyForm({ ...replyForm, keyword: e.target.value })}
-                  placeholder="例如：价格、包邮、怎么样"
+                  placeholder={tr('keywords.replyPlaceholder')}
                   className="w-full px-6 py-4 rounded-2xl font-medium border-2 border-gray-200 focus:border-[#FFE815] focus:ring-4 focus:ring-[#FFE815]/20 transition-all bg-gray-50"
                 />
                 <p className="text-sm text-gray-500 mt-2 ml-1">💡 买家消息中包含此关键词时自动回复</p>
@@ -746,7 +748,7 @@ const Keywords: React.FC = () => {
                 <textarea
                   value={replyForm.reply_content}
                   onChange={(e) => setReplyForm({ ...replyForm, reply_content: e.target.value })}
-                  placeholder="输入自动回复的内容..."
+                  placeholder={tr('keywords.replyContentPlaceholder')}
                   rows={6}
                   className="w-full px-6 py-4 rounded-2xl font-medium border-2 border-gray-200 focus:border-[#FFE815] focus:ring-4 focus:ring-[#FFE815]/20 transition-all bg-gray-50 resize-none"
                 />
@@ -789,7 +791,7 @@ const Keywords: React.FC = () => {
                     <Truck className="w-7 h-7 text-white" />
                   </div>
                   <h3 className="text-3xl font-black text-white">
-                    {editingDeliveryRule ? '编辑发货规则' : '添加发货规则'}
+                    {editingDeliveryRule ? tr('keywords.editDelivery') : tr('keywords.addDelivery')}
                   </h3>
                 </div>
                 <button
@@ -812,7 +814,7 @@ const Keywords: React.FC = () => {
                   type="text"
                   value={deliveryForm.keyword}
                   onChange={(e) => setDeliveryForm({ ...deliveryForm, keyword: e.target.value })}
-                  placeholder="例如：发货卡密、自动发货"
+                  placeholder={tr('keywords.triggerDeliveryPlaceholder')}
                   className="w-full px-6 py-4 rounded-2xl font-medium border-2 border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 transition-all bg-gray-50"
                 />
                 <p className="text-sm text-gray-500 mt-2 ml-1">💡 买家消息中包含此关键词时自动发货</p>
@@ -828,7 +830,7 @@ const Keywords: React.FC = () => {
                   onChange={(e) => setDeliveryForm({ ...deliveryForm, card_id: e.target.value })}
                   className="w-full px-6 py-4 rounded-2xl font-medium border-2 border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 transition-all bg-gray-50"
                 >
-                  <option value="">请选择卡券</option>
+                  <option value="">{tr('keywords.selectCard')}</option>
                   {cards.map((card) => (
                     <option key={card.id} value={card.id}>
                       {card.name || card.text_content?.substring(0, 30) || `卡券 ${card.id}`}
@@ -848,7 +850,7 @@ const Keywords: React.FC = () => {
                   type="text"
                   value={deliveryForm.description}
                   onChange={(e) => setDeliveryForm({ ...deliveryForm, description: e.target.value })}
-                  placeholder="规则描述，方便识别"
+                  placeholder={tr('keywords.descriptionPlaceholder')}
                   className="w-full px-6 py-4 rounded-2xl font-medium border-2 border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 transition-all bg-gray-50"
                 />
               </div>
@@ -856,7 +858,7 @@ const Keywords: React.FC = () => {
               <div className="flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-2xl border-2 border-blue-200">
                 <div className="flex items-center gap-3">
                   <Power className="w-6 h-6 text-blue-500" />
-                  <span className="text-base font-black text-gray-900">启用此规则</span>
+                  <span className="text-base font-black text-gray-900">{tr('keywords.enableRule')}</span>
                 </div>
                 <button
                   type="button"
@@ -933,7 +935,7 @@ const Keywords: React.FC = () => {
                   onChange={(e) => setDefaultForm({ ...defaultForm, cookie_id: e.target.value })}
                   className="w-full px-6 py-4 rounded-2xl font-medium border-2 border-gray-200 focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 transition-all bg-gray-50"
                 >
-                  <option value="">请选择账号</option>
+                  <option value="">{tr('keywords.needAccount')}</option>
                   {accounts.map((acc) => (
                     <option key={acc.id} value={acc.id}>
                       {acc.nickname}
@@ -946,7 +948,7 @@ const Keywords: React.FC = () => {
               <div className="flex items-center justify-between p-5 bg-gradient-to-r from-purple-50 to-purple-100/50 rounded-2xl border-2 border-purple-200">
                 <div className="flex items-center gap-3">
                   <Power className="w-6 h-6 text-purple-500" />
-                  <span className="text-base font-black text-gray-900">启用默认回复</span>
+                  <span className="text-base font-black text-gray-900">{tr('keywords.enableDefaultReply')}</span>
                 </div>
                 <button
                   type="button"
@@ -981,7 +983,7 @@ const Keywords: React.FC = () => {
               <div className="flex items-center justify-between p-5 bg-gradient-to-r from-amber-50 to-amber-100/50 rounded-2xl border-2 border-amber-200">
                 <div className="flex items-center gap-3">
                   <span className="text-base font-black text-gray-900">🔁 只回复一次</span>
-                  <span className="text-xs text-gray-500">启用后，每个对话只使用一次默认回复</span>
+                  <span className="text-xs text-gray-500">{tr('keywords.replyOnceHint')}</span>
                 </div>
                 <button
                   type="button"

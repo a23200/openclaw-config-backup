@@ -3,9 +3,11 @@ import { AdminStats, OrderAnalytics, Order, OrderStatus, Item } from '../types';
 import { getAdminStats, getOrderAnalytics, getValidOrders, getItems } from '../services/api';
 import { TrendingUp, Users, ShoppingCart, AlertCircle, DollarSign, Activity, Package, ArrowUpRight, Calendar, X, BarChart3, PackageCheck, ExternalLink, Eye, Edit } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
+import { useI18n } from '../lib/i18n';
 
 // 状态徽章组件
 const StatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
+  const { t } = useI18n();
   const styles = {
     processing: 'bg-yellow-100 text-yellow-800',
     pending_ship: 'bg-[#FFE815] text-black',
@@ -16,12 +18,12 @@ const StatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
   };
 
   const labels = {
-    processing: '处理中',
-    pending_ship: '待发货',
-    shipped: '已发货',
-    completed: '已完成',
-    cancelled: '已取消',
-    refunding: '退款中',
+    processing: t('status.processing'),
+    pending_ship: t('status.pendingShip'),
+    shipped: t('status.shipped'),
+    completed: t('status.completed'),
+    cancelled: t('status.cancelled'),
+    refunding: t('status.refunding'),
   };
 
   return (
@@ -52,6 +54,7 @@ const StatCard: React.FC<{ title: string; value: string | number; icon: React.El
 type TimeRange = 'today' | 'yesterday' | '3days' | '7days' | '30days' | 'custom';
 
 const Dashboard: React.FC = () => {
+  const { t } = useI18n();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [analytics, setAnalytics] = useState<OrderAnalytics | null>(null);
   const [timeRange, setTimeRange] = useState<TimeRange>('7days');
@@ -362,25 +365,25 @@ const Dashboard: React.FC = () => {
     })) : [];
 
   const timeRangeOptions = [
-    { key: 'today' as TimeRange, label: '今天' },
-    { key: 'yesterday' as TimeRange, label: '昨天' },
-    { key: '3days' as TimeRange, label: '三天内' },
-    { key: '7days' as TimeRange, label: '7天内' },
-    { key: '30days' as TimeRange, label: '一个月内' },
-    { key: 'custom' as TimeRange, label: '自定义' },
+    { key: 'today' as TimeRange, label: t('dashboard.range.today') },
+    { key: 'yesterday' as TimeRange, label: t('dashboard.range.yesterday') },
+    { key: '3days' as TimeRange, label: t('dashboard.range.3days') },
+    { key: '7days' as TimeRange, label: t('dashboard.range.7days') },
+    { key: '30days' as TimeRange, label: t('dashboard.range.30days') },
+    { key: 'custom' as TimeRange, label: t('dashboard.range.custom') },
   ];
 
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
         <div>
-          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">运营概览</h2>
-          <p className="text-gray-500 mt-2 text-base">欢迎回来，以下是鱼鱼店铺的实时经营数据。</p>
+          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">{t('dashboard.title')}</h2>
+          <p className="text-gray-500 mt-2 text-base">{t('dashboard.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="text-sm font-bold text-gray-700 bg-white px-5 py-2.5 rounded-full shadow-sm border border-gray-100 flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></span>
-            系统正常运行
+            {t('dashboard.systemHealthy')}
           </div>
         </div>
       </div>
@@ -419,7 +422,7 @@ const Dashboard: React.FC = () => {
               onClick={() => loadAnalytics('custom')}
               className="px-4 py-2 rounded-xl text-sm font-bold bg-black text-white hover:bg-gray-800 transition-colors"
             >
-              应用
+              {t('dashboard.apply')}
             </button>
           </>
         )}
@@ -428,26 +431,26 @@ const Dashboard: React.FC = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="累计营收 (CNY)"
+          title={t('dashboard.totalRevenue')}
           value={`¥${(analytics.revenue_stats?.total_amount || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2 })}`}
           icon={DollarSign}
           colorClass="bg-yellow-400"
           trend={getTrendPercent() || undefined}
         />
         <StatCard
-          title="活跃账号 / 总数"
+          title={t('dashboard.activeAccounts')}
           value={`${stats.active_cookies} / ${stats.total_cookies}`}
           icon={Users}
           colorClass="bg-blue-500"
         />
         <StatCard
-          title="订单数"
+          title={t('dashboard.orderCount')}
           value={(analytics.revenue_stats?.total_orders || 0).toLocaleString()}
           icon={ShoppingCart}
           colorClass="bg-orange-500"
         />
         <StatCard
-          title="库存卡密余量"
+          title={t('dashboard.cardStock')}
           value={stats.total_cards}
           icon={Package}
           colorClass="bg-purple-500"
@@ -457,15 +460,15 @@ const Dashboard: React.FC = () => {
       {/* Main Chart Section */}
       <div className="ios-card p-8 rounded-[2rem]">
         <div className="mb-10">
-          <h3 className="text-xl font-bold text-gray-900">营收趋势分析</h3>
-          <p className="text-sm text-gray-400 mt-1">最近7天的销售额走势</p>
+          <h3 className="text-xl font-bold text-gray-900">{t('dashboard.revenueTrend')}</h3>
+          <p className="text-sm text-gray-400 mt-1">{t('dashboard.last7Sales')}</p>
         </div>
         <div className="h-[350px] w-full">
           {chartData.length === 0 || (analytics.revenue_stats?.total_amount || 0) === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-gray-400">
               <ShoppingCart className="w-16 h-16 mb-4 opacity-20" />
-              <p className="text-lg font-medium">暂无营收数据</p>
-              <p className="text-sm mt-2">所选时间范围内暂无订单记录</p>
+              <p className="text-lg font-medium">{t('dashboard.noRevenue')}</p>
+              <p className="text-sm mt-2">{t('dashboard.noOrdersInRange')}</p>
             </div>
           ) : chartData.length <= 2 ? (
             // 数据点少于等于2个时使用美化柱状图
@@ -495,7 +498,7 @@ const Dashboard: React.FC = () => {
                   itemStyle={{ color: '#FFE815', fontWeight: 600 }}
                   formatter={(value) => {
                     const num = Number(value);
-                    return `营收: ¥${num.toFixed(2)}`;
+                    return t('dashboard.revenueTooltip', { amount: num.toFixed(2) });
                   }}
                 />
                 <Bar
@@ -551,10 +554,10 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* 商品销量排行 */}
         <div className="ios-card p-6 rounded-[2rem]">
-          <h3 className="font-bold text-lg text-gray-900 mb-6">商品销量排行</h3>
+          <h3 className="font-bold text-lg text-gray-900 mb-6">{t('dashboard.productSalesRank')}</h3>
           <div className="h-[280px]">
             {productSalesData.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-gray-400">暂无数据</div>
+              <div className="flex items-center justify-center h-full text-gray-400">{t('common.noData')}</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={productSalesData} layout="vertical">
@@ -590,10 +593,10 @@ const Dashboard: React.FC = () => {
 
         {/* 商品下单占比 */}
         <div className="ios-card p-6 rounded-[2rem]">
-          <h3 className="font-bold text-lg text-gray-900 mb-6">商品下单占比</h3>
+          <h3 className="font-bold text-lg text-gray-900 mb-6">{t('dashboard.productOrderShare')}</h3>
           <div className="h-[280px]">
             {sourceDataData.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-gray-400">暂无数据</div>
+              <div className="flex items-center justify-center h-full text-gray-400">{t('common.noData')}</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -630,10 +633,10 @@ const Dashboard: React.FC = () => {
         {/* 参与统计的订单列表 */}
         <div className="lg:col-span-2 ios-card p-0 rounded-[2rem] border-0 bg-white overflow-hidden flex flex-col">
           <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-[#FAFAFA]">
-            <h3 className="font-bold text-lg text-gray-900">参与统计的订单</h3>
+            <h3 className="font-bold text-lg text-gray-900">{t('dashboard.statOrders')}</h3>
             <div className="relative">
               <input
-                placeholder="搜索订单号/商品/买家..."
+                placeholder={t('dashboard.searchOrdersPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-4 pr-4 py-2 rounded-xl bg-white border border-gray-100 text-sm focus:border-yellow-400 outline-none w-48"
@@ -645,7 +648,7 @@ const Dashboard: React.FC = () => {
             {ordersLoading ? (
               <div className="flex items-center justify-center py-20 text-gray-400">
                 <Activity className="w-6 h-6 animate-spin mr-2" />
-                加载中...
+                {t('common.loading')}
               </div>
             ) : validOrders.filter((order) =>
               order.order_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -653,17 +656,17 @@ const Dashboard: React.FC = () => {
               order.buyer_id?.toLowerCase().includes(searchTerm.toLowerCase())
             ).length === 0 ? (
               <div className="flex items-center justify-center py-20 text-gray-400">
-                暂无订单数据
+                {t('dashboard.noOrdersInRange')}
               </div>
             ) : (
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-white text-gray-400 text-xs font-bold uppercase tracking-wider border-b border-gray-50">
-                    <th className="px-6 py-4">订单信息</th>
-                    <th className="px-6 py-4">买家信息</th>
-                    <th className="px-6 py-4">金额</th>
-                    <th className="px-6 py-4">状态</th>
-                    <th className="px-6 py-4 text-right">操作</th>
+                    <th className="px-6 py-4">{t('orders.table.orderInfo')}</th>
+                    <th className="px-6 py-4">{t('orders.table.buyerInfo')}</th>
+                    <th className="px-6 py-4">{t('orders.table.amountPaid')}</th>
+                    <th className="px-6 py-4">{t('common.status')}</th>
+                    <th className="px-6 py-4 text-right">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -682,10 +685,10 @@ const Dashboard: React.FC = () => {
                             </div>
                             <div className="min-w-0">
                               <div className="font-bold text-gray-900 text-sm line-clamp-1">
-                                {order.item_title || order.item_id || '未知商品'}
+                                {order.item_title || order.item_id || t('common.unknownProduct')}
                               </div>
                               <div className="text-xs text-gray-500 mt-1 font-mono">{order.order_id}</div>
-                              <div className="text-xs text-gray-400 mt-0.5">数量: {order.quantity || 1}</div>
+                              <div className="text-xs text-gray-400 mt-0.5">{t('common.quantityValue', { count: order.quantity || 1 })}</div>
                             </div>
                           </div>
                         </td>
@@ -707,7 +710,7 @@ const Dashboard: React.FC = () => {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex text-gray-400 hover:text-amber-600 p-2 rounded-xl hover:bg-amber-50 transition-colors"
-                            title="查看鱼鱼详情"
+                            title={t('orders.viewGoofish')}
                           >
                             <ExternalLink className="w-4 h-4" />
                           </a>
@@ -722,9 +725,9 @@ const Dashboard: React.FC = () => {
 
         {/* 商品金额分析 */}
         <div className="ios-card p-6 rounded-[2rem] bg-white">
-          <h3 className="font-bold text-lg text-gray-900 mb-6">商品金额分析 (TOP5)</h3>
+          <h3 className="font-bold text-lg text-gray-900 mb-6">{t('dashboard.amountAnalysis')}</h3>
           {categoryDataData.length === 0 ? (
-            <div className="flex items-center justify-center h-[300px] text-gray-400">暂无数据</div>
+            <div className="flex items-center justify-center h-[300px] text-gray-400">{t('common.noData')}</div>
           ) : (
             <>
               <div className="h-[300px] relative">

@@ -1,5 +1,6 @@
 import React from 'react';
 import { LayoutDashboard, Users, ShoppingBag, CreditCard, Settings, LogOut, Box, Sparkles, MessageSquare, Upload, Layers, SearchCheck } from 'lucide-react';
+import { useI18n } from '../lib/i18n';
 
 interface SidebarProps {
   activeTab: string;
@@ -8,18 +9,19 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout }) => {
+  const { t } = useI18n();
   const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: '仪表盘' },
-    { id: 'accounts', icon: Users, label: '账号管理' },
-    { id: 'orders', icon: ShoppingBag, label: '订单管理' },
-    { id: 'conversations', icon: MessageSquare, label: '聊天记录' },
-    { id: 'cards', icon: CreditCard, label: '卡密库存' },
-    { id: 'items', icon: Box, label: '商品列表' },
-    { id: 'publish', icon: Upload, label: '发布商品' },
-    { id: 'batch-publish', icon: Layers, label: '批量发布' },
-    { id: 'market-research', icon: SearchCheck, label: '市场调研' },
-    { id: 'keywords', icon: Sparkles, label: '关键词管理' },
-    { id: 'settings', icon: Settings, label: '系统与AI' },
+    { id: 'dashboard', icon: LayoutDashboard, label: t('nav.dashboard') },
+    { id: 'accounts', icon: Users, label: t('nav.accounts') },
+    { id: 'orders', icon: ShoppingBag, label: t('nav.orders') },
+    { id: 'conversations', icon: MessageSquare, label: t('nav.conversations') },
+    { id: 'cards', icon: CreditCard, label: t('nav.cards') },
+    { id: 'items', icon: Box, label: t('nav.items') },
+    { id: 'publish', icon: Upload, label: t('nav.publish') },
+    { id: 'batch-publish', icon: Layers, label: t('nav.batchPublish') },
+    { id: 'market-research', icon: SearchCheck, label: t('nav.marketResearch') },
+    { id: 'keywords', icon: Sparkles, label: t('nav.keywords') },
+    { id: 'settings', icon: Settings, label: t('nav.settings') },
   ];
 
   return (
@@ -29,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout }) 
           <div className="w-10 h-10 bg-[#FFE815] rounded-xl flex items-center justify-center shadow-lg shadow-yellow-200 transform rotate-[-3deg]">
             <span className="text-black font-extrabold text-xl">鱼</span>
           </div>
-          <h1 className="text-xl font-extrabold tracking-tight text-gray-900">鱼鱼 <span className="text-xs bg-black text-[#FFE815] px-1.5 py-0.5 rounded ml-1">PRO</span></h1>
+          <h1 className="text-xl font-extrabold tracking-tight text-gray-900">{t('common.productName')} <span className="text-xs bg-black text-[#FFE815] px-1.5 py-0.5 rounded ml-1">{t('common.pro')}</span></h1>
         </div>
 
         <nav className="space-y-2">
@@ -61,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout }) 
           className="w-full flex items-center gap-3 px-4 py-3 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all duration-200 font-medium"
         >
           <LogOut className="w-5 h-5" />
-          <span className="text-sm">退出登录</span>
+          <span className="text-sm">{t('nav.logout')}</span>
         </button>
       </div>
     </div>

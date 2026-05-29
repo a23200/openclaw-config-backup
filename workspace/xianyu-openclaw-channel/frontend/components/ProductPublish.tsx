@@ -7,8 +7,10 @@ import {
 import { getAccountDetails } from '../services/api';
 import { publishProduct, uploadImage } from '../services/productService';
 import { AccountDetail } from '../types';
+import { useI18n, translate as tr } from '../lib/i18n';
 
 const ProductPublish: React.FC = () => {
+  useI18n();
   const [accounts, setAccounts] = useState<AccountDetail[]>([]);
   const [loading, setLoading] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -72,7 +74,7 @@ const ProductPublish: React.FC = () => {
       }
     } catch (error) {
       console.error('图片上传失败:', error);
-      alert('图片上传失败，请重试');
+      alert(tr('publish.uploadFailed'));
     } finally {
       setUploadingImage(false);
     }
@@ -92,11 +94,11 @@ const ProductPublish: React.FC = () => {
       return;
     }
     if (!formData.price || parseFloat(formData.price) <= 0) {
-      alert('请输入有效的价格');
+      alert(tr('publish.invalidPrice'));
       return;
     }
     if (images.length === 0) {
-      alert('请至少上传一张商品图片');
+      alert(tr('publish.needImage'));
       return;
     }
 
@@ -114,7 +116,7 @@ const ProductPublish: React.FC = () => {
       });
 
       setResultSuccess(result.success);
-      setResultMessage(result.message || '发布成功！');
+      setResultMessage(result.message || tr('publish.successMessage'));
       setShowResult(true);
 
       if (result.success) {
@@ -133,7 +135,7 @@ const ProductPublish: React.FC = () => {
       }
     } catch (error: any) {
       setResultSuccess(false);
-      setResultMessage(error.message || '发布失败，请重试');
+      setResultMessage(error.message || tr('publish.failedMessage'));
       setShowResult(true);
     } finally {
       setPublishing(false);
@@ -143,21 +145,21 @@ const ProductPublish: React.FC = () => {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">发布商品</h2>
-        <p className="text-gray-500 mt-2 font-medium">填写商品信息并发布到鱼鱼平台</p>
+        <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">{tr('publish.title')}</h2>
+        <p className="text-gray-500 mt-2 font-medium">{tr('publish.subtitle')}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="ios-card p-8 rounded-[2rem] space-y-6">
         {/* 选择账号 */}
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">发布账号 *</label>
+          <label className="block text-sm font-bold text-gray-700 mb-2">{tr('publish.account')}</label>
           <select
             value={formData.cookie_id}
             onChange={(e) => setFormData({ ...formData, cookie_id: e.target.value })}
             className="w-full ios-input px-4 py-3 rounded-xl"
             required
           >
-            <option value="">请选择账号</option>
+            <option value="">{tr('common.selectAccount')}</option>
             {accounts.map(account => (
               <option key={account.id} value={account.id}>
                 {account.nickname || account.remark || account.id}
@@ -168,11 +170,11 @@ const ProductPublish: React.FC = () => {
 
         {/* 商品描述 */}
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">商品描述</label>
+          <label className="block text-sm font-bold text-gray-700 mb-2">{tr('publish.description')}</label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="详细描述商品的状态、配置、使用情况等..."
+            placeholder={tr('publish.descriptionPlaceholder')}
             className="w-full ios-input px-4 py-3 rounded-xl h-32 resize-none"
             maxLength={500}
           />
@@ -198,7 +200,7 @@ const ProductPublish: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">原价 (元)</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">{tr('publish.originalPrice')}</label>
             <input
               type="number"
               value={formData.original_price}
@@ -236,7 +238,7 @@ const ProductPublish: React.FC = () => {
               type="text"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              placeholder="例如：数码产品/手机/苹果"
+              placeholder={tr('publish.categoryPlaceholder')}
               className="w-full ios-input px-4 py-3 rounded-xl"
             />
           </div>
@@ -249,7 +251,7 @@ const ProductPublish: React.FC = () => {
               type="text"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              placeholder="例如：北京市/朝阳区"
+              placeholder={tr('publish.locationPlaceholder')}
               className="w-full ios-input px-4 py-3 rounded-xl"
             />
           </div>
@@ -295,7 +297,7 @@ const ProductPublish: React.FC = () => {
                 ) : (
                   <>
                     <Plus className="w-8 h-8 text-gray-400 mb-2" />
-                    <span className="text-xs text-gray-500 font-medium">上传图片</span>
+                    <span className="text-xs text-gray-500 font-medium">{tr('publish.uploadImage')}</span>
                   </>
                 )}
               </label>
@@ -344,7 +346,7 @@ const ProductPublish: React.FC = () => {
                 )}
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {resultSuccess ? '发布成功' : '发布失败'}
+                {resultSuccess ? tr('publish.successTitle') : tr('publish.failedTitle')}
               </h3>
               <p className="text-gray-600">{resultMessage}</p>
               <button

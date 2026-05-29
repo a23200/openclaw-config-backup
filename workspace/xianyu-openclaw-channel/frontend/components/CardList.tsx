@@ -4,8 +4,10 @@ import { Card } from '../types';
 import { getCards, createCard, updateCard, deleteCard } from '../services/api';
 import { Plus, CreditCard, Clock, FileText, Image as ImageIcon, Code, Edit, Trash2, Save, X, Eye, EyeOff, Package } from 'lucide-react';
 import { buildCardPreviewFallback } from '../utils/image';
+import { useI18n, translate as tr } from '../lib/i18n';
 
 const CardList: React.FC = () => {
+  useI18n();
   const [cards, setCards] = useState<Card[]>([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -68,11 +70,11 @@ const CardList: React.FC = () => {
 
     // 验证必填字段
     if (!editForm.name?.trim()) {
-      alert('请输入卡密名称');
+      alert(tr('cards.nameRequired'));
       return;
     }
     if (!editForm.type) {
-      alert('请选择卡密类型');
+      alert(tr('cards.typeRequired'));
       return;
     }
 
@@ -110,18 +112,18 @@ const CardList: React.FC = () => {
       getCards().then(setCards);
     } catch (error) {
       console.error('更新卡密失败:', error);
-      alert('更新失败，请重试');
+      alert(tr('alerts.updateFailedRetry'));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('确认删除该卡密吗？')) {
+    if (confirm(tr('cards.confirmDelete'))) {
       try {
         await deleteCard(id);
         getCards().then(setCards);
       } catch (error) {
         console.error('删除卡密失败:', error);
-        alert('删除失败，请重试');
+        alert(tr('alerts.deleteFailedRetry'));
       }
     }
   };
@@ -141,7 +143,7 @@ const CardList: React.FC = () => {
       getCards().then(setCards);
     } catch (error) {
       console.error('添加卡密失败:', error);
-      alert('添加失败，请重试');
+      alert(tr('alerts.addFailedRetry'));
     }
   };
 
@@ -158,8 +160,8 @@ const CardList: React.FC = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">卡密库存</h2>
-          <p className="text-gray-500 mt-2 text-sm">管理自动发货的卡密、链接或图片资源。</p>
+          <h2 className="text-3xl font-bold text-gray-900">{tr('cards.title')}</h2>
+          <p className="text-gray-500 mt-2 text-sm">{tr('cards.subtitle')}</p>
         </div>
         <button
             onClick={() => setShowAddModal(true)}
@@ -175,12 +177,12 @@ const CardList: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-white text-gray-400 text-xs font-bold uppercase tracking-wider border-b border-gray-50">
-                <th className="px-8 py-5 w-[15%]">卡密名称</th>
-                <th className="px-6 py-5 w-[12%]">类型</th>
-                <th className="px-6 py-5 w-[25%]">内容/库存</th>
-                <th className="px-6 py-5 w-[20%]">描述</th>
-                <th className="px-6 py-5 w-[10%]">状态</th>
-                <th className="px-6 py-5 w-[10%] text-right">操作</th>
+                <th className="px-8 py-5 w-[15%]">{tr('cards.name')}</th>
+                <th className="px-6 py-5 w-[12%]">{tr('cards.type')}</th>
+                <th className="px-6 py-5 w-[25%]">{tr('cards.contentStock')}</th>
+                <th className="px-6 py-5 w-[20%]">{tr('cards.description')}</th>
+                <th className="px-6 py-5 w-[10%]">{tr('common.status')}</th>
+                <th className="px-6 py-5 w-[10%] text-right">{tr('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -195,7 +197,7 @@ const CardList: React.FC = () => {
                 } else if (card.type === 'api' && card.api_config) {
                   stockInfo = card.api_config.url;
                 } else if (card.type === 'image' && card.text_content) {
-                  stockInfo = '图片链接';
+                  stockInfo = tr('cards.imageLink');
                 }
 
                 return (
@@ -215,9 +217,9 @@ const CardList: React.FC = () => {
                         card.type === 'api' ? 'bg-orange-50 text-orange-600' :
                         'bg-pink-50 text-pink-600'
                       }`}>
-                        {card.type === 'text' ? '文本' :
-                         card.type === 'data' ? '批量' :
-                         card.type === 'api' ? 'API' : '图片'}
+                        {card.type === 'text' ? tr('cards.typeText') :
+                         card.type === 'data' ? tr('cards.typeData') :
+                         card.type === 'api' ? 'API' : tr('cards.typeImage')}
                       </span>
                     </td>
                     <td className="px-6 py-5">
@@ -250,7 +252,7 @@ const CardList: React.FC = () => {
                         <button
                           onClick={() => handleEdit(card)}
                           className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-xl transition-colors"
-                          title="编辑"
+                          title={tr('common.edit')}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -272,7 +274,7 @@ const CardList: React.FC = () => {
         {cards.length === 0 && (
           <div className="py-20 text-center text-gray-400">
             <Package className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p>暂无卡密配置，请点击右上角添加。</p>
+            <p>{tr('cards.empty')}</p>
           </div>
         )}
       </div>
@@ -282,7 +284,7 @@ const CardList: React.FC = () => {
         <div className="modal-overlay-centered">
           <div className="modal-container">
             <div className="modal-header">
-              <h3 className="text-2xl font-extrabold text-gray-900">编辑卡密</h3>
+              <h3 className="text-2xl font-extrabold text-gray-900">{tr('cards.editTitle')}</h3>
               <button
                 onClick={() => setShowEditModal(false)}
                 className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
@@ -296,13 +298,13 @@ const CardList: React.FC = () => {
                 {/* 基本信息 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">卡密名称 <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.name')}<span className="text-red-500">*</span></label>
                     <input
                       type="text"
                       value={editForm.name || ''}
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                       className="w-full ios-input px-4 py-3 rounded-xl"
-                      placeholder="例如：游戏点卡、会员卡等"
+                      placeholder={tr('cards.namePlaceholder')}
                     />
                   </div>
                   <div>
@@ -312,11 +314,11 @@ const CardList: React.FC = () => {
                       onChange={(e) => setEditForm({ ...editForm, type: e.target.value as any })}
                       className="w-full ios-input px-4 py-3 rounded-xl"
                     >
-                      <option value="">请选择类型</option>
-                      <option value="text">固定文字</option>
-                      <option value="data">批量数据</option>
-                      <option value="api">API接口</option>
-                      <option value="image">图片</option>
+                      <option value="">{tr('cards.selectType')}</option>
+                      <option value="text">{tr('cards.fixedText')}</option>
+                      <option value="data">{tr('cards.batchData')}</option>
+                      <option value="api">{tr('cards.typeApi')}</option>
+                      <option value="image">{tr('cards.typeImage')}</option>
                     </select>
                   </div>
                 </div>
@@ -324,9 +326,9 @@ const CardList: React.FC = () => {
                 {/* API 配置 */}
                 {editForm.type === 'api' && (
                   <div className="border border-gray-200 rounded-xl p-4 space-y-4 bg-gray-50">
-                    <h3 className="font-bold text-gray-900">API 配置</h3>
+                    <h3 className="font-bold text-gray-900">{tr('cards.apiConfig')}</h3>
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">API 地址</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.apiUrl')}</label>
                       <input
                         type="url"
                         value={editForm.api_url || ''}
@@ -337,7 +339,7 @@ const CardList: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">请求方法</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.requestMethod')}</label>
                         <select
                           value={editForm.api_method || 'GET'}
                           onChange={(e) => setEditForm({ ...editForm, api_method: e.target.value as 'GET' | 'POST' })}
@@ -348,7 +350,7 @@ const CardList: React.FC = () => {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">超时时间（秒）</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.timeout')}</label>
                         <input
                           type="number"
                           value={editForm.api_timeout || 10}
@@ -360,7 +362,7 @@ const CardList: React.FC = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">请求头（JSON 格式）</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.headersJson')}</label>
                       <textarea
                         value={editForm.api_headers || ''}
                         onChange={(e) => setEditForm({ ...editForm, api_headers: e.target.value })}
@@ -369,7 +371,7 @@ const CardList: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">请求参数（JSON 格式）</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.paramsJson')}</label>
                       <textarea
                         value={editForm.api_params || ''}
                         onChange={(e) => setEditForm({ ...editForm, api_params: e.target.value })}
@@ -383,14 +385,14 @@ const CardList: React.FC = () => {
                 {/* 固定文字配置 */}
                 {editForm.type === 'text' && (
                   <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
-                    <h3 className="font-bold text-gray-900 mb-3">固定文字配置</h3>
+                    <h3 className="font-bold text-gray-900 mb-3">{tr('cards.textConfig')}</h3>
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">文字内容</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.textContent')}</label>
                       <textarea
                         value={editForm.text_content || ''}
                         onChange={(e) => setEditForm({ ...editForm, text_content: e.target.value })}
                         className="w-full ios-input px-4 py-3 rounded-xl h-32 resize-none"
-                        placeholder="请输入要发送的固定文字内容..."
+                        placeholder={tr('cards.textPlaceholder')}
                       />
                     </div>
                   </div>
@@ -399,19 +401,19 @@ const CardList: React.FC = () => {
                 {/* 批量数据配置 */}
                 {editForm.type === 'data' && (
                   <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
-                    <h3 className="font-bold text-gray-900 mb-3">批量数据配置</h3>
+                    <h3 className="font-bold text-gray-900 mb-3">{tr('cards.dataConfig')}</h3>
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">数据内容（一行一个）</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.dataContent')}</label>
                       <textarea
                         value={editForm.data_content || ''}
                         onChange={(e) => setEditForm({ ...editForm, data_content: e.target.value })}
                         className="w-full ios-input px-4 py-3 rounded-xl h-80 resize-none font-mono text-sm"
                         placeholder="请输入数据，每行一个：&#10;卡号1:密码1&#10;卡号2:密码2&#10;或者&#10;兑换码1&#10;兑换码2"
                       />
-                      <p className="text-xs text-gray-500 mt-2">支持格式：卡号:密码 或 单独的兑换码</p>
-                      <p className="text-xs text-gray-500">当前库存：<span className="font-bold text-amber-600">
+                      <p className="text-xs text-gray-500 mt-2">{tr('cards.dataFormatHelp')}</p>
+                      <p className="text-xs text-gray-500">{tr('cards.currentStock')}<span className="font-bold text-amber-600">
                         {editForm.data_content ? editForm.data_content.split('\n').filter(line => line.trim()).length : 0}
-                      </span> 条</p>
+                      </span>{tr('common.countUnit')}</p>
                     </div>
                   </div>
                 )}
@@ -419,9 +421,9 @@ const CardList: React.FC = () => {
                 {/* 图片配置 */}
                 {editForm.type === 'image' && (
                   <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
-                    <h3 className="font-bold text-gray-900 mb-3">图片配置</h3>
+                    <h3 className="font-bold text-gray-900 mb-3">{tr('cards.imageConfig')}</h3>
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">图片 URL</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.imageUrl')}</label>
                       <input
                         type="url"
                         value={editForm.image_url || ''}
@@ -429,11 +431,11 @@ const CardList: React.FC = () => {
                         className="w-full ios-input px-4 py-3 rounded-xl font-mono text-sm"
                         placeholder="https://example.com/image.png"
                       />
-                      <p className="text-xs text-gray-500 mt-2">输入图片卡密的 URL 地址</p>
+                      <p className="text-xs text-gray-500 mt-2">{tr('cards.imageUrlHelp')}</p>
                     </div>
                     {editForm.image_url && (
                       <div className="mt-3">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">图片预览</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.preview')}</label>
                         <img
                           src={editForm.image_url}
                           alt="预览"
@@ -447,7 +449,7 @@ const CardList: React.FC = () => {
 
                 {/* 延时发货时间 */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">延时发货时间（秒）</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.delay')}</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -458,19 +460,19 @@ const CardList: React.FC = () => {
                       max="3600"
                       placeholder="0"
                     />
-                    <span className="text-sm text-gray-500 whitespace-nowrap">秒</span>
+                    <span className="text-sm text-gray-500 whitespace-nowrap">{tr('common.seconds')}</span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">0表示立即发货，最大3600秒（1小时）</p>
+                  <p className="text-xs text-gray-500 mt-1">{tr('cards.delayHelp')}</p>
                 </div>
 
                 {/* 备注信息 */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">备注信息</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.note')}</label>
                   <textarea
                     value={editForm.description || ''}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     className="w-full ios-input px-4 py-3 rounded-xl h-40 resize-none"
-                    placeholder="可选的备注信息"
+                    placeholder={tr('cards.notePlaceholder')}
                   />
                 </div>
 
@@ -488,28 +490,28 @@ const CardList: React.FC = () => {
                       多规格卡券
                     </label>
                   </div>
-                  <p className="text-xs text-gray-500 mb-3">开启后可以为同一商品的不同规格创建不同的卡券</p>
+                  <p className="text-xs text-gray-500 mb-3">{tr('cards.multiSpecHelp')}</p>
 
                   {editForm.is_multi_spec && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">规格名称</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.specName')}</label>
                         <input
                           type="text"
                           value={editForm.spec_name || ''}
                           onChange={(e) => setEditForm({ ...editForm, spec_name: e.target.value })}
                           className="w-full ios-input px-4 py-3 rounded-xl"
-                          placeholder="例如：套餐类型、颜色、尺寸"
+                          placeholder={tr('cards.specNamePlaceholder')}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">规格值</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.specValue')}</label>
                         <input
                           type="text"
                           value={editForm.spec_value || ''}
                           onChange={(e) => setEditForm({ ...editForm, spec_value: e.target.value })}
                           className="w-full ios-input px-4 py-3 rounded-xl"
-                          placeholder="例如：30天、红色、XL"
+                          placeholder={tr('cards.specValuePlaceholder')}
                         />
                       </div>
                     </div>
@@ -518,7 +520,7 @@ const CardList: React.FC = () => {
 
                 {/* 启用状态 */}
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <span className="font-bold text-gray-900">启用状态</span>
+                  <span className="font-bold text-gray-900">{tr('cards.enabledStatus')}</span>
                   <button
                     type="button"
                     onClick={() => setEditForm({ ...editForm, enabled: !editForm.enabled })}
@@ -563,7 +565,7 @@ const CardList: React.FC = () => {
         <div className="modal-overlay-centered">
           <div className="modal-container">
             <div className="modal-header">
-              <h3 className="text-2xl font-extrabold text-gray-900">添加新卡密</h3>
+              <h3 className="text-2xl font-extrabold text-gray-900">{tr('cards.addNew')}</h3>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
@@ -575,7 +577,7 @@ const CardList: React.FC = () => {
             <div className="flex-1 overflow-y-auto -mr-2 pr-2">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">卡密名称</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.name')}</label>
                   <input
                     type="text"
                     value={addForm.name}
@@ -586,7 +588,7 @@ const CardList: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">类型</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.type')}</label>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
@@ -617,7 +619,7 @@ const CardList: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
-                    {addForm.type === 'text' ? '卡密内容（一行一个）' : addForm.type === 'image' ? '图片URL（一行一个）' : 'API地址'}
+                    {addForm.type === 'text' ? tr('cards.contentTextLabel') : addForm.type === 'image' ? tr('cards.imageUrlLineLabel') : 'API地址'}
                   </label>
                   {addForm.type === 'api' ? (
                     <input
@@ -638,11 +640,11 @@ const CardList: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">描述</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">{tr('cards.description')}</label>
                   <textarea
                     value={addForm.description}
                     onChange={(e) => setAddForm({ ...addForm, description: e.target.value })}
-                    placeholder="卡密用途描述"
+                    placeholder={tr('cards.descriptionPlaceholder')}
                     className="w-full ios-input px-4 py-3 rounded-xl h-20 resize-none"
                   />
                 </div>

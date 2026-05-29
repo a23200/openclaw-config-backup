@@ -11,10 +11,13 @@ import BatchProductPublish from './components/BatchProductPublish';
 import MarketResearch from './components/MarketResearch';
 import Settings from './components/Settings';
 import Keywords from './components/Keywords';
+import LanguageSwitcher from './components/LanguageSwitcher';
+import { useI18n } from './lib/i18n';
 import { login, verifyToken } from './services/api';
 import { ShieldCheck, ArrowRight, Loader2, Sparkles, User, Lock, KeyRound } from 'lucide-react';
 
 const App: React.FC = () => {
+  const { t } = useI18n();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -51,10 +54,10 @@ const App: React.FC = () => {
               localStorage.setItem('auth_token', res.token);
               setIsLoggedIn(true);
           } else {
-              setLoginError(res.message || '登录失败');
+              setLoginError(res.message || t('auth.loginFailed'));
           }
       } catch (err) {
-          setLoginError('无法连接服务器');
+          setLoginError(t('auth.serverUnavailable'));
       } finally {
           setLoginLoading(false);
       }
@@ -86,14 +89,17 @@ const App: React.FC = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-200/30 rounded-full blur-[120px] animate-pulse" style={{animationDelay: '2s'}}></div>
 
         <div className="bg-white/80 backdrop-blur-3xl p-8 md:p-12 rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] w-full max-w-lg border border-white relative z-10 animate-fade-in">
+          <div className="flex justify-end mb-4">
+            <LanguageSwitcher />
+          </div>
           
           {/* Header with Logo */}
           <div className="text-center mb-10">
              <div className="w-24 h-24 bg-[#FFE815] rounded-[2rem] flex items-center justify-center shadow-xl shadow-yellow-200 mx-auto mb-6 transform rotate-[-6deg] hover:rotate-0 transition-all duration-500 cursor-pointer group">
                 <span className="text-black font-extrabold text-5xl group-hover:scale-110 transition-transform">鱼</span>
              </div>
-             <h2 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">欢迎回来</h2>
-             <p className="text-gray-500 font-medium">鱼鱼智能自动发货与管家系统</p>
+             <h2 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">{t('auth.welcome')}</h2>
+             <p className="text-gray-500 font-medium">{t('auth.subtitle')}</p>
           </div>
           
           <form onSubmit={handleLogin} className="space-y-5">
@@ -102,7 +108,7 @@ const App: React.FC = () => {
                     <User className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-black transition-colors" />
                     <input 
                         type="text" 
-                        placeholder="管理员账号" 
+                        placeholder={t('auth.usernamePlaceholder')} 
                         value={username}
                         onChange={e => setUsername(e.target.value)}
                         className="w-full ios-input pl-14 pr-6 py-4.5 rounded-2xl text-base h-14"
@@ -112,7 +118,7 @@ const App: React.FC = () => {
                     <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-black transition-colors" />
                     <input 
                         type="password" 
-                        placeholder="密码" 
+                        placeholder={t('auth.passwordPlaceholder')} 
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         className="w-full ios-input pl-14 pr-6 py-4.5 rounded-2xl text-base h-14"
@@ -131,7 +137,7 @@ const App: React.FC = () => {
               disabled={loginLoading}
               className="w-full ios-btn-primary h-14 rounded-2xl text-lg shadow-xl shadow-yellow-200 mt-2 flex items-center justify-center gap-2 group disabled:opacity-70"
             >
-              {loginLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>立即登录 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></>}
+              {loginLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>{t('auth.login')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></>}
             </button>
           </form>
           
@@ -143,11 +149,11 @@ const App: React.FC = () => {
                 className="w-full bg-black text-white h-14 rounded-2xl text-base font-bold shadow-lg shadow-gray-200 flex items-center justify-center gap-2 hover:bg-gray-800 transition-all active:scale-95"
              >
                 <KeyRound className="w-5 h-5 text-[#FFE815]" />
-                游客试用 (无需账号)
+                {t('auth.guest')}
              </button>
              <div className="mt-6 text-center">
                  <span className="text-xs text-gray-400 font-medium tracking-widest uppercase">
-                    YUYU Auto-Dispatch Pro v2.5
+                    {t('common.productName')} Auto-Dispatch Pro v2.5
                  </span>
              </div>
           </div>
@@ -186,6 +192,9 @@ const App: React.FC = () => {
       />
       
       <main className="flex-1 ml-64 p-8 md:p-12 overflow-y-auto h-screen relative scroll-smooth">
+        <div className="absolute right-8 top-8 z-30">
+          <LanguageSwitcher />
+        </div>
         {/* Subtle background decoration */}
         <div className="fixed top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-yellow-50 to-transparent rounded-full blur-[120px] pointer-events-none -z-10 opacity-60"></div>
         

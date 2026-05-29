@@ -2,13 +2,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Bot, Clock, Filter, MessageSquare, Package, RefreshCw, Search, User } from 'lucide-react';
 import { getConversationAccounts, getConversationSessions, getConversationThread } from '../services/api';
 import { AccountDetail, ConversationRecord, ConversationSession } from '../types';
+import { useI18n, translate as tr } from '../lib/i18n';
 
 const buildSessionKey = (session: Pick<ConversationSession, 'cookie_id' | 'chat_id'>) =>
   `${session.cookie_id}::${session.chat_id}`;
 
 const getAccountLabel = (accounts: AccountDetail[], cookieId: string) => {
   const account = accounts.find((item) => item.id === cookieId);
-  return account?.nickname || account?.remark || account?.username || cookieId || '未知账号';
+  return account?.nickname || account?.remark || account?.username || cookieId || tr('common.unknownAccount');
 };
 
 const isMeaningfulBuyerId = (value?: string) => {
@@ -19,15 +20,15 @@ const isMeaningfulBuyerId = (value?: string) => {
 };
 
 const getCounterpartRoleLabel = (session: Pick<ConversationSession, 'counterpart_role'>) =>
-  session.counterpart_role === 'seller' ? '卖家' : '买家';
+  session.counterpart_role === 'seller' ? tr('conversations.role.seller') : tr('conversations.role.buyer');
 
 const getOurRoleLabel = (session: Pick<ConversationSession, 'our_role'>) =>
-  session.our_role === 'buyer' ? '买家' : '卖家';
+  session.our_role === 'buyer' ? tr('conversations.role.buyer') : tr('conversations.role.seller');
 
 const getCounterpartName = (session: Pick<ConversationSession, 'counterpart_name' | 'buyer_name' | 'user_name' | 'user_id' | 'counterpart_role'>) => {
   const roleLabel = getCounterpartRoleLabel(session);
   const name = (session.counterpart_name || session.buyer_name || session.user_name || '').trim();
-  if (name && !['未知用户', '未知买家', '未知卖家'].includes(name)) return name;
+  if (name && ![tr('conversations.unknownUser'), '未知买家', '未知卖家'].includes(name)) return name;
   return isMeaningfulBuyerId(session.user_id) ? `${roleLabel} ${session.user_id}` : `未知${roleLabel}`;
 };
 
@@ -39,8 +40,8 @@ const getCounterpartSubtitle = (session: Pick<ConversationSession, 'counterpart_
 };
 
 const getSceneLabel = (session: Pick<ConversationSession, 'scene_type' | 'our_role'>) => {
-  if (session.scene_type === 'market_research') return '调研沟通';
-  return session.our_role === 'buyer' ? '买家沟通' : '售卖会话';
+  if (session.scene_type === 'market_research') return tr('conversations.marketScene');
+  return session.our_role === 'buyer' ? tr('conversations.buyerScene') : tr('conversations.sellerScene');
 };
 
 const formatConversationTime = (value?: string) => {
@@ -56,6 +57,7 @@ const formatConversationTime = (value?: string) => {
 };
 
 const Conversations: React.FC = () => {
+  useI18n();
   const [accounts, setAccounts] = useState<AccountDetail[]>([]);
   const [sessions, setSessions] = useState<ConversationSession[]>([]);
   const [messages, setMessages] = useState<ConversationRecord[]>([]);
@@ -89,7 +91,7 @@ const Conversations: React.FC = () => {
       }
     } catch (loadError) {
       console.error('获取账号列表失败:', loadError);
-      setError(loadError instanceof Error ? loadError.message : '获取账号列表失败');
+      setError(loadError instanceof Error ? loadError.message : tr('conversations.loadAccountsFailed'));
     }
   };
 
@@ -109,8 +111,8 @@ const Conversations: React.FC = () => {
       if (syncMode === 'background') {
         setSyncNotice(
           response.sync_triggered
-            ? '已在后台补同步聊天记录，几秒后会自动刷新。'
-            : '当前先读取本地记录，暂无新的后台补同步任务。',
+            ? tr('conversations.syncTriggered')
+            : tr('conversations.noSyncTask'),
         );
       } else if (syncMode === 'auto' && response.total) {
         setSyncNotice('');
@@ -122,7 +124,7 @@ const Conversations: React.FC = () => {
       setTotal(0);
       setTotalPages(1);
       setSyncNotice('');
-      setError(loadError instanceof Error ? loadError.message : '获取聊天会话失败');
+      setError(loadError instanceof Error ? loadError.message : tr('conversations.loadSessionsFailed'));
     } finally {
       setLoadingSessions(false);
     }
@@ -183,7 +185,7 @@ const Conversations: React.FC = () => {
     } catch (loadError) {
       console.error('获取聊天详情失败:', loadError);
       setMessages([]);
-      setThreadError(loadError instanceof Error ? loadError.message : '获取聊天详情失败');
+      setThreadError(loadError instanceof Error ? loadError.message : tr('conversations.loadThreadFailed'));
     } finally {
       setLoadingMessages(false);
     }
@@ -211,8 +213,8 @@ const Conversations: React.FC = () => {
   return (
     <div className="p-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">聊天记录</h1>
-        <p className="text-gray-500">点开会话只读取后端已保存记录；需要补历史时点右上角后台同步。</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{tr('conversations.title')}</h1>
+        <p className="text-gray-500">{tr('conversations.subtitle')}</p>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -221,7 +223,7 @@ const Conversations: React.FC = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="搜索买家、商品、会话或最近一条消息..."
+              placeholder={tr('conversations.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
@@ -238,11 +240,11 @@ const Conversations: React.FC = () => {
               }}
               className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent appearance-none bg-white"
             >
-              <option value="">全部账号（按账号分组）</option>
+              <option value="">{tr('conversations.allAccounts')}</option>
               {accounts.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.nickname || account.remark || account.id}
-                  {account.conversation_only ? '（聊天派生）' : ''}
+                  {account.conversation_only ? tr('conversations.derived') : ''}
                 </option>
               ))}
             </select>
@@ -265,7 +267,7 @@ const Conversations: React.FC = () => {
               当前账号：{getAccountLabel(accounts, selectedCookie)}
             </span>
           )}
-          {searchTerm && <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg">本页搜索中</span>}
+          {searchTerm && <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg">{tr('conversations.searchingPage')}</span>}
         </div>
 
         {error && (
@@ -285,8 +287,8 @@ const Conversations: React.FC = () => {
         <div className="border-r border-gray-100 flex flex-col min-h-[720px]">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <div>
-              <div className="text-lg font-bold text-gray-900">会话列表</div>
-              <div className="text-sm text-gray-500">点击左侧用户查看完整对话</div>
+              <div className="text-lg font-bold text-gray-900">{tr('conversations.listTitle')}</div>
+              <div className="text-sm text-gray-500">{tr('conversations.listHint')}</div>
             </div>
             <MessageSquare className="w-5 h-5 text-gray-300" />
           </div>
@@ -299,7 +301,7 @@ const Conversations: React.FC = () => {
             ) : filteredSessions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                 <MessageSquare className="w-14 h-14 mb-3" />
-                <p>{sessions.length ? '本页没有匹配的会话' : '暂无聊天会话'}</p>
+                <p>{sessions.length ? tr('conversations.noMatch') : tr('conversations.empty')}</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
@@ -330,7 +332,7 @@ const Conversations: React.FC = () => {
                       </div>
 
                       <div className="mt-2 text-sm text-gray-700 line-clamp-2 break-all">
-                        {session.latest_content || '暂无消息内容'}
+                        {session.latest_content || tr('conversations.noContent')}
                       </div>
 
                       <div className="mt-3 flex items-center flex-wrap gap-2 text-xs">
@@ -386,7 +388,7 @@ const Conversations: React.FC = () => {
           {!selectedSession ? (
             <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
               <MessageSquare className="w-16 h-16 mb-4" />
-              <p className="text-lg">请选择左侧会话</p>
+              <p className="text-lg">{tr('conversations.selectChat')}</p>
             </div>
           ) : (
             <>
@@ -424,7 +426,7 @@ const Conversations: React.FC = () => {
                 ) : messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                     <MessageSquare className="w-16 h-16 mb-4" />
-                    <p className="text-lg">当前会话暂无消息</p>
+                    <p className="text-lg">{tr('conversations.emptyThread')}</p>
                   </div>
                 ) : (
                   messages.map((message) => {

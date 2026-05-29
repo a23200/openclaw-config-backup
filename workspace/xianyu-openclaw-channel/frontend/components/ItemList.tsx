@@ -3,8 +3,10 @@ import { Item, AccountDetail } from '../types';
 import { getItems, getAccountDetails, syncItemsFromAccount, updateItemAiKnowledge } from '../services/api';
 import { RefreshCw, ShoppingBag, Edit, Trash2, Plus, Save, X, Eye, EyeOff, Brain } from 'lucide-react';
 import { buildItemPlaceholderDataUrl } from '../utils/image';
+import { useI18n, translate as tr } from '../lib/i18n';
 
 const ItemList: React.FC = () => {
+  useI18n();
   const [items, setItems] = useState<Item[]>([]);
   const [accounts, setAccounts] = useState<AccountDetail[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<string>('');
@@ -33,7 +35,7 @@ const ItemList: React.FC = () => {
   }, []);
 
   const handleSync = async () => {
-      if (!selectedAccount) return alert('请先选择账号');
+      if (!selectedAccount) return alert(tr('product.chooseAccountFirst'));
       setLoading(true);
       await syncItemsFromAccount(selectedAccount);
       getItems().then(setItems);
@@ -58,7 +60,7 @@ const ItemList: React.FC = () => {
       setShowEditModal(false);
     } catch (error) {
       console.error('更新商品失败:', error);
-      alert('更新失败，请重试');
+      alert(tr('alerts.updateFailedRetry'));
     }
   };
 
@@ -71,7 +73,7 @@ const ItemList: React.FC = () => {
         setItems(filteredItems);
       } catch (error) {
         console.error('删除商品失败:', error);
-        alert('删除失败，请重试');
+        alert(tr('alerts.deleteFailedRetry'));
       }
     }
   };
@@ -95,7 +97,7 @@ const ItemList: React.FC = () => {
       });
     } catch (error) {
       console.error('添加商品失败:', error);
-      alert('添加失败，请重试');
+      alert(tr('alerts.addFailedRetry'));
     }
   };
 
@@ -117,7 +119,7 @@ const ItemList: React.FC = () => {
       );
       setItems(updatedItems);
       setShowAiModal(false);
-      alert('AI专属知识库保存成功！');
+      alert(tr('product.knowledgeSaved'));
     } catch (error) {
       console.error('保存AI知识库失败:', error);
       alert('保存失败，请重试');
@@ -157,8 +159,8 @@ const ItemList: React.FC = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">商品管理</h2>
-          <p className="text-gray-500 mt-2 text-sm">监控并管理所有账号下的鱼鱼商品。</p>
+          <h2 className="text-3xl font-bold text-gray-900">{tr('product.title')}</h2>
+          <p className="text-gray-500 mt-2 text-sm">{tr('product.subtitle')}</p>
         </div>
         <div className="flex gap-3">
             <select
@@ -166,7 +168,7 @@ const ItemList: React.FC = () => {
                 value={selectedAccount}
                 onChange={e => setSelectedAccount(e.target.value)}
             >
-                <option value="">选择账号以同步</option>
+                <option value="">{tr('product.selectToSync')}</option>
                 {accounts.map(acc => (
                     <option key={acc.id} value={acc.id}>{acc.nickname}</option>
                 ))}
@@ -197,7 +199,7 @@ const ItemList: React.FC = () => {
                       <button
                         onClick={() => handleOpenAiModal(item)}
                         className="p-2 bg-white/90 backdrop-blur rounded-lg shadow-md hover:bg-purple-100 text-purple-600 transition-colors"
-                        title="AI专属知识库"
+                        title={tr('product.aiKnowledge')}
                       >
                         <Brain className="w-4 h-4" />
                       </button>
@@ -205,14 +207,14 @@ const ItemList: React.FC = () => {
                         onClick={() => handleEdit(item)}
 
                         className="p-2 bg-white/90 backdrop-blur rounded-lg shadow-md hover:bg-[#FFE815] transition-colors"
-                        title="编辑"
+                        title={tr('common.edit')}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(item)}
                         className="p-2 bg-white/90 backdrop-blur rounded-lg shadow-md hover:bg-red-100 text-red-500 transition-colors"
-                        title="删除"
+                        title={tr('common.delete')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -227,7 +229,7 @@ const ItemList: React.FC = () => {
                         }}
                       />
                       <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg">
-                          {item.item_price || '价格待补充'}
+                          {item.item_price || tr('product.priceMissing')}
                       </div>
                   </div>
                   <h3 className="font-bold text-gray-900 line-clamp-2 text-sm mb-2 h-10">{item.item_title}</h3>
@@ -275,7 +277,7 @@ const ItemList: React.FC = () => {
                   <Brain className="w-5 h-5 text-purple-600" />
                   AI专属知识库喂养
                 </h3>
-                <p className="text-xs text-gray-500 mt-1">预设用户可能会问的问题及标准回答方向</p>
+                <p className="text-xs text-gray-500 mt-1">{tr('product.aiKnowledgeSubtitle')}</p>
               </div>
               <button onClick={() => setShowAiModal(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
                 <X className="w-5 h-5" />
@@ -288,14 +290,7 @@ const ItemList: React.FC = () => {
               </div>
               <textarea
                 className="ios-input w-full h-64 p-4 rounded-2xl resize-none font-mono text-sm leading-relaxed"
-                placeholder="例如：
-Q：能便宜吗？
-A：底价500，不能再低了，不包邮。
-
-Q：几成新？
-A：95新，屏幕无划痕，边框有一点小磕碰，已拍图。
-
-规则：售出不退换，看好再拍。"
+                placeholder={tr('product.aiPlaceholder')}
                 value={aiKnowledgeText}
                 onChange={(e) => setAiKnowledgeText(e.target.value)}
               ></textarea>

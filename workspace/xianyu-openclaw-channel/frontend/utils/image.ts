@@ -1,3 +1,4 @@
+import { translate as tr } from '../lib/i18n';
 const escapeXml = (value: string) =>
   value
     .replace(/&/g, '&amp;')
@@ -143,8 +144,8 @@ export const extractItemImage = (item: any): string => {
 };
 
 export const buildAvatarDataUrl = (label?: string, seed?: string) => {
-  const base = (label || seed || '账号').trim();
-  const text = escapeXml(base.slice(0, 2) || '账号');
+  const base = (label || seed || tr('image.avatarFallback')).trim();
+  const text = escapeXml(base.slice(0, 2) || tr('image.avatarFallback'));
   const colors = palette[hashSeed(seed || base) % palette.length];
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
@@ -162,8 +163,8 @@ export const buildAvatarDataUrl = (label?: string, seed?: string) => {
 };
 
 export const buildItemPlaceholderDataUrl = (title?: string, price?: string) => {
-  const safeTitle = escapeXml((title || '鱼鱼商品').trim().slice(0, 18) || '鱼鱼商品');
-  const safePrice = escapeXml((price || '暂无图片').trim().slice(0, 16) || '暂无图片');
+  const safeTitle = escapeXml((title || tr('image.productFallbackTitle')).trim().slice(0, 18) || tr('image.productFallbackTitle'));
+  const safePrice = escapeXml((price || tr('image.noImage')).trim().slice(0, 16) || tr('image.noImage'));
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 720 720">
       <defs>
@@ -178,13 +179,13 @@ export const buildItemPlaceholderDataUrl = (title?: string, price?: string) => {
       <path d="M94 286c40-54 83-88 130-88 48 0 93 32 142 101 29-22 59-34 90-34 67 0 118 56 156 130v171H108V286z" fill="#F7D548" opacity="0.95" />
       <text x="84" y="536" font-size="42" font-family="Arial, PingFang SC, sans-serif" font-weight="700" fill="#111827">${safeTitle}</text>
       <text x="84" y="600" font-size="28" font-family="Arial, PingFang SC, sans-serif" fill="#4B5563">${safePrice}</text>
-      <text x="84" y="648" font-size="24" font-family="Arial, PingFang SC, sans-serif" fill="#9CA3AF">图片缺失，已自动补位</text>
+      <text x="84" y="648" font-size="24" font-family="Arial, PingFang SC, sans-serif" fill="#9CA3AF">${escapeXml(tr('image.missingAutoFilled'))}</text>
     </svg>
   `;
   return toSvgDataUrl(svg);
 };
 
-export const buildCardPreviewFallback = () => buildItemPlaceholderDataUrl('图片预览', '加载失败');
+export const buildCardPreviewFallback = () => buildItemPlaceholderDataUrl(tr('image.preview'), tr('image.loadFailed'));
 
 export const resolveItemImage = (item: any, title?: string, price?: string) =>
   extractItemImage(item) || buildItemPlaceholderDataUrl(title || extractItemTitle(item), price || extractItemPrice(item));

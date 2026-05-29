@@ -120,3 +120,57 @@ Avoid assigning to `status` in zsh; use names like `curl_exit` or split the chec
 - Related Files: none
 
 ---
+## [ERR-20260529-001] wrong_frontend_relative_path
+
+**Logged**: 2026-05-29T00:00:00+08:00
+**Priority**: low
+**Status**: pending
+**Area**: frontend
+
+### Summary
+Used repo-root-relative paths while already inside the frontend working directory.
+
+### Error
+```text
+sed: frontend/src/lib/i18n.ts: No such file or directory
+```
+
+### Context
+- Command/operation attempted: inspect upgraded i18n files after installer ran
+- Environment details: workdir=/Users/mac/Desktop/PlotPilot/frontend
+
+### Suggested Fix
+When workdir is the frontend folder, use `src/...` instead of `frontend/src/...`.
+
+### Metadata
+- Reproducible: yes
+- Related Files: /Users/mac/Desktop/PlotPilot/frontend/src/lib/i18n.ts
+
+---
+## [ERR-20260529-002] setsid_missing_on_host
+
+**Logged**: 2026-05-29T00:00:00+08:00
+**Priority**: low
+**Status**: pending
+**Area**: infra
+
+### Summary
+Tried to background a dev server with `setsid`, but the host shell environment did not provide that command.
+
+### Error
+```text
+zsh: command not found: setsid
+```
+
+### Context
+- Command/operation attempted: start Vite dev server detached for runtime validation
+- Environment details: macOS zsh thread environment
+
+### Suggested Fix
+Use plain backgrounding with `nohup` or the unified exec PTY session instead of relying on `setsid`.
+
+### Metadata
+- Reproducible: yes
+- Related Files: none
+
+---

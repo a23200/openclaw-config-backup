@@ -1,4 +1,5 @@
 import { get, post, put, del } from '../lib/request';
+import { translate as tr } from '../lib/i18n';
 import {
   LoginResponse, AccountDetail, Order, PaginatedResponse,
   AdminStats, Card, SystemSettings, ApiResponse, OrderAnalytics,
@@ -49,7 +50,7 @@ export const getAccountDetails = async (): Promise<AccountDetail[]> => {
     username: item.username,
     login_password: item.login_password,
     show_browser: item.show_browser,
-    nickname: item.remark || item.username || `账号 ${item.id.substring(0, 6)}`,
+    nickname: item.remark || item.username || tr('api.accountNickname', { id: item.id.substring(0, 6) }),
     avatar_url: buildAvatarDataUrl(item.remark || item.username || item.id, item.id),
     ai_enabled: false, // 需要从AI设置API获取
   }));
@@ -405,7 +406,7 @@ export const getItems = async (): Promise<Item[]> => {
     const res = await get<any>('/items');
     const items = Array.isArray(res) ? res : (res.items || []);
     return items.map((item: any) => {
-      const itemTitle = item.item_title || extractItemTitle(item) || item.item_id || '未知商品';
+      const itemTitle = item.item_title || extractItemTitle(item) || item.item_id || tr('common.unknownProduct');
       const itemPrice = item.item_price || extractItemPrice(item);
       return {
         ...item,
@@ -557,12 +558,12 @@ export const updateAccountAISettings = async (cookieId: string, settings: Partia
 
 export const testAIConnection = async (cookieId: string): Promise<ApiResponse> => {
   const result = await post<{ success?: boolean; message?: string; reply?: string }>(`/ai-reply-test/${cookieId}`, {
-    message: '你好，这是一条测试消息',
+    message: tr('api.aiTestMessage'),
   });
   if (result.reply) {
-    return { success: true, message: `AI 回复: ${result.reply}` };
+    return { success: true, message: tr('api.aiReply', { reply: result.reply }) };
   }
-  return { success: result.success ?? true, message: result.message || 'AI 连接测试成功' };
+  return { success: result.success ?? true, message: result.message || tr('api.aiConnectionSuccess') };
 }
 
 // Notification Channels

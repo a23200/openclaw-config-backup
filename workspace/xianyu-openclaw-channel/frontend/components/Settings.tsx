@@ -5,8 +5,10 @@ import {
   Bot, Save, Lock, Sparkles, Mail, Settings as SettingsIcon,
   Eye, EyeOff, RefreshCw, Database, ToggleLeft, ToggleRight
 } from 'lucide-react';
+import { useI18n, translate as tr } from '../lib/i18n';
 
 const Settings: React.FC = () => {
+  useI18n();
   const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -29,7 +31,7 @@ const Settings: React.FC = () => {
       setSaving(true);
       try {
         await updateSystemSettings(settings);
-        alert('系统配置已保存');
+        alert(tr('settings.saved'));
       } catch (e) {
         alert('保存失败：' + (e as Error).message);
       } finally {
@@ -37,7 +39,7 @@ const Settings: React.FC = () => {
       }
   };
 
-  if (!settings) return <div className="p-8 text-center text-gray-400">加载配置中...</div>;
+  if (!settings) return <div className="p-8 text-center text-gray-400">{tr('settings.loading')}</div>;
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-fade-in pb-24">
@@ -48,8 +50,8 @@ const Settings: React.FC = () => {
               <SettingsIcon className="w-6 h-6 text-gray-600" />
           </div>
           <div>
-              <h2 className="text-3xl font-extrabold text-gray-900">系统设置</h2>
-              <p className="text-gray-500 mt-1 text-sm font-medium">配置全局自动化规则与系统参数</p>
+              <h2 className="text-3xl font-extrabold text-gray-900">{tr('settings.title')}</h2>
+              <p className="text-gray-500 mt-1 text-sm font-medium">{tr('settings.subtitle')}</p>
           </div>
         </div>
         <button
@@ -76,8 +78,8 @@ const Settings: React.FC = () => {
             <div className="ios-card rounded-[2rem] p-6 bg-white space-y-4">
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                 <div>
-                  <div className="font-bold text-gray-900">允许用户注册</div>
-                  <div className="text-xs text-gray-500 mt-1">开启后允许新用户注册账号</div>
+                  <div className="font-bold text-gray-900">{tr('settings.registration')}</div>
+                  <div className="text-xs text-gray-500 mt-1">{tr('settings.registrationDesc')}</div>
                 </div>
                 <button
                   onClick={() => setSettings({...settings, registration_enabled: !settings.registration_enabled})}
@@ -95,8 +97,8 @@ const Settings: React.FC = () => {
 
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                 <div>
-                  <div className="font-bold text-gray-900">显示默认登录信息</div>
-                  <div className="text-xs text-gray-500 mt-1">登录页面显示默认账号密码提示</div>
+                  <div className="font-bold text-gray-900">{tr('settings.showDefaultLogin')}</div>
+                  <div className="text-xs text-gray-500 mt-1">{tr('settings.showDefaultLoginDesc')}</div>
                 </div>
                 <button
                   onClick={() => setSettings({...settings, show_default_login_info: !settings.show_default_login_info})}
@@ -114,8 +116,8 @@ const Settings: React.FC = () => {
 
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                 <div>
-                  <div className="font-bold text-gray-900">登录滑动验证码</div>
-                  <div className="text-xs text-gray-500 mt-1">开启后账号密码登录需要完成滑动验证</div>
+                  <div className="font-bold text-gray-900">{tr('settings.loginCaptcha')}</div>
+                  <div className="text-xs text-gray-500 mt-1">{tr('settings.loginCaptchaDesc')}</div>
                 </div>
                 <button
                   onClick={() => setSettings({...settings, login_captcha_enabled: !settings.login_captcha_enabled})}
@@ -133,8 +135,8 @@ const Settings: React.FC = () => {
 
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                 <div>
-                  <div className="font-bold text-gray-900">启用商品自动同步</div>
-                  <div className="text-xs text-gray-500 mt-1">定时自动获取商品信息到本地数据库</div>
+                  <div className="font-bold text-gray-900">{tr('settings.itemSync')}</div>
+                  <div className="text-xs text-gray-500 mt-1">{tr('settings.itemSyncDesc')}</div>
                 </div>
                 <button
                   onClick={() => setSettings({...settings, item_sync_enabled: !settings.item_sync_enabled})}
@@ -151,7 +153,7 @@ const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-3 px-4">
-                <label className="block text-sm font-bold text-gray-800">商品同步间隔（分钟）</label>
+                <label className="block text-sm font-bold text-gray-800">{tr('settings.syncInterval')}</label>
                 <input
                   type="number"
                   value={Math.round((settings.item_sync_interval || 600) / 60)}
@@ -163,11 +165,11 @@ const Settings: React.FC = () => {
                   min="1"
                   max="1440"
                 />
-                <p className="text-xs text-gray-500">建议：10-60分钟</p>
+                <p className="text-xs text-gray-500">{tr('settings.syncIntervalHint')}</p>
               </div>
 
               <div className="space-y-3 px-4">
-                <label className="block text-sm font-bold text-gray-800">每次最多同步页数</label>
+                <label className="block text-sm font-bold text-gray-800">{tr('settings.maxPages')}</label>
                 <input
                   type="number"
                   value={settings.item_sync_max_pages || 5}
@@ -176,7 +178,7 @@ const Settings: React.FC = () => {
                   min="1"
                   max="50"
                 />
-                <p className="text-xs text-gray-500">每页20个商品</p>
+                <p className="text-xs text-gray-500">{tr('settings.maxPagesHint')}</p>
               </div>
             </div>
           </section>
@@ -192,7 +194,7 @@ const Settings: React.FC = () => {
 
             <div className="ios-card rounded-[2rem] p-6 bg-white space-y-6">
               <div className="space-y-3">
-                <label className="block text-sm font-bold text-gray-800">API 地址</label>
+                <label className="block text-sm font-bold text-gray-800">{tr('settings.apiUrl')}</label>
                 <input
                   type="text"
                   value={settings.ai_api_url || 'https://dashscope.aliyuncs.com/compatible-mode/v1'}
@@ -200,7 +202,7 @@ const Settings: React.FC = () => {
                   className="w-full ios-input px-4 py-3 rounded-xl text-sm"
                   placeholder="https://api.openai.com/v1"
                 />
-                <p className="text-xs text-gray-500">无需补全 /chat/completions</p>
+                <p className="text-xs text-gray-500">{tr('settings.apiUrlHint')}</p>
               </div>
 
               <div className="space-y-3">
@@ -224,31 +226,31 @@ const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <label className="block text-sm font-bold text-gray-800">模型</label>
+                <label className="block text-sm font-bold text-gray-800">{tr('settings.model')}</label>
                 <select
                   value={settings.ai_model || 'qwen-plus'}
                   onChange={e => setSettings({...settings, ai_model: e.target.value})}
                   className="w-full ios-input px-4 py-3 rounded-xl"
                 >
-                  <option value="qwen-plus">通义千问 Plus</option>
-                  <option value="qwen-turbo">通义千问 Turbo</option>
+                  <option value="qwen-plus">{tr('settings.modelQwenPlus')}</option>
+                  <option value="qwen-turbo">{tr('settings.modelQwenTurbo')}</option>
                   <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                   <option value="gpt-4">GPT-4</option>
                 </select>
               </div>
 
               <div className="space-y-3">
-                <label className="block text-sm font-bold text-gray-800">默认自动回复内容</label>
+                <label className="block text-sm font-bold text-gray-800">{tr('settings.defaultReply')}</label>
                 <textarea
                   className="w-full ios-input px-4 py-3 rounded-xl min-h-[100px] text-sm resize-none"
                   value={settings.default_reply || ''}
                   onChange={e => setSettings({...settings, default_reply: e.target.value})}
-                  placeholder="设置默认的自动回复内容..."
+                  placeholder={tr('settings.defaultReplyPlaceholder')}
                 ></textarea>
               </div>
 
               <div className="p-3 bg-amber-50 rounded-xl text-xs text-amber-700">
-                <strong>常见 AI 服务:</strong>
+                <strong>{tr('settings.commonAiServices')}</strong>
                 <ul className="list-disc list-inside mt-1 space-y-0.5">
                   <li>阿里云通义千问: https://dashscope.aliyuncs.com/compatible-mode/v1</li>
                   <li>OpenAI: https://api.openai.com/v1</li>
@@ -270,11 +272,11 @@ const Settings: React.FC = () => {
             </h3>
 
             <div className="ios-card rounded-[2rem] p-6 bg-white space-y-6">
-              <p className="text-sm text-gray-500">配置SMTP服务器用于发送注册验证码等邮件通知</p>
+              <p className="text-sm text-gray-500">{tr('settings.smtpDesc')}</p>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-3">
-                  <label className="block text-sm font-bold text-gray-800">SMTP服务器</label>
+                  <label className="block text-sm font-bold text-gray-800">{tr('settings.smtpServer')}</label>
                   <input
                     type="text"
                     value={settings.smtp_server || ''}
@@ -284,7 +286,7 @@ const Settings: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-3">
-                  <label className="block text-sm font-bold text-gray-800">SMTP端口</label>
+                  <label className="block text-sm font-bold text-gray-800">{tr('settings.smtpPort')}</label>
                   <input
                     type="number"
                     value={settings.smtp_port || 587}
@@ -296,7 +298,7 @@ const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <label className="block text-sm font-bold text-gray-800">发件邮箱</label>
+                <label className="block text-sm font-bold text-gray-800">{tr('settings.smtpUser')}</label>
                 <input
                   type="email"
                   value={settings.smtp_user || ''}
@@ -307,13 +309,13 @@ const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <label className="block text-sm font-bold text-gray-800">邮箱密码/授权码</label>
+                <label className="block text-sm font-bold text-gray-800">{tr('settings.smtpPassword')}</label>
                 <div className="relative">
                   <input
                     type={showSmtpPassword ? 'text' : 'password'}
                     value={settings.smtp_password || ''}
                     onChange={e => setSettings({...settings, smtp_password: e.target.value})}
-                    placeholder="输入密码或授权码"
+                    placeholder={tr('settings.smtpPasswordPlaceholder')}
                     className="w-full ios-input px-4 py-3 pr-12 rounded-xl text-sm"
                   />
                   <button
@@ -324,16 +326,16 @@ const Settings: React.FC = () => {
                     {showSmtpPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-                <p className="text-xs text-gray-500">QQ邮箱需要使用授权码</p>
+                <p className="text-xs text-gray-500">{tr('settings.qqAuthHint')}</p>
               </div>
 
               <div className="space-y-3">
-                <label className="block text-sm font-bold text-gray-800">发件人显示名（可选）</label>
+                <label className="block text-sm font-bold text-gray-800">{tr('settings.senderName')}</label>
                 <input
                   type="text"
                   value={settings.smtp_from || ''}
                   onChange={e => setSettings({...settings, smtp_from: e.target.value})}
-                  placeholder="鱼鱼自动回复系统"
+                  placeholder={tr('settings.senderNamePlaceholder')}
                   className="w-full ios-input px-4 py-3 rounded-xl text-sm"
                 />
               </div>
@@ -350,7 +352,7 @@ const Settings: React.FC = () => {
             className="ios-btn-primary px-10 py-5 rounded-[2rem] text-lg shadow-2xl shadow-yellow-200 flex items-center gap-3 transform hover:scale-105 active:scale-95 transition-all disabled:opacity-70"
         >
             <Save className="w-6 h-6" />
-            {saving ? '保存中...' : '保存所有配置'}
+            {saving ? tr('common.saving') : tr('settings.saveAll')}
         </button>
       </div>
     </div>
