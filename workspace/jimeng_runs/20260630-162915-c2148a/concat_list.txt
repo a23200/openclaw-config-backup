@@ -1,0 +1,3 @@
+file '/Users/mac/Movies/素材/食物生活/01-咖啡拉花.mp4'
+file '/Users/mac/Movies/素材/食物生活/02-面包出炉.mp4'
+file '/Users/mac/Movies/素材/食物生活/03-番茄切片.mp4'

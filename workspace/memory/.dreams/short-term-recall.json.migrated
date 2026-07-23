@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-31T00:00:24.359Z",
+  "entries": {
+    "memory:memory/2026-03-26.md:1:2": {
+      "key": "memory:memory/2026-03-26.md:1:2",
+      "path": "memory/2026-03-26.md",
+      "startLine": 1,
+      "endLine": 2,
+      "source": "memory",
+      "snippet": "- **[ERROR]** Daily backup to GitHub failed due to SSH key permission denied. The script could not clone the repository `git@github.com:a23200/openclaw-config-backup.git`. - **[TODO]** Need to check the SSH key configuration for GitHub access.",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "totalScore": 0.3706078022718429,
+      "maxScore": 0.3706078022718429,
+      "firstRecalledAt": "2026-05-31T00:00:24.359Z",
+      "lastRecalledAt": "2026-05-31T00:00:24.359Z",
+      "queryHashes": [
+        "74bcfedd10b5"
+      ],
+      "recallDays": [
+        "2026-05-31"
+      ],
+      "conceptTags": [
+        "backup",
+        "github.com",
+        "error",
+        "github",
+        "failed",
+        "due",
+        "ssh",
+        "key"
+      ]
+    }
+  }
+}

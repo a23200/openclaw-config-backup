@@ -1,0 +1,101 @@
+{
+  "id": "20260630-162721-0830c1",
+  "title": "宇宙",
+  "task_type": "material",
+  "status": "mastered",
+  "error": "",
+  "publish_status": "unpublished",
+  "publish_error": "",
+  "output": "/Users/mac/.openclaw/workspace/jimeng_runs/20260630-162721-0830c1/final_mastered.mp4",
+  "created_at": 1782808041.880388,
+  "updated_at": 1782808051.177532,
+  "post": {
+    "mode": "narrated",
+    "title_card_text": "重新理解宇宙起源",
+    "enable_natural_voiceover": true,
+    "material_category": "opinion",
+    "narration_tone": "Judged but not aggressive; point first, reasons next, close with an attitude",
+    "voice_profile": "calm_female",
+    "narration_style": "opinion",
+    "subtitle_style": "douyin_bold",
+    "selection_engine": "manual",
+    "narration_text": "关于宇宙起源，我更愿意把它看成一种正在发生的变化。它不只是一个画面，也不只是一个概念。",
+    "resolved_mode": "narrated",
+    "voice_style_config": {
+      "voice_profile": "calm_female",
+      "voice": "nova",
+      "speed": 1.03,
+      "gain": 1.04,
+      "pause_bias": 0.18,
+      "bgm_volume": 0.23,
+      "style": "opinion",
+      "category": "opinion"
+    },
+    "tts_voice": "nova",
+    "tts_speed": 1.03,
+    "voice_gain": 1.04,
+    "pause_bias": 0.18,
+    "bgm_volume": 0.23,
+    "tts_engine": "smart_tts",
+    "tts_detail": "智能配音 ok",
+    "mix_params": {
+      "voice_gain": 1.04,
+      "bgm_volume": 0.23,
+      "ducking": "sidechaincompress_or_fallback",
+      "target_duration": 15.232,
+      "voice_source": "tts"
+    },
+    "voiceover_normalized": "/Users/mac/.openclaw/workspace/jimeng_runs/20260630-162721-0830c1/narration_normalized.mp3"
+  },
+  "publish": {
+    "title": "重新理解宇宙起源",
+    "description": "宇宙 精选片段合集 #宇宙 #ClawLink #AI短片",
+    "cover": "auto",
+    "auto_publish": false
+  },
+  "input": {
+    "library": "宇宙",
+    "stitch_mode": "concat",
+    "topic": "宇宙起源",
+    "clips": [
+      {
+        "file": "01-星云漩涡.mp4",
+        "relpath": "01-星云漩涡.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 1
+      },
+      {
+        "file": "02-深蓝星空.mp4",
+        "relpath": "02-深蓝星空.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 2
+      },
+      {
+        "file": "03-紫色星云.mp4",
+        "relpath": "03-紫色星云.mp4",
+        "duration_sec": 5.06,
+        "reason": "顺序贪心兜底",
+        "order": 3
+      }
+    ],
+    "target_duration_sec": 15.0,
+    "material_category": "opinion",
+    "narration_tone": "Judged but not aggressive; point first, reasons next, close with an attitude",
+    "voice_profile": "calm_female",
+    "narration_style": "opinion"
+  },
+  "selection": {
+    "engine": "manual",
+    "suggested_tags": [
+      "宇宙",
+      "ClawLink",
+      "素材库短片"
+    ],
+    "selected_bgm_asset": null,
+    "selected_voice_asset": null
+  },
+  "subtitle_mode": "burned",
+  "subtitle_backend": "overlay:douyin_bold"
+}

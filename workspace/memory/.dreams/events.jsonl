@@ -1,0 +1,1 @@
+{"type":"memory.recall.recorded","timestamp":"2026-05-31T00:00:24.359Z","query":"exec denied allowlist miss git clone rsync backup repository github ssh","resultCount":1,"results":[{"path":"memory/2026-03-26.md","startLine":1,"endLine":2,"score":0.3706078022718429}]}
