@@ -66,3 +66,9 @@
 - **自动记忆检索仍不可用**：尝试通过记忆检索补充核对时返回 `index metadata is missing`，提示当前索引与 embedding provider/model/settings 不匹配；需要先执行 `openclaw memory status --index` 或 `openclaw memory index --force` 才能恢复基于 LanceDB Pro 的周回顾数据源。
 - **本周没有新增的显著教训可归档**：现有 `MEMORY.md` 已多次覆盖“旧版 Markdown 周回顾持续读空、应迁移到 LanceDB Pro 检索”的机制问题；本次没有发现新的高价值业务经验或错误复盘需要追加。
 - **SOP 改进方向仍然明确**：应把周回顾 cron/SOP 从“读取 `memory/` 并追加 `MEMORY.md`”改为“先检查/修复自动记忆索引，再检索最近 7 天高重要度记忆，仅在有新增洞察时输出摘要”，避免继续产生重复低价值周报。
+
+### Weekly Review (2026-08-23)
+- **最近 7 天没有新增本地日志**：按 2026-08-16 至 2026-08-23 检查，`memory/` 目录没有新增文件，因此没有从旧版 Markdown 日志发现新的学习、问题解决记录、用户反馈或错误复盘。
+- **自动记忆检索仍不可用**：LanceDB Pro 检索返回 `index metadata is missing`，说明索引与当前 embedding provider/model/settings 不匹配；本周无法用自动记忆补充验证。
+- **没有新增显著业务经验**：本周结论与既有记录一致，未发现足以追加为长期业务记忆的新内容；重复出现的机制问题是周回顾数据源仍停留在已弃用的本地 Markdown 流程。
+- **改进原则**：周回顾应先检查自动记忆索引状态，再检索最近 7 天高重要度记忆；只有发现新增高价值洞察时才生成周报，并停止把 `MEMORY.md` 作为自动记忆的主写入位置。
