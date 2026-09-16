@@ -20,9 +20,9 @@
     "fail": 0
   },
   "attempt_1_ultra_fast": {
-    "total": 44260,
-    "success": 1617,
-    "fail": 42643
+    "total": 47604,
+    "success": 1622,
+    "fail": 45982
   },
   "attempt_2_ultra_fast": {
     "total": 9,
@@ -30,8 +30,8 @@
     "fail": 8
   },
   "attempt_3_ultra_fast": {
-    "total": 40724,
-    "success": 471,
-    "fail": 40253
+    "total": 44052,
+    "success": 472,
+    "fail": 43580
   }
 }
